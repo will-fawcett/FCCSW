@@ -19,6 +19,8 @@ gaudi_add_module(Generation
                  INCLUDE_DIRS Generation HepMC Pythia8 FWCore FCCEDM PODIO
                  LINK_LIBRARIES HepMC GaudiAlgLib Pythia8 FCCEDM PODIO)
 
+gaudi_add_dictionary(Generation Generation/IPileUpTool.h Generation/selection.xml)
+
 include(CTest)
 
 gaudi_add_test(particleGun
