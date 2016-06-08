@@ -1,7 +1,7 @@
 #include "G4DD4hepDetector.h"
 
 // FCCSW
-#include "DetDesInterfaces/IGeoSvc.h"
+#include "DetInterface/IGeoSvc.h"
 
 // Geant4
 #include "G4VUserDetectorConstruction.hh"
@@ -21,7 +21,8 @@ StatusCode G4DD4hepDetector::initialize() {
   }
   m_geoSvc = service ("GeoSvc");
   if (!m_geoSvc) {
-    error()<<"Unable to locate Geometry Service"<<endmsg;
+    error() << "Unable to locate Geometry Service. "
+            << "Make sure you have GeoSvc and SimSvc in the right order in the configuration." << endmsg;
     return StatusCode::FAILURE;
   }
   return StatusCode::SUCCESS;
