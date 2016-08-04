@@ -2,7 +2,7 @@
 
 
 
-pwd = $(CURDIR)/options
+pwd = $(CURDIR)/PileupStudy/options
 datadir = $(subst options,data,$(pwd))
 plotdir = $(subst options,data,$(pwd))
 jobfiles = $(shell find "$(pwd)/"*.py)

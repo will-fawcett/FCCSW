@@ -3,7 +3,7 @@ from geant_fullsim_baseconfig import *
 
 
 from Configurables import ConstPileUp
-pileuptool = ConstPileUp(numPileUpEvents=1040, Filename=optionspath + "Pythia_minbias_pp_100TeV.cmd")
+pileuptool = ConstPileUp(numPileUpEvents=100, Filename=optionspath + "Pythia_minbias_pp_100TeV.cmd")
 
 from Configurables import PythiaInterface
 pythiafile=optionspath + "Pythia_ttbar.cmd"
