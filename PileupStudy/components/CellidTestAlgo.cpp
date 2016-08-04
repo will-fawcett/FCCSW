@@ -51,6 +51,9 @@ public:
     auto m_decoderBarrel = readoutBarrel.idSpec().decoder();
     auto readoutEndcap = lcdd->readout("TrackerEndcapReadout");
     auto m_decoderEndcap = readoutEndcap.idSpec().decoder();
+    auto segmentationBarrel = readoutBarrel.segmentation().segmentation();
+    info() << "Barrel segmentation of type " << segmentationBarrel->type() << endmsg;
+    auto segmentationEndcap = readoutEndcap.segmentation().segmentation();
     const fcc::TrackHitCollection* trkhits = m_trkHits.get();
 
     info() << "hits size: " << trkhits->size() << endmsg;
@@ -67,12 +70,17 @@ public:
         int rod_id = (*m_decoderBarrel)["rod"];
         int module_id = (*m_decoderBarrel)["module"];
         //int layer_id = -1;
-        info() << "hit cellid: " << aCellId << "in system " << system_id << ", layer " << layer_id << ", rod " << rod_id << ", module" << module_id << endmsg;
+        info() << "hit cellid: " << aCellId << " in system " << system_id << ", layer " << layer_id << ", rod " << rod_id << ", module " << module_id << endmsg;
+        auto pos = segmentationBarrel->position(aCellId);
+        info() << "\t has position " << pos.x() << "\t" << pos.y() << "\t" << pos.z()  <<endmsg;
         } else if (system_id == 11 || system_id == 13) {
         m_decoderEndcap->setValue(aCellId);
         int layer_id = (*m_decoderEndcap)["layer"];
         int petal_id = (*m_decoderEndcap)["petal"];
-        info() << "hit cellid: " << aCellId << "in system " << system_id << ", layer " << layer_id << ", petal " << petal_id << endmsg;
+        info() << "hit cellid: " << aCellId << " in system " << system_id << ", layer " << layer_id << ", petal " << petal_id << endmsg;
+        auto pos = segmentationEndcap->position(aCellId);
+        info() << "\t has position " << pos.x() << "\t" << pos.y() << "\t" << pos.z()  <<endmsg;
+        //info() << "\t has position " << pos.X << "\t" << pos.Y << "\t" << pos.Z  <<endmsg;
         }
 
       }
