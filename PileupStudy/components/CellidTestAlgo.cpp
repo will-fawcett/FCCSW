@@ -47,8 +47,10 @@ public:
   StatusCode execute() {
     auto lcdd = m_geoSvc->lcdd();
     auto allReadouts = lcdd->readouts();
-    auto readout = lcdd->readout("TrackerBarrelReadout");
-    auto m_decoder = readout.segmentation().segmentation()->decoder();
+    auto readoutBarrel = lcdd->readout("TrackerBarrelReadout");
+    auto m_decoderBarrel = readoutBarrel.segmentation().segmentation()->decoder();
+    auto readoutEndcap = lcdd->readout("TrackerEndcapReadout");
+    auto m_decoderEndcap = readoutEndcap.segmentation().segmentation()->decoder();
     const fcc::TrackHitCollection* trkhits = m_trkHits.get();
 
     info() << "hits size: " << trkhits->size() << endmsg;
@@ -58,13 +60,21 @@ public:
       if (10 < cntr++ || true) {
         auto aCellId = hit.Core().Cellid;
 
-        m_decoder->setValue(aCellId);
-        int system_id = (*m_decoder)["system"];
-        int layer_id = (*m_decoder)["layer"];
-        int rod_id = (*m_decoder)["rod"];
-        int module_id = (*m_decoder)["module"];
+        m_decoderBarrel->setValue(aCellId);
+        int system_id = (*m_decoderBarrel)["system"];
+        if (system_id == 10 || system_id == 12 ) {
+        int layer_id = (*m_decoderBarrel)["layer"];
+        int rod_id = (*m_decoderBarrel)["rod"];
+        int module_id = (*m_decoderBarrel)["module"];
         //int layer_id = -1;
         info() << "hit cellid: " << aCellId << "in system " << system_id << ", layer " << layer_id << ", rod " << rod_id << ", module" << module_id << endmsg;
+        } else if (system_id == 11 || system_id == 13) {
+        m_decoderEndcap->setValue(aCellId);
+        int layer_id = (*m_decoderEndcap)["layer"];
+        int petal_id = (*m_decoderEndcap)["petal"];
+        info() << "hit cellid: " << aCellId << "in system " << system_id << ", layer " << layer_id << ", petal " << petal_id << endmsg;
+        }
+
       }
     }
     
