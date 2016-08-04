@@ -1,5 +1,5 @@
 
-import os
+import sys
 
 datapath = "PileupStudy/data/"
 optionspath = "PileupStudy/options/"

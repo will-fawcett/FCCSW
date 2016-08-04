@@ -11,7 +11,8 @@ pythia8gen = PythiaInterface("Pythia8Interface", Filename=pythiafile)
 pythia8gen.PileUpTool = pileuptool
 pythia8gen.DataOutputs.hepmc.Path = "hepmc"
 
-out.Filename = datapath +  __file__.replace(".py", ".root")
+out.filename = sys.argv[1].replace("options/", "data/").replace(".py", ".root")
+
 TopAlg = [pythia8gen, hepmc_converter, geantsim, out]
 
 from Configurables import ApplicationMgr
