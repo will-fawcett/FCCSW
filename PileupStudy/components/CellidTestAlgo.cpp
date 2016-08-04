@@ -48,9 +48,9 @@ public:
     auto lcdd = m_geoSvc->lcdd();
     auto allReadouts = lcdd->readouts();
     auto readoutBarrel = lcdd->readout("TrackerBarrelReadout");
-    auto m_decoderBarrel = readoutBarrel.segmentation().segmentation()->decoder();
+    auto m_decoderBarrel = readoutBarrel.idSpec().decoder();
     auto readoutEndcap = lcdd->readout("TrackerEndcapReadout");
-    auto m_decoderEndcap = readoutEndcap.segmentation().segmentation()->decoder();
+    auto m_decoderEndcap = readoutEndcap.idSpec().decoder();
     const fcc::TrackHitCollection* trkhits = m_trkHits.get();
 
     info() << "hits size: " << trkhits->size() << endmsg;
