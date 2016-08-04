@@ -18,7 +18,6 @@ class IGeoSvc;
 void countNodes(TGeoNode* node, const std::string nodeName, int& nodeCount) {
   std::string currentNodeName = node->GetName();
   if (currentNodeName.find(nodeName) != std::string::npos) {
-    std::cout<<currentNodeName<<std::endl;
     ++nodeCount;
   }
   auto daughters = node->GetNodes();
@@ -35,7 +34,6 @@ public:
   CellidTestAlgo(const std::string& name, ISvcLocator* svcLoc) :
     GaudiAlgorithm(name, svcLoc)
   {
-    //declareInput("genParticles", m_genParticles, "allGenParticles");
     declareInput("hits", m_trkHits, "hits");
   }
 
@@ -70,26 +68,22 @@ public:
       }
     }
     
-    info() << "Counting modules ..." << endmsg;
-    //auto geoman = new TGeoManager();
-    info() << "Counting modules ..." << endmsg;
+    // counting physical volumes
+    info() << "Count physical volumes ... " << endmsg;
     auto highest_vol = gGeoManager->GetTopVolume();
-    info() << "Counting modules ..." << endmsg;
     auto  daughters = highest_vol->GetNodes();
     int nodeCount = 0;
+    // the sensitive part of the module has the material string in its name
     std::string nodeName = "Silicon";
     TIter iObj(daughters);
     info() << highest_vol->GetName() << endmsg;
     while (TObject* obj = iObj()) {
       // dynamic_cast to a node
       TGeoNode* node = dynamic_cast<TGeoNode*>(obj);
-      info() << node->GetName() << endmsg;
+      info() << "\t  ... in " << node->GetName() << endmsg;
       if (node) countNodes(node, nodeName, nodeCount);
     }
     info() << nodeCount << " modules found!" << endmsg;
-
-
-    //delete geoman;
     return StatusCode::SUCCESS;
   }
 
