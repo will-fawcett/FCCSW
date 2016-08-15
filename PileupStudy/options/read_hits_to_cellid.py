@@ -8,7 +8,7 @@ podioevent   = FCCDataSvc("EventDataSvc")
 
 # reads HepMC text file and write the HepMC::GenEvent to the data service
 from Configurables import PodioInput, CellidTestAlgo
-podioinput = PodioInput("PodioReader", filename="PileupStudy/data/geantino_scan.root", collections=["hits"], OutputLevel=DEBUG)
+podioinput = PodioInput("PodioReader", filename="PileupStudy/data/geantino_scan.root", collections=["hits", "clusters", "hitClusterAssociation"], OutputLevel=DEBUG)
 checker = CellidTestAlgo()
 
 out = PodioOutput("out", filename="out2.root",
@@ -19,6 +19,6 @@ ApplicationMgr(
     TopAlg = [podioinput, checker
               ],
     EvtSel = 'NONE',
-    EvtMax   = 3,
+    EvtMax   = 20,
     ExtSvc = [podioevent, geoservice],
  )
