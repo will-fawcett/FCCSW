@@ -14,7 +14,7 @@ TopAlg = [geantsim, out]
 from Configurables import ApplicationMgr
 ApplicationMgr( TopAlg = TopAlg,
                 EvtSel = 'NONE',
-                EvtMax   = 1000,
+                EvtMax   = 10000,
                 ExtSvc = [podioevent, geoservice, geantservice],
-                OutputLevel=DEBUG
+                OutputLevel=INFO
  )
