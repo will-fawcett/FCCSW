@@ -88,7 +88,9 @@ public:
         int module_id = (*m_decoderBarrel)["module"];
         int x_id= (*m_decoderBarrel)["x"];
         int y_id = (*m_decoderBarrel)["y"];
-        int z_id = (*m_decoderBarrel)["z"];
+        //int z_id = (*m_decoderBarrel)["z"];
+        //int z_id = (*m_decoderEndcap)["z"];
+        int z_id = 0;
         //int layer_id = -1;
         info() << "hit cellid: " << aCellId << " in system " << system_id << ", layer " << layer_id << ", rod " << rod_id << ", module " << module_id << "  x " << x_id << " y  " << y_id << " z " << z_id << endmsg;
         auto pos = segmentationBarrel->position(aCellId);
@@ -116,7 +118,8 @@ public:
         int petal_id = (*m_decoderEndcap)["petal"];
         int x_id= (*m_decoderEndcap)["x"];
         int y_id = (*m_decoderEndcap)["y"];
-        int z_id = (*m_decoderEndcap)["z"];
+        //int z_id = (*m_decoderEndcap)["z"];
+        int z_id = 0;
         info() << "hit cellid: " << aCellId << " in system " << system_id << ", layer " << layer_id << ", petal " << petal_id << " x " << x_id << " y " << y_id << " z " << z_id  << endmsg;
         auto volid = aCellId;//iddec.volumeID(aCellId);
         info() << "hit volid:  " << volid << endmsg;

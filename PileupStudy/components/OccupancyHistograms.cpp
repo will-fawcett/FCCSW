@@ -39,14 +39,6 @@ StatusCode OccupancyHistograms::initialize() {
     error() << "Couldn't get THistSvc" << endmsg;
     return StatusCode::FAILURE;
   }
-  m_detEta = new TH1F("DetEta", "Tracker Module Pseudorapidity", 50, -6, 6);
-  if (m_ths->regHist("/rec/DetEta", m_detEta).isFailure()) {
-    error() << "Couldn't register DetEta" << endmsg;
-  }
-  m_hitEta = new TH1F("HitEta", "Tracker Hit Pseudorapidity", 50, -6, 6);
-  if (m_ths->regHist("/rec/HitEta", m_hitEta).isFailure()) {
-    error() << "Couldn't register HitEta" << endmsg;
-  }
   m_geoSvc = service("GeoSvc");
   auto lcdd = m_geoSvc->lcdd();
   m_volMan = lcdd->volumeManager();
@@ -56,15 +48,63 @@ StatusCode OccupancyHistograms::initialize() {
   info() << highest_vol->GetName() << endmsg;
   TGeoIterator next(highest_vol);
   TGeoNode* node;
-  TString path;
+  TString tpath;
+  std::string delimiter = "_";
+  int layerIndexOffset;
+  auto readoutEndcap = lcdd->readout("TrackerEndcapReadout");
+  auto segmentationEndcap = static_cast<DD4hep::DDSegmentation::CartesianGridXYZ*>(readoutEndcap.segmentation().segmentation());
+  auto readoutBarrel = lcdd->readout("TrackerBarrelReadout");
+  auto segmentationBarrel = static_cast<DD4hep::DDSegmentation::CartesianGridXYZ*>(readoutBarrel.segmentation().segmentation());
+  float segmentationCellVolume; //
+  int layerIndex;
   while ((node=next())) {
     std::string currentNodeName = node->GetName();
-    if (currentNodeName.find(m_moduleNodeName) != std::string::npos) {
+    next.GetPath(tpath);
+    std::string path(tpath.Data());
+    //info() << currentNodeName << endmsg;
+    //info() << path << endmsg;
+    if (currentNodeName.find("layer") != std::string::npos) {
+      if (path.find("BarrelInner") != std::string::npos) {
+        layerIndexOffset = 0;
+
+      } else if (path.find("BarrelOuter") != std::string::npos) {
+        layerIndexOffset = 100;
+      } else if (path.find("EndcapInner_0") != std::string::npos) {
+        layerIndexOffset = 200;
+      } else if (path.find("EndcapInner_1") != std::string::npos) {
+        layerIndexOffset = 300;
+      } else if (path.find("EndcapOuter_0") != std::string::npos) {
+        layerIndexOffset = 400;
+      } else if (path.find("EndcapOuter_1") != std::string::npos) {
+        layerIndexOffset = 500;
+      }
+      info() << path << "\t" << layerIndexOffset << endmsg;
+      std::string subs =  currentNodeName.substr(currentNodeName.find(delimiter) + 1, currentNodeName.size());
+      std::stringstream convert(subs);
+      convert >> layerIndex;
+      layerIndex += layerIndexOffset;
+      //info() << subs << "\t " << layerIndex <<endmsg;
+      std::string histname = "DetEta" + std::to_string(layerIndex);
+      m_detEta = new TH1F(histname.c_str(), "Tracker Module Pseudorapidity", 50, -6, 6);
+      if (m_ths->regHist("/rec/DetEta/" + path , m_detEta).isFailure()) {
+           error() << "Couldn't register DetEta" << endmsg;
+           info() << path << endmsg; 
+      }
+      m_detEtas[layerIndex] = m_detEta;
+      histname = "HitEta" + std::to_string(layerIndex);
+      m_hitEta = new TH1F(histname.c_str(), "Tracker Module Pseudorapidity", 50, -6, 6);
+      if (m_ths->regHist("/rec/HitEta/" + path, m_hitEta).isFailure()) {
+           error() << "Couldn't register HitEta" << endmsg;
+      }
+      m_hitEtas[layerIndex] = m_hitEta;
+    } else if (currentNodeName.find(m_moduleNodeName) != std::string::npos) {
       const TGeoMatrix* mat = next.GetCurrentMatrix();
       TVector3 pos(0, 0, 0);
       // loop over all signs
       float cornerEtasMin = 10;
       float cornerEtasMax = -10;
+      float shapeVolume = 0;
+      int numCells;
       std::array<int, 2> signs = {-1, 1};
       std::string shapename = node->GetVolume()->GetShape()->GetName();
       if (shapename == "TGeoTrd2" ) {
@@ -94,11 +134,19 @@ StatusCode OccupancyHistograms::initialize() {
             }
           }
         }
+        shapeVolume = 4 * shape->GetDz() * shape->GetDY() * (shape->GetDx1() + shape->GetDx2());
+      if (layerIndexOffset < 200) {
+        info() << shape->GetDX() << "\t" << segmentationBarrel->gridSizeX() << endmsg;
+        segmentationCellVolume = 100*  segmentationBarrel->gridSizeX() * segmentationBarrel->gridSizeZ() * shape->GetDY();
+
+
+      } else {
+        segmentationCellVolume = 100*  segmentationEndcap->gridSizeX() * segmentationEndcap->gridSizeZ() * shape->GetDY();
+      }
+        numCells = shapeVolume / segmentationCellVolume;
+        debug() << ", segCellVol " << segmentationCellVolume << ", numCells " << numCells << endmsg;
       } else {
       TGeoBBox* shape = static_cast<TGeoBBox*>(node->GetVolume()->GetShape());
-        debug() << node->GetVolume()->GetShape()->GetName() << "\t" << node->GetVolume()->GetShape()->GetId() << endmsg; 
-        next.GetPath(path);
-        debug() << path << endmsg;
         // loop over all the corners
         for (int signx: signs) {
           for (int signy: signs) {
@@ -115,10 +163,21 @@ StatusCode OccupancyHistograms::initialize() {
             }
           }
         }
+        shapeVolume = 8 * shape->GetDX() * shape->GetDY() * shape->GetDZ();
+      if (layerIndexOffset < 200) {
+        info() << shape->GetDZ() << "\t" << segmentationBarrel->gridSizeZ() << endmsg;
+        segmentationCellVolume = 100 * segmentationBarrel->gridSizeX() * segmentationBarrel->gridSizeZ() * 2 * shape->GetDY();
+
+
+      } else {
+        segmentationCellVolume = 100 * segmentationEndcap->gridSizeX() * segmentationEndcap->gridSizeZ() * 2 * shape->GetDY();
+      }
+        numCells = shapeVolume / segmentationCellVolume;
       }
       // TODO: get real value
-      int numCells = 1000;
+        info() << ", segCellVol " << segmentationCellVolume << ", numCells " << numCells << endmsg;
       float dEta = (cornerEtasMax - cornerEtasMin ) / static_cast<float>(numCells);
+      m_detEta = m_detEtas[layerIndex];
       for (int cellIndex = 0; cellIndex < numCells; ++cellIndex) {
         m_detEta->Fill(cornerEtasMin + cellIndex * dEta);
       }
@@ -139,9 +198,11 @@ StatusCode OccupancyHistograms::execute() {
 
   auto readoutEndcap = lcdd->readout("TrackerEndcapReadout");
   auto segmentationEndcap = readoutEndcap.segmentation().segmentation();
+  auto m_decoderEndcap = readoutEndcap.idSpec().decoder();
 
   const fcc::TrackClusterHitsAssociationCollection* trkhitclusterassociations = m_trkHitClusterAssociations.get();
   debug() << "filling histograms with " << trkhitclusterassociations->size() << " hits " << endmsg;
+  int layerIndexOffset;
   for (const auto& hitcluster : *trkhitclusterassociations) {
     auto hit = hitcluster.Hit();
     auto cluster = hitcluster.Cluster();
@@ -149,18 +210,36 @@ StatusCode OccupancyHistograms::execute() {
     DD4hep::Geometry::Position pos;
     m_decoderBarrel->setValue(aCellId);
     int system_id = (*m_decoderBarrel)["system"];
-    if (system_id == 10 || system_id == 12 ) {
+    int layer_id;
+    if (system_id == 10) {
       pos  = segmentationBarrel->position(aCellId);
-    } else if (system_id == 11 || system_id == 13) {
+      layerIndexOffset = 0;
+      layer_id = (*m_decoderBarrel)["layer"];
+    } else if ( system_id == 12 ) {
+       layerIndexOffset = 100;
+      pos  = segmentationBarrel->position(aCellId);
+      layer_id = (*m_decoderBarrel)["layer"];
+    } else if (system_id == 11) {
+    m_decoderEndcap->setValue(aCellId);
+      layerIndexOffset = 200 +(*m_decoderEndcap)["posneg"] * 100;
+      layer_id = (*m_decoderEndcap)["layer"];
+      
       pos  = segmentationEndcap->position(aCellId);
+    } else if (system_id == 13) {
+    m_decoderEndcap->setValue(aCellId);
+      layerIndexOffset = 400 + (*m_decoderEndcap)["posneg"] * 100;
+      pos  = segmentationEndcap->position(aCellId);
+      layer_id = (*m_decoderEndcap)["layer"];
     }
+    
+    --layer_id; //TODO: understand
     auto cpos = cluster.Core().position;
     TVector3 finalPosition (cpos.X, cpos.Y, cpos.Z); 
     debug() << "CellId hit position: \t" << finalPosition.X() << "\t" << finalPosition.Y() << "\t" << finalPosition.Z() << endmsg;
     debug() << "Cluster position \t" << cpos.X << "\t" << cpos.Y << "\t" << cpos.Z  <<endmsg;
     const bool notYetOccupied = m_occupiedCells.find(aCellId) == m_occupiedCells.end();
     if (notYetOccupied) {
-      m_hitEta->Fill(finalPosition.Eta());
+      m_hitEtas[layerIndexOffset + layer_id ]->Fill(finalPosition.Eta());
       m_occupiedCells.insert(aCellId);
     } else {
         ++m_multipleOccupancy;
@@ -171,6 +250,10 @@ StatusCode OccupancyHistograms::execute() {
 }
 
 StatusCode OccupancyHistograms::finalize() {
+  m_hitEta->GetXaxis()->SetTitle("Eta");
+  m_hitEta->GetYaxis()->SetTitle("Hits");
+  m_detEta->GetXaxis()->SetTitle("Eta");
+  m_detEta->GetYaxis()->SetTitle("Det. Cells");
   info() << m_multipleOccupancy << " hits not counted because their cell was already occupied" << endmsg;
   return GaudiAlgorithm::finalize();
 }

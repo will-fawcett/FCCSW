@@ -18,6 +18,15 @@ $(datadir)%.root: $(pwd)%.py
 .PHONY: all
 all:  $(datafiles) 
 
+
+
+
+%.plotlog: %.root
+	python PileupStudy/python/plot_occupancy.py $<
+
+.PHONY: plots
+plots: PileupStudy/data/min_bias_pool_DetHist.plotlog PileupStudy/data/geantino_scan_DetHist.plotlog
+
 #.PHONY: clean
 #clean:
 #	rm RUN*.py RUN*.conf $(datadir)/*.pic $(datadir)/*.dat $(plotdir)/*.dat $(plotdir)/*.png $(plotdir)/*.pdf

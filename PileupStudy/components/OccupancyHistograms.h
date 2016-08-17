@@ -37,6 +37,8 @@ private:
   TH1F* m_occupancy;
   TH1F* m_detEta; 
   TH1F* m_hitEta; 
+  std::map<int, TH1F*> m_detEtas;
+  std::map<int, TH1F*> m_hitEtas;
   DataHandle<fcc::TrackHitCollection> m_trkHits;
   DataHandle<fcc::TrackClusterCollection> m_trkClusters;
   DataHandle<fcc::TrackClusterHitsAssociationCollection> m_trkHitClusterAssociations;
