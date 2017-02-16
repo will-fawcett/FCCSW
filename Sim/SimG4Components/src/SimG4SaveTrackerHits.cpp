@@ -10,6 +10,7 @@
 // datamodel
 #include "datamodel/PositionedTrackHitCollection.h"
 #include "datamodel/TrackHitCollection.h"
+#include "datamodel/GenVertexCollection.h"
 
 // DD4hep
 #include "DDG4/Geant4Hits.h"
@@ -22,6 +23,7 @@ SimG4SaveTrackerHits::SimG4SaveTrackerHits(const std::string& aType, const std::
   declareProperty("readoutNames", m_readoutNames);
   declareOutput("positionedTrackHits", m_positionedTrackHits,"hits/positionedTrackerHits");
   declareOutput("trackHits", m_trackHits,"hits/trackerHits");
+  declareOutput("trackHitsDirections", m_hitDirections,"hits/hitDirections");
   // needed for AlgTool wit output/input until it appears in Gaudi AlgTool constructor
   declareProperty("DataInputs", inputDataObjects());
   declareProperty("DataOutputs", outputDataObjects());
@@ -62,6 +64,7 @@ StatusCode SimG4SaveTrackerHits::saveOutput(const G4Event& aEvent) {
   DD4hep::Simulation::Geant4TrackerHit* hit;
   if(collections != nullptr) {
     auto edmPositions = m_positionedTrackHits.createAndPut();
+    auto edmDirections = m_hitDirections.createAndPut();
     auto edmHits = m_trackHits.createAndPut();
     for (int iter_coll=0; iter_coll<collections->GetNumberOfCollections(); iter_coll++) {
       collect = collections->GetHC(iter_coll);
@@ -81,6 +84,11 @@ StatusCode SimG4SaveTrackerHits::saveOutput(const G4Event& aEvent) {
           position.z = hit->position.z() * sim::g42edm::length;
           edmHitCore.bits = hit->truth.trackID;
           edmPositions->create(position, edmHitCore);
+          fcc::GenVertex direction = edmDirections->create();
+          direction.position().x = hit->momentum.x() * sim::g42edm::length;
+          direction.position().y = hit->momentum.y() * sim::g42edm::length;
+          direction.position().z = hit->momentum.z() * sim::g42edm::length;
+          
         }
       }
     }

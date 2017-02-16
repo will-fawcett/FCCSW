@@ -13,6 +13,7 @@ class IGeoSvc;
 namespace fcc {
 class TrackHitCollection;
 class PositionedTrackHitCollection;
+class GenVertexCollection;
 }
 
 /** @class SimG4SaveTrackerHits SimG4Components/src/SimG4SaveTrackerHits.h SimG4SaveTrackerHits.h
@@ -53,6 +54,7 @@ private:
   DataHandle<fcc::TrackHitCollection> m_trackHits;
   /// Handle for tracker hits including position information
   DataHandle<fcc::PositionedTrackHitCollection> m_positionedTrackHits;
+  DataHandle<fcc::GenVertexCollection> m_hitDirections;
   /// Name of the readouts (hits collections) to save
   std::vector<std::string> m_readoutNames;
 

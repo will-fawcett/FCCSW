@@ -8,7 +8,7 @@ podioevent = FCCDataSvc("EventDataSvc")
 # Parses the given xml file
 from Configurables import GeoSvc, SimG4SingleParticleGeneratorTool
 geoservice = GeoSvc("GeoSvc", detectors=['file:Detector/DetFCChhBaseline1/compact/FCChh_DectEmptyMaster.xml',
-  'file:Detector/DetFCChhTrackerTkLayout/compact/Tracker.xml'],
+  'file:Detector/DetFCChhTrackerTkLayout/compact/Tracker_ACTSCompatible.xml'],
                     OutputLevel = DEBUG)
 
 
@@ -16,7 +16,7 @@ geoservice = GeoSvc("GeoSvc", detectors=['file:Detector/DetFCChhBaseline1/compac
 # Configures the Geant simulation: geometry, physics list and user actions
 from Configurables import SimG4Svc
 # giving the names of tools will initialize the tools of that type
-geantservice = SimG4Svc("SimG4Svc", detector='SimG4DD4hepDetector', physicslist="SimG4FtfpBert", actions="SimG4FullSimActions")
+geantservice = SimG4Svc("SimG4Svc", detector='SimG4DD4hepDetector', physicslist="SimG4GeantinoDeposits", actions="SimG4FullSimActions")
 
 #geantservice.G4commands += ["/tracking/verbose 1"]
 
@@ -45,7 +45,7 @@ out.outputCommands = ["keep *"]
 from Configurables import ApplicationMgr
 ApplicationMgr( TopAlg = [geantsim, out],
                 EvtSel = 'NONE',
-                EvtMax   = 10000,
+                EvtMax   = 10000 ,
                 # order is important, as GeoSvc is needed by SimG4Svc
                 ExtSvc = [podioevent, geoservice, geantservice],
                 OutputLevel=DEBUG
