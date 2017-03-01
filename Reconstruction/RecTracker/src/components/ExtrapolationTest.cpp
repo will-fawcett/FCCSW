@@ -110,7 +110,7 @@ StatusCode ExtrapolationTest::execute() {
 
   auto propConfig = RungeKuttaEngine<>::Config();
   /// @todo: use magnetic field service
-  propConfig.fieldService = std::make_shared<ConstantBField>(0, 0, 0.002);
+  propConfig.fieldService = std::make_shared<ConstantBField>(0, 0, 0.006);
   auto propEngine = std::make_shared<RungeKuttaEngine<>>(propConfig);
 
   auto matConfig = MaterialEffectsEngine::Config();
@@ -144,7 +144,7 @@ StatusCode ExtrapolationTest::execute() {
   double std1, std2, l1, l2;
   for (const auto& step : exCell.extrapolationSteps) {
     const auto& tp = step.parameters;
-    if (tp->associatedSurface().type() != Surface::Plane) continue;
+    //if (tp->associatedSurface().type() != Surface::Plane) continue;
     fcc::TrackHit edmHit = hitscoll->create();
     fcc::BareHit& edmHitCore = edmHit.core();
     auto position = fcc::Point();

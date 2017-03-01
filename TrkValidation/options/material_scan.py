@@ -5,8 +5,9 @@ from Configurables import GeoSvc
 
 from Configurables import FCCDataSvc
 podioevent   = FCCDataSvc("EventDataSvc")
-geoservice = GeoSvc("GeoSvc", detectors=['file:Detector/DetFCChhBaseline1/compact/FCChh_DectEmptyMaster.xml', 'file:Detector/DetFCChhTrackerTkLayout/compact/Tracker.xml'], OutputLevel = DEBUG)
 
+geoservice = GeoSvc("GeoSvc", detectors=['file:Detector/DetFCChhBaseline1/compact/FCChh_DectEmptyMaster.xml',
+  'file:Detector/DetFCChhTrackerTkLayout/compact/Tracker.xml'])
 from Configurables import MaterialScan
 materialservice = MaterialScan("GeoDump", filename="DD4hep_material_scan.root", etaBinning=0.05, etaMax=6)
 

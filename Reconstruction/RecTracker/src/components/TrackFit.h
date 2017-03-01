@@ -45,6 +45,9 @@ private:
   std::shared_ptr<Acts::TrackingGeometry> m_trkGeo;
 
   DataHandle<fcc::PositionedTrackHitCollection> m_positionedTrackHits;
+  DataHandle<fcc::MCParticleCollection> m_genParticlesHandle;
+  /// Handle for the genvertices to be written
+  DataHandle<fcc::GenVertexCollection> m_genVerticesHandle;
 };
 
 using namespace Acts;
@@ -108,7 +111,7 @@ public:
 std::shared_ptr<IExtrapolationEngine> initExtrapolator(const std::shared_ptr<const TrackingGeometry>& geo) {
   auto propConfig = RungeKuttaEngine<>::Config();
   /// @todo: use magnetic field service
-  propConfig.fieldService = std::make_shared<ConstantBField>(0, 0, 0.002);
+  propConfig.fieldService = std::make_shared<ConstantBField>(0, 0, 0.006);
   auto propEngine = std::make_shared<RungeKuttaEngine<>>(propConfig);
 
   auto matConfig = MaterialEffectsEngine::Config();

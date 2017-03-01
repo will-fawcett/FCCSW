@@ -31,8 +31,6 @@
   <include ref="./FCChh_Shielding.xml" />
 
 
-  <include ref="../../DetFCChhTrackerSimple/compact/Tracker.xml" />
-  <include ref="../../DetFCChhECalSimple/compact/FCChh_ECalBarrel_Mockup.xml" />
   <include ref="../../DetFCChhHCalTile/compact/FCChh_HCalBarrel_TileCal.xml" />
 
   <!-->

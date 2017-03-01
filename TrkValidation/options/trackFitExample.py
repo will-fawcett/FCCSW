@@ -4,7 +4,7 @@ from Gaudi.Configuration import *
 from Configurables import FCCDataSvc
 podioevent   = FCCDataSvc("EventDataSvc", input="TrkValidation/data/geant_fullsim_tracker_singleparticles.root")
 from Configurables import PodioInput
-podioinput = PodioInput("PodioReader", collections=["positionedHits"], OutputLevel=DEBUG)
+podioinput = PodioInput("PodioReader", collections=["positionedHits", "GenParticles"], OutputLevel=DEBUG)
 
 from Configurables import GeoSvc
 geoservice = GeoSvc("GeoSvc", detectors=['file:Detector/DetFCChhBaseline1/compact/FCChh_DectEmptyMaster.xml',

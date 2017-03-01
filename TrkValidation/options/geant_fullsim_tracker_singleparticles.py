@@ -10,7 +10,7 @@ from Configurables import ParticleGunAlg, MomentumRangeParticleGun
 # MomentumRangeParticleGun generates particles of given type(s) within given momentum, phi and theta range
 # FlatSmearVertex smears the vertex with uniform distribution
 
-pgun_tool = MomentumRangeParticleGun(PdgCodes=[-13], ThetaMin=1.5707, ThetaMax=1.5707, MomentumMin=0.01, MomentumMax=10)
+pgun_tool = MomentumRangeParticleGun(PdgCodes=[-13], ThetaMin=1.5707, ThetaMax=1.5707, MomentumMin=10, MomentumMax=10)
 gen = ParticleGunAlg("ParticleGun", ParticleGunTool=pgun_tool, VertexSmearingToolPGun="FlatSmearVertex")
 gen.DataOutputs.hepmc.Path = "hepmc"
 
@@ -55,7 +55,7 @@ savetrackertool.DataOutputs.trackHits.Path = "hits"
 particle_converter = SimG4PrimariesFromEdmTool("EdmConverter")
 particle_converter.DataInputs.genParticles.Path = "allGenParticles"
 
-pgun = SimG4SingleParticleGeneratorTool("MuonGun", phiMin=0, phiMax=0, etaMin=1, etaMax=1, energyMin=5000, energyMax=5000, particleName="mu-")
+pgun = SimG4SingleParticleGeneratorTool("MuonGun", phiMin=0, phiMax=0, etaMin=1, etaMax=1, energyMin=5000, energyMax=5000, particleName="mu-", saveEdm=True)
 geantsim = SimG4Alg("SimG4Alg",
                     outputs= ["SimG4SaveTrackerHits/saveTrackerHits" ],
                     eventProvider=pgun)

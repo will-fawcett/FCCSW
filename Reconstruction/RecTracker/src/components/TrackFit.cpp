@@ -25,6 +25,8 @@
 #include "ACTS/Utilities/Logger.hpp"
 
 #include "datamodel/PositionedTrackHitCollection.h"
+#include "datamodel/MCParticleCollection.h"
+#include "datamodel/GenVertexCollection.h"
 #include "datamodel/TrackHitCollection.h"
 
 
@@ -48,6 +50,8 @@ DECLARE_ALGORITHM_FACTORY(TrackFit)
 TrackFit::TrackFit(const std::string& name, ISvcLocator* svcLoc) : GaudiAlgorithm(name, svcLoc) {
 
   declareInput("positionedTrackHits", m_positionedTrackHits,"hits/TrackerPositionedHits");
+  declareInput("genParticles", m_genParticlesHandle, "GenParticles");
+  declareInput("genVertices", m_genVerticesHandle, "GenVertices");
   declareProperty("trackSeedingTool", m_trackSeedingTool);
   declarePublicTool(m_trackSeedingTool, "TrackSeedingTool/TruthSeedingTool");
 
@@ -86,6 +90,7 @@ StatusCode TrackFit::execute() {
     auto m_decoderBarrel = readoutBarrel.idSpec().decoder();
 
   const fcc::PositionedTrackHitCollection* hits = m_positionedTrackHits.get();
+  const fcc::MCParticleCollection* mcparticles = m_genParticlesHandle.get();
 
   std::vector<FitMeas_t> fccMeasurements;
   std::vector<const Acts::Surface*> surfVec;
@@ -116,6 +121,8 @@ StatusCode TrackFit::execute() {
     int module_id = (*m_decoderBarrel)["module"];
     debug() << "\t module " << module_id;
     debug() << endmsg;
+    fcc_l1 = (*m_decoderBarrel)["x"] * 0.005;
+    fcc_l2 = (*m_decoderBarrel)["z"] * 0.01;
     (*m_decoderBarrel)["x"] = 0; // workaround for broken `volumeID` method --
     (*m_decoderBarrel)["z"] = 0; // set everything not connected with the VolumeID to zero,
     // so the cellID can be used to look up the tracking surface
@@ -144,12 +151,13 @@ StatusCode TrackFit::execute() {
   }
 
   
-  FastHelix helix(outerPoint, middlePoint, GlobalPoint(0,0,0), 0.002);
-  PerigeeTrackParameters res = ParticleProperties2TrackParameters(GlobalPoint(0,0,0), helix.getPt(), 0.002, 1);
+  FastHelix helix(outerPoint, middlePoint, GlobalPoint(0,0,0), 0.006);
+  PerigeeTrackParameters res = ParticleProperties2TrackParameters(GlobalPoint(0,0,0), helix.getPt(), 0.006, 1);
   
 
   ActsVector<ParValue_t, NGlobalPars> pars;
-  pars << res.d0, res.z0, res.phi0, M_PI * 0.5, res.qOverPt;
+  std::cout << res.d0 << "\t" << res.z0 << "\t" << res.phi0 << "\t" << res.qOverPt << std::endl;
+    pars << res.d0, res.z0, res.phi0, M_PI * 0.5 + 0.705026844, res.qOverPt;
   auto startCov =
       std::make_unique<ActsSymMatrix<ParValue_t, NGlobalPars>>(ActsSymMatrix<ParValue_t, NGlobalPars>::Identity());
 
@@ -210,9 +218,18 @@ StatusCode TrackFit::execute() {
   auto track = KF.fit(fccMeasurements, std::make_unique<BoundParameters>(*startTP));
 
   // dump track
+  int trackCounter = 0;
   for (const auto& p : track) {
+  auto smoothedState = *p->getSmoothedState();
+  auto cov = *smoothedState.covariance();
     debug() << *p->getCalibratedMeasurement() << endmsg;
     debug() << *p->getSmoothedState() << endmsg;
+  for (auto pp: *mcparticles) {
+    if (trackCounter == 0) {
+    std::cout <<  "fitresult: " << std::sqrt(pp.core().p4.px * pp.core().p4.px + pp.core().p4.py * pp.core().p4.py) << "\t"  << pp.core().p4.pz << "\t" <<std::sqrt(cov(4,4)) << std::endl;
+    }
+  }
+  trackCounter++;
   }
 
   return StatusCode::SUCCESS;
