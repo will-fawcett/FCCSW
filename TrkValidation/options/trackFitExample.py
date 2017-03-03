@@ -36,7 +36,7 @@ trackFitAlg.DataInputs.positionedTrackHits.Path = "positionedHits"
 from Configurables import ApplicationMgr
 ApplicationMgr( TopAlg = [podioinput, trackFitAlg],
                 EvtSel = 'NONE',
-                EvtMax   = 3,
+                EvtMax   = 15,
                 # order is important, as GeoSvc is needed by SimG4Svc
                 ExtSvc = [podioevent, geoservice, geantservice, trkgeoservice, trkvolmanservice],
                 OutputLevel=DEBUG

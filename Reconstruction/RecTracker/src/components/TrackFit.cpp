@@ -88,6 +88,8 @@ StatusCode TrackFit::execute() {
     auto allReadouts = lcdd->readouts();
     auto readoutBarrel = lcdd->readout("TrackerBarrelReadout");
     auto m_decoderBarrel = readoutBarrel.idSpec().decoder();
+    auto readoutEndcap = lcdd->readout("TrackerEndcapReadout");
+    auto m_decoderEndcap = readoutEndcap.idSpec().decoder();
 
   const fcc::PositionedTrackHitCollection* hits = m_positionedTrackHits.get();
   const fcc::MCParticleCollection* mcparticles = m_genParticlesHandle.get();
@@ -136,8 +138,8 @@ StatusCode TrackFit::execute() {
     const Acts::Surface* fccSurf = m_trkVolMan->lookUpTrkSurface(Identifier(m_decoderBarrel->getValue()));
     debug() << " found surface pointer: " << fccSurf<< endmsg;
     if (nullptr != fccSurf) {
-    double std1 = 1;
-    double std2 = 1;
+    double std1 = 0.001;
+    double std2 = 0.001;
     ActsSymMatrixD<2> cov;
     cov << std1* std1, 0, 0, std2* std2;
     fccMeasurements.push_back(Meas_t<eLOC_1, eLOC_2>(*fccSurf, hit.core().cellId, std::move(cov), fcc_l1, fcc_l2));
@@ -155,15 +157,37 @@ StatusCode TrackFit::execute() {
   PerigeeTrackParameters res = ParticleProperties2TrackParameters(GlobalPoint(0,0,0), helix.getPt(), 0.006, 1);
   
 
+    double pT = 0;
+    double                x  = 0;
+    double                y  = 0;
+    double                z  = 0;
+    double                px = 0;//pT * cos(phi);
+    double                py = 0;//pT * sin(phi);
+    double                pz = 0;//pT / tan(theta);
+    double                q  = 1; //(charge != 0) ? charge : +1;
+
+    for (auto pp: *mcparticles) {
+      px = 1000 * pp.core().p4.px;
+      py = 1000 * pp.core().p4.py;
+      pz = 1000 * pp.core().p4.pz;
+    }
+    Vector3D              pos(x, y, z);
+    Vector3D              mom(px, py, pz);
+
+
+
   ActsVector<ParValue_t, NGlobalPars> pars;
   std::cout << res.d0 << "\t" << res.z0 << "\t" << res.phi0 << "\t" << res.qOverPt << std::endl;
-    pars << res.d0, res.z0, res.phi0, M_PI * 0.5 + 0.705026844, res.qOverPt;
+    pars << res.d0, res.z0, res.phi0, 0.705026844, 0.0001959031;
   auto startCov =
       std::make_unique<ActsSymMatrix<ParValue_t, NGlobalPars>>(ActsSymMatrix<ParValue_t, NGlobalPars>::Identity());
 
   const Surface* pSurf =  m_trkGeo->getBeamline();
-  auto startTP = std::make_unique<BoundParameters>(std::move(startCov), std::move(pars), *pSurf);
+  //auto startTP = std::make_unique<BoundParameters>(std::move(startCov), std::move(pars), *pSurf);
+      auto           startTP = std::make_unique<BoundParameters>(
+          std::move(startCov), std::move(pos), std::move(mom), q, *pSurf);
 
+std::cout << "mine: " << *startTP << std::endl;
   ExtrapolationCell<TrackParameters> exCell(*startTP);
   exCell.addConfigurationMode(ExtrapolationMode::CollectSensitive);
   exCell.addConfigurationMode(ExtrapolationMode::CollectPassive);
@@ -186,9 +210,10 @@ StatusCode TrackFit::execute() {
   std::uniform_real_distribution<double> std_loc2(0.1, 2);
   std::normal_distribution<double> g(0, 1);
 
-  double std1, std2, l1, l2;
+   double std1, std2, l1, l2;
   for (const auto& step : exCell.extrapolationSteps) {
     const auto& tp = step.parameters;
+    std::cout << "epopos: " << tp->position().x() << "\t" << tp->position().y() << "\t" << tp->position().z() << std::endl;
     if (tp->associatedSurface().type() != Surface::Plane) continue;
 
     std1 = 1;//std_loc1(e);
@@ -215,7 +240,9 @@ StatusCode TrackFit::execute() {
   KF.m_oExtrapolator = MyExtrapolator(exEngine);
   KF.m_oUpdator = GainMatrixUpdator();
 
+  if (fccMeasurements.size() > 0) {
   auto track = KF.fit(fccMeasurements, std::make_unique<BoundParameters>(*startTP));
+  std::cout << "fit done!" << std::endl;
 
   // dump track
   int trackCounter = 0;
@@ -224,12 +251,14 @@ StatusCode TrackFit::execute() {
   auto cov = *smoothedState.covariance();
     debug() << *p->getCalibratedMeasurement() << endmsg;
     debug() << *p->getSmoothedState() << endmsg;
+    double pt  = std::sqrt(smoothedState.momentum().x() * smoothedState.momentum().x() + smoothedState.momentum().y() * smoothedState.momentum().y());
   for (auto pp: *mcparticles) {
-    if (trackCounter == 0) {
-    std::cout <<  "fitresult: " << std::sqrt(pp.core().p4.px * pp.core().p4.px + pp.core().p4.py * pp.core().p4.py) << "\t"  << pp.core().p4.pz << "\t" <<std::sqrt(cov(4,4)) << std::endl;
+    if (trackCounter == fccMeasurements.size() - 1) {
+    std::cout <<  "fitresult: " << std::sqrt(pp.core().p4.px * pp.core().p4.px + pp.core().p4.py * pp.core().p4.py) << "\t" << pt << "\t"  << pp.core().p4.pz << "\t" << smoothedState.momentum().z() <<  "\t" <<std::sqrt(cov(4,4)) << std::endl;
     }
   }
   trackCounter++;
+  }
   }
 
   return StatusCode::SUCCESS;

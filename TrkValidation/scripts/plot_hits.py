@@ -21,7 +21,7 @@ def id_to_color(ID):
 def load_data(filename):
   return np.loadtxt(filename)
 
-def plot_data_rphi(hits, ids, cellIds, title="rphi"):
+def plot_data_rphi(hits, ids, cellIds, data_epos, title="rphi"):
     f1 = plt.figure(title)
     ax1 = plt.axes()
     for i in np.unique(ids):
@@ -33,6 +33,7 @@ def plot_data_rphi(hits, ids, cellIds, title="rphi"):
       else:
         ax1.plot(h[:,0], h[:,1], 'o', color=col, ms=1, alpha=0.8)
 
+    #ax1.plot(data_epos[:,0], data_epos[:,1], '*', ms=5, alpha=0.8, color="blue")
     ax1.set_title("Tracker Hits")
     ax1.set_xlabel("x")
     ax1.set_ylabel("y")
@@ -41,7 +42,7 @@ def plot_data_rphi(hits, ids, cellIds, title="rphi"):
     ax1.set_xlim((1.1 * hmin, 1.1 * hmax))
     ax1.set_ylim((1.1 * hmin, 1.1 * hmax))
 
-def plot_data_rz(hits, ids, cells, title="rz"):
+def plot_data_rz(hits, ids, cells, data_epos, title="rz"):
     f2 = plt.figure(title)
     ax2 = plt.axes()
     plt.title("Tracker hits from geant_pgun_fullsim")
@@ -53,16 +54,17 @@ def plot_data_rz(hits, ids, cells, title="rz"):
       if i == 1:
         ax2.plot(h[:,2], r, 'o', color=col, ms=5, alpha=0.8)
       else:
-        ax2.plot(h[:,2], r, 'o', color=col, ms=1, alpha=0.8)
+        ax2.plot(h[:,2], r, '.', color=col, ms=1, alpha=0.8)
 
+    #ax2.plot(data_epos[:,2], np.sqrt(data_epos[:,0]**2 + data_epos[:,1]**2), '*', ms=5, alpha=0.8, color="blue")
     ax2.set_title("Tracker Hits")
     ax2.set_xlabel("z")
     ax2.set_ylabel("r")
     rmax = np.max(r)
     hmax = np.max(h[:,2])
     hmin = np.min(h[:,2])
-    ax2.set_xlim((1.1 * hmin, 1.1 * hmax))
-    ax2.set_ylim((0, 1.1 * rmax))
+    ax2.set_xlim((0, 2000))
+    ax2.set_ylim((0, 2000))
 
 
 
@@ -76,10 +78,11 @@ if __name__ == "__main__":
     #plot_data_rphi(hits, ids, cellIds, title="rphi-barrel")
     #plot_data_rz(hits, ids, cellIds, title="rz-barrel")
     data = load_data(basefilename + 'hit_positions_e.dat')
+    data_epos = load_data("epos.dat")
     hits = data
     id_data = load_data(basefilename + 'hit_ids_e.dat')
     ids = id_data[:,0]
     cellIds = id_data[:,1]
-    plot_data_rz(hits, ids, cellIds, title="rphi-endcap")
-    plot_data_rphi(hits, ids, cellIds, title="rz-endcap")
+    plot_data_rz(hits, ids, cellIds, data_epos, title="rphi-endcap")
+    plot_data_rphi(hits, ids, cellIds, data_epos, title="rz-endcap")
     plt.show()

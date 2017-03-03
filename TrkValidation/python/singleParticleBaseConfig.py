@@ -15,9 +15,11 @@ ppservice = Gaudi__ParticlePropertySvc("ParticlePropertySvc", ParticleProperties
 # Parses the given xml file
 from Configurables import GeoSvc
 geoservice = GeoSvc("GeoSvc", detectors=['file:Detector/DetFCChhBaseline1/compact/FCChh_DectEmptyMaster.xml',
-  'file:Detector/DetFCChhTrackerTkLayout/compact/Tracker.xml'],
+  'file:TrkValidation/compact/Tracker_withoutBeampipe.xml'],
                     OutputLevel = DEBUG)
 
+from Configurables import TrackingGeoSvc
+trkgeoservice = TrackingGeoSvc("TrackingGeometryService")
 
 # Geant4 service
 # Configures the Geant simulation: geometry, physics list and user actions
@@ -41,7 +43,7 @@ savetrackertool.DataOutputs.trackHits.Path = "hits"
 particle_converter = SimG4PrimariesFromEdmTool("EdmConverter")
 particle_converter.DataInputs.genParticles.Path = "allGenParticles"
 
-pgun = SimG4SingleParticleGeneratorToolPt("MuonGun", phiMin=0, phiMax=0, etaMin=0, etaMax=1, ptMin=10000, ptMax=10000, particleName="mu-", saveEdm=True)
+pgun = SimG4SingleParticleGeneratorToolPt("MuonGun", phiMin=0, phiMax=0, etaMin=0, etaMax=6, ptMin=100000, ptMax=100000, particleName="mu-", saveEdm=True)
 geantsim = SimG4Alg("SimG4Alg",
                     outputs= ["SimG4SaveTrackerHits/saveTrackerHits" ],
                     eventProvider=pgun)
@@ -52,19 +54,25 @@ geantsim = SimG4Alg("SimG4Alg",
 x = 1123532
 geantservice.G4commands += ["/random/setSeeds "+str(x)+" 0"] #where x is the number you want
 
+from Configurables import TrkVolumeManagerSvc
+trkvolmanservice = TrkVolumeManagerSvc("TrkVolMan")
+
+from Configurables import TruthSeedingTool
+
+truthseedtool = TruthSeedingTool()
+
+
+from Configurables import TrackFit
+trackFitAlg = TrackFit()
+trackFitAlg.trackSeedingTool = truthseedtool
+trackFitAlg.DataInputs.positionedTrackHits.Path = "positionedHits"
+#trackFitAlg.DataInputs.trackHits.Path = "hits"
+
 # PODIO algorithm
 from Configurables import PodioOutput
 out = PodioOutput("out",
                    OutputLevel=DEBUG)
 out.outputCommands = ["keep *"]
-out.filename = sys.argv[1].replace("options/", "data/").replace(".py", ".root")
+svcList = [podioevent, geoservice, geantservice, trkgeoservice, trkvolmanservice]
+topAlgList = [geantsim, trackFitAlg]
 
-# ApplicationMgr
-from Configurables import ApplicationMgr
-ApplicationMgr( TopAlg = [geantsim, out],
-                EvtSel = 'NONE',
-                EvtMax   = 15,
-                # order is important, as GeoSvc is needed by SimG4Svc
-                ExtSvc = [ppservice, podioevent, geoservice, geantservice],
-                OutputLevel=DEBUG
- )
