@@ -20,6 +20,10 @@ gaudi_add_module(RecTracker
                  INCLUDE_DIRS ROOT FWCore HepMC FCCEDM PODIO DD4hep DetInterface RecInterface ACTS
                  LINK_LIBRARIES ROOT GaudiAlgLib FCCEDM PODIO HepMC DD4hep ${DD4hep_COMPONENT_LIBRARIES} ACTS::ACTSCore ACTS::ACTSDD4hepPlugin ACTS::ACTSExamples) 
 
+gaudi_add_library(ActsLogger
+                 src/components/ACTSLogger.cpp
+                 INCLUDE_DIRS ROOT FWCore HepMC FCCEDM PODIO DD4hep DetInterface RecInterface ACTS
+                 LINK_LIBRARIES ROOT GaudiAlgLib FCCEDM PODIO HepMC DD4hep ${DD4hep_COMPONENT_LIBRARIES} ACTS::ACTSCore ACTS::ACTSDD4hepPlugin ACTS::ACTSExamples) 
 include(CTest)
 gaudi_add_test(muonsForTrackReco
                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
