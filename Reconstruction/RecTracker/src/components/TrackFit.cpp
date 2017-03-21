@@ -42,6 +42,7 @@
 #include "FastHelix.h"
 #include "TrackParameterConversions.h"
 
+#include "ACTSLogger.h"
 
 
 
