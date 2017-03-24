@@ -140,5 +140,8 @@ private:
   Acts::KalmanFitter<MyExtrapolator, CacheGenerator, NoCalibration, Acts::GainMatrixUpdator> m_KF;
 
   DataHandle<fcc::PositionedTrackHitCollection> m_positionedTrackHits;
+    DataHandle<fcc::MCParticleCollection> m_genParticlesHandle;
+      /// Handle for the genvertices to be written
+    DataHandle<fcc::GenVertexCollection> m_genVerticesHandle;
 };
 #endif /* RECTRACKER_TRACKFIT_H */
