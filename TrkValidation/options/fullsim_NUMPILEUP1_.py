@@ -1,20 +1,18 @@
 
-from singleParticleBaseConfig import *
+from geantFullsimBaseConfig import *
 import sys
 
-pgun.ptMin = float(sys.argv[1].split('ptMin')[1].split('_')[0])
-pgun.ptMax = float(sys.argv[1].split('ptMin')[1].split('_')[0])
-geantsim.eventProvider = pgun
+pileuptool.numPileUpEvents = float(sys.argv[1].split('NUMPILEUP')[1].split('_')[0])
+pythia8gen.PileUpTool = pileuptool
 
 # take the name of this file, replace extension and place in data directory
 out.filename = sys.argv[1].replace("options/", "data/").replace(".py", ".root")
 
-topAlgList = [geantsim, trackFitAlg, out]
 # ApplicationMgr
 from Configurables import ApplicationMgr
 ApplicationMgr( TopAlg = topAlgList,
                 EvtSel = 'NONE',
-                EvtMax   = 500,
+                EvtMax   = 1,
                 # order is important, as GeoSvc is needed by SimG4Svc
                 ExtSvc = svcList,
                 OutputLevel=DEBUG

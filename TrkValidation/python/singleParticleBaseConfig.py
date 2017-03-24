@@ -74,5 +74,5 @@ out = PodioOutput("out",
                    OutputLevel=DEBUG)
 out.outputCommands = ["keep *"]
 svcList = [podioevent, geoservice, geantservice, trkgeoservice, trkvolmanservice]
-topAlgList = [geantsim, trackFitAlg]
+topAlgList = [geantsim, trackFitAlg, out]
 

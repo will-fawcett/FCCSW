@@ -9,7 +9,6 @@ geantsim.eventProvider = pgun
 # take the name of this file, replace extension and place in data directory
 out.filename = sys.argv[1].replace("options/", "data/").replace(".py", ".root")
 
-topAlgList = [geantsim, trackFitAlg]
 # ApplicationMgr
 from Configurables import ApplicationMgr
 ApplicationMgr( TopAlg = topAlgList,
