@@ -44,6 +44,7 @@
 
 #include "ACTSLogger.h"
 
+using namespace Acts;
 
 
 DECLARE_ALGORITHM_FACTORY(TrackFit)
@@ -80,6 +81,13 @@ StatusCode TrackFit::initialize() {
   }
 
   m_trkGeo = m_trkGeoSvc->trackingGeometry();
+  m_exEngine = initExtrapolator(m_trkGeo);
+
+  m_KF.m_oCacheGenerator = CacheGenerator();
+  m_KF.m_oCalibrator = NoCalibration();
+  m_KF.m_oExtrapolator = MyExtrapolator(m_exEngine);
+  m_KF.m_oUpdator = GainMatrixUpdator();
+
   return sc;
 }
 
@@ -194,10 +202,9 @@ std::cout << "mine: " << *startTP << std::endl;
   exCell.addConfigurationMode(ExtrapolationMode::CollectPassive);
   exCell.addConfigurationMode(ExtrapolationMode::StopAtBoundary);
 
-  auto exEngine = initExtrapolator(m_trkGeo);
-  exEngine->extrapolate(exCell);
+  m_exEngine->extrapolate(exCell);
 
-  debug() << "got " << exCell.extrapolationSteps.size() << " extrapolation steps" << endmsg;
+  info() << "got " << exCell.extrapolationSteps.size() << " extrapolation steps" << endmsg;
 
   std::vector<FitMeas_t> vMeasurements;
   vMeasurements.reserve(exCell.extrapolationSteps.size());
@@ -227,23 +234,17 @@ std::cout << "mine: " << *startTP << std::endl;
     ++id;
   }
 
-  debug() << "created " << vMeasurements.size() << " pseudo-measurements" << endmsg;
+  info() << "created " << vMeasurements.size() << " pseudo-measurements" << endmsg;
   for (const auto& m : vMeasurements)
-    info() << m << endmsg;
+    debug() << m << endmsg;
 
-  debug() << "created " << fccMeasurements.size() << " fcc-measurements" << endmsg;
+  info() << "created " << fccMeasurements.size() << " fcc-measurements" << endmsg;
   for (const auto& m : fccMeasurements)
-    info() << m << endmsg;
+    debug() << m << endmsg;
 
-  KalmanFitter<MyExtrapolator, CacheGenerator, NoCalibration, GainMatrixUpdator> KF;
-  KF.m_oCacheGenerator = CacheGenerator();
-  KF.m_oCalibrator = NoCalibration();
-  KF.m_oExtrapolator = MyExtrapolator(exEngine);
-  KF.m_oUpdator = GainMatrixUpdator();
 
   if (fccMeasurements.size() > 0) {
-  auto track = KF.fit(fccMeasurements, std::make_unique<BoundParameters>(*startTP));
-  std::cout << "fit done!" << std::endl;
+  auto track = m_KF.fit(fccMeasurements, std::make_unique<BoundParameters>(*startTP));
 
   // dump track
   int trackCounter = 0;
