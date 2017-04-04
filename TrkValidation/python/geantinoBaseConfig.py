@@ -42,8 +42,8 @@ savetrackertool.positionedTrackHits.Path = "positionedHits"
 savetrackertool.trackHits.Path = "hits"
 # next, create the G4 algorithm, giving the list of names of tools ("XX/YY")
 pgun = SimG4SingleParticleGeneratorTool("GeantinoGun", 
-                                        etaMin=-5, 
-                                        etaMax=5, 
+                                        etaMin=-6, 
+                                        etaMax=6, 
                                         particleName="geantino"
                                         )
 
