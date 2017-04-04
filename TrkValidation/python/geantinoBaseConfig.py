@@ -45,6 +45,7 @@ pgun = SimG4SingleParticleGeneratorTool("GeantinoGun",
                                         etaMin=-6, 
                                         etaMax=6, 
                                         particleName="geantino"
+                                        saveEdm=True,
                                         )
 
 geantsim = SimG4Alg("SimG4Alg",
