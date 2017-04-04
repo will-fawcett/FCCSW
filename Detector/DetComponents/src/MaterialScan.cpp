@@ -92,7 +92,7 @@ StatusCode MaterialScan::initialize() {
           phiAveragedMaterialsBetween[materials[i].first] += materials[i].second / static_cast<double>(m_nPhiTrials);
       }
       }
-      nMaterials = materialPhiAverage.size();
+      nMaterials = phiAveragedMaterialsBetween.size();
       for (auto matpair: phiAveragedMaterialsBetween) {
         TGeoMaterial* mat = matpair.first->GetMaterial();
         material->push_back(mat->GetName());
