@@ -44,7 +44,7 @@ savetrackertool.trackHits.Path = "hits"
 pgun = SimG4SingleParticleGeneratorTool("GeantinoGun", 
                                         etaMin=-6, 
                                         etaMax=6, 
-                                        particleName="geantino"
+                                        particleName="geantino",
                                         saveEdm=True,
                                         )
 
