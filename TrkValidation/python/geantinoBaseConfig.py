@@ -32,6 +32,9 @@ geantservice = SimG4Svc("SimG4Svc",
 # Geant4 algorithm
 # Translates EDM to G4Event, passes the event to G4, writes out outputs via tools
 from Configurables import SimG4Alg, SimG4SaveTrackerHits
+
+from Configurables import SimG4ConstantMagneticFieldTool
+field = SimG4ConstantMagneticFieldTool("SimG4ConstantMagneticFieldTool", FieldOn=True, IntegratorStepper="ClassicalRK4")
 # first, create a tool that saves the tracker hits
 # Name of that tool in GAUDI is "XX/YY" where XX is the tool class name ("SimG4SaveTrackerHits")
 # and YY is the given name ("saveTrackerHits")
@@ -44,7 +47,7 @@ savetrackertool.trackHits.Path = "hits"
 pgun = SimG4SingleParticleGeneratorTool("GeantinoGun", 
                                         etaMin=-6, 
                                         etaMax=6, 
-                                        particleName="geantino",
+                                        particleName="chargedgeantino",
                                         saveEdm=True,
                                         )
 

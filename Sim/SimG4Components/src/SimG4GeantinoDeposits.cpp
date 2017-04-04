@@ -3,6 +3,7 @@
 // Geant4
 #include "G4VModularPhysicsList.hh"
 #include "G4Geantino.hh"
+#include "G4ChargedGeantino.hh"
 #include "G4VUserPhysicsList.hh"
 #include "G4VProcess.hh"
 #include "G4VContinuousProcess.hh"
@@ -22,11 +23,11 @@ class GeantinoEnergyDepositProcess: public G4VContinuousProcess {
      const G4Step&  aStep) {
     aParticleChange.Initialize(aTrack);
     G4double kinEnergyStart = aTrack.GetKineticEnergy();  
-    G4double edepo = kinEnergyStart * 0.01;
+    G4double edepo =  0.000001;
     aParticleChange.ClearDebugFlag();
     aParticleChange.ProposeLocalEnergyDeposit( edepo );
     aParticleChange.SetNumberOfSecondaries(0);
-    aParticleChange.ProposeEnergy( kinEnergyStart - edepo );
+    aParticleChange.ProposeEnergy( kinEnergyStart );
     return &aParticleChange;
   }
 
@@ -55,6 +56,7 @@ class GeantinoEnergyDepositList : public G4VModularPhysicsList {
 
   void ConstructParticle() {
     G4Geantino::GeantinoDefinition();
+    G4ChargedGeantino::ChargedGeantinoDefinition();
   }
 
   void SetCuts() {
