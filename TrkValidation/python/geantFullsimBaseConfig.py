@@ -8,10 +8,10 @@ podioevent = FCCDataSvc("EventDataSvc")
 
 
 from Configurables import ConstPileUp
-pileuptool = ConstPileUp(numPileUpEvents=0, Filename="Generation/data/Pythia_minbias_pp_100TeV.cmd")
+pileuptool = ConstPileUp(numPileUpEvents=0)#, Filename="Generation/data/Pythia_minbias_pp_100TeV.cmd")
 
 from Configurables import PythiaInterface
-pythiafile="Generation/data/Pythia_ttbar.cmd"
+pythiafile="Generation/data/Pythia_minbias_pp_100TeV.cmd"
 pythia8gen = PythiaInterface("Pythia8Interface", Filename=pythiafile, OutputLevel=INFO)
 pythia8gen.PileUpTool = pileuptool
 pythia8gen.hepmc.Path = "hepmc"

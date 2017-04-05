@@ -18,8 +18,6 @@ geoservice = GeoSvc("GeoSvc", detectors=['file:Detector/DetFCChhBaseline1/compac
   'file:Detector/DetFCChhTrackerTkLayout/compact/Tracker.xml'],
                     OutputLevel = DEBUG)
 
-from Configurables import TrackingGeoSvc
-trkgeoservice = TrackingGeoSvc("TrackingGeometryService")
 
 # Geant4 service
 # Configures the Geant simulation: geometry, physics list and user actions
@@ -53,8 +51,11 @@ geantsim = SimG4Alg("SimG4Alg",
                     eventProvider=pgun)
 
 x = 1123532
-geantservice.G4commands += ["/random/setSeeds "+str(x)+" 0"] #where x is the number you want
+#geantservice.g4PreInitCommands += ["/random/setSeeds "+str(x)+" 0"] #where x is the number you want
 
+"""
+from Configurables import TrackingGeoSvc
+trkgeoservice = TrackingGeoSvc("TrackingGeometryService")
 from Configurables import TrkVolumeManagerSvc
 trkvolmanservice = TrkVolumeManagerSvc("TrkVolMan")
 
@@ -69,11 +70,12 @@ trackFitAlg = TrackFit()
 trackFitAlg.positionedTrackHits.Path = "positionedHits"
 #trackFitAlg.trackHits.Path = "hits"
 
+"""
 # PODIO algorithm
 from Configurables import PodioOutput
 out = PodioOutput("out",
                    OutputLevel=DEBUG)
 out.outputCommands = ["keep *"]
-svcList = [podioevent, geoservice, geantservice, trkgeoservice, trkvolmanservice]
-topAlgList = [geantsim, trackFitAlg, out]
+svcList = [podioevent, geoservice, geantservice]#, trkgeoservice, trkvolmanservice]
+topAlgList = [geantsim, out]
 
