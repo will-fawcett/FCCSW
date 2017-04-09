@@ -17,13 +17,35 @@ geoservice = GeoSvc("GeoSvc", detectors=['file:Detector/DetFCChhBaseline1/compac
 from Configurables import ConstPileUp
 pileuptool = ConstPileUp(numPileUpEvents=0)
 
-from Configurables import PythiaInterface
-pythiafile="Generation/data/Pythia_minbias_pp_100TeV.cmd"
-pythia8gen = PythiaInterface("Pythia8Interface", 
-    Filename=pythiafile, 
-    OutputLevel=INFO)
+
+# option 1: pythia
+pythiafile="Generation/data/Pythia_standard.cmd"
+pythiafile_pileup="Generation/data/Pythia_minbias_pp_100TeV.cmd"
+from Configurables import PythiaInterface, GenAlg
+### PYTHIA algorithm
+pythia8gentool = PythiaInterface("Pythia8Interface", Filename=pythiafile)
+pythia8gen = GenAlg("Pythia8", SignalProvider=pythia8gentool, PileUpProvider=pileupreader)
 pythia8gen.PileUpTool = pileuptool
-pythia8gen.hepmc.Path = "hepmc"
+pythia8gen.hepmc.Path = "hepmcevent"
+
+
+# option 2: particle gun
+from Configurables import GenAlg, MomentumRangeParticleGun
+guntool = MomentumRangeParticleGun("ParticleGunTool", PdgCodes=[13])
+gunalg = GenAlg("ParticleGun", SignalProvider=guntool, VertexSmearingTool="FlatSmearVertex")
+gunalg.hepmc.Path = "hepmc"
+
+from Configurables import Gaudi__ParticlePropertySvc
+## Particle service
+# list of possible particles is defined in ParticlePropertiesFile
+ppservice = Gaudi__ParticlePropertySvc("ParticlePropertySvc", ParticlePropertiesFile="Generation/data/ParticleTable.txt")
+
+from Configurables import HepMCConverter
+## Reads an HepMC::GenEvent from the data service and writes a collection of EDM Particles
+hepmc_converter = HepMCConverter("Converter")
+hepmc_converter.hepmc.Path="hepmc"
+hepmc_converter.genparticles.Path="allGenParticles"
+hepmc_converter.genvertices.Path="allGenVertices"
 
 from Configurables import HepMCConverter
 hepmc_converter = HepMCConverter("Converter")
