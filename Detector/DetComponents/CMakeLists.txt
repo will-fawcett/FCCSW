@@ -23,7 +23,7 @@ gaudi_install_headers(DetComponents)
 include(${Geant4_USE_FILE})
 gaudi_add_module(DetComponents
                  src/*.cpp
-                 INCLUDE_DIRS GaudiKernel ROOT DD4hep Geant4 FWCore DetInterface DetExtensions DetSegmentation DetCommon ACTS
+                 INCLUDE_DIRS GaudiKernel ROOT DD4hep Geant4 FWCore DetInterface DetExtensions DetSegmentation DetCommon ACTS ACTS::ACTSDD4hepPlugin
                  LINK_LIBRARIES GaudiKernel ROOT DD4hep ${DD4hep_COMPONENT_LIBRARIES} DetSegmentation DetCommon Geant4 FWCore ACTS::ACTSCore ACTS::ACTSDD4hepPlugin ACTS::ACTSExamples)
 
 include(CTest)
