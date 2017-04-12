@@ -1,6 +1,8 @@
 
 #include "DetCommon/DetUtils.h"
 
+#include "ACTS/Plugins/DD4hepPlugins/ActsExtension.hpp"
+#include "ACTS/Plugins/DD4hepPlugins/IActsExtension.hpp"
 
 #include "DD4hep/DetFactoryHelper.h"
 
@@ -25,6 +27,10 @@ static DD4hep::Geometry::Ref_t createTkLayoutTrackerBarrel(DD4hep::Geometry::LCD
   // has min/max dimensions of tracker for visualization etc.
   std::string detectorName = xmlDet.nameStr();
   DetElement topDetElement(detectorName, xmlDet.id());
+  Acts::ActsExtension::Config volConfig;
+  volConfig.isBarrel = true;
+  Acts::ActsExtension* detWorldExt = new Acts::ActsExtension(volConfig);
+  topDetElement.addExtension<Acts::IActsExtension>(detWorldExt);
   double l_overlapMargin = 0.0001;
   DD4hep::Geometry::Tube topVolumeShape(
       dimensions.rmin(), dimensions.rmax() + l_overlapMargin, (dimensions.zmax() - dimensions.zmin()) * 0.5);
@@ -34,6 +40,7 @@ static DD4hep::Geometry::Ref_t createTkLayoutTrackerBarrel(DD4hep::Geometry::LCD
   // counts all layers - incremented in the inner loop over repeat - tags
   unsigned int layerCounter = 0;
   double integratedModuleComponentThickness = 0;
+  unsigned int nPhi;
   double phi = 0;
   // loop over 'layer' nodes in xml
   DD4hep::XML::Component xLayers = xmlElement.child(_Unicode(layers));
@@ -52,6 +59,11 @@ static DD4hep::Geometry::Ref_t createTkLayoutTrackerBarrel(DD4hep::Geometry::LCD
     PlacedVolume placedLayerVolume = topVolume.placeVolume(layerVolume);
     placedLayerVolume.addPhysVolID("layer", layerCounter);
     DetElement lay_det(topDetElement, "layer" + std::to_string(layerCounter), layerCounter);
+    Acts::ActsExtension::Config layConfig;
+    layConfig.isLayer = true;
+    layConfig.axes = "XzY";
+    Acts::ActsExtension* detlayer = new Acts::ActsExtension(layConfig);
+    lay_det.addExtension<Acts::IActsExtension>(detlayer);
     lay_det.setPlacement(placedLayerVolume);
     DD4hep::XML::Component xModuleComponentsOdd = xModulePropertiesOdd.child("components");
     integratedModuleComponentThickness = 0;
@@ -66,12 +78,10 @@ static DD4hep::Geometry::Ref_t createTkLayoutTrackerBarrel(DD4hep::Geometry::LCD
                                                   0.5 * xModuleComponentOdd.thickness(),
                                                   0.5 * xModulePropertiesOdd.attr<double>("modLength")),
                             lcdd.material(xModuleComponentOdd.materialStr()));
-      unsigned int nPhi = xRods.repeat();
+      double lX, lY, lZ;
+      nPhi = xRods.repeat();
       DD4hep::XML::Handle_t currentComp;
       for (unsigned int phiIndex = 0; phiIndex < nPhi; ++phiIndex) {
-        double lX = 0;
-        double lY = 0;
-        double lZ = 0;
         if (0 == phiIndex % 2) {
           phi = 2 * M_PI * static_cast<double>(phiIndex) / static_cast<double>(nPhi);
           currentComp = xModulesEven;
