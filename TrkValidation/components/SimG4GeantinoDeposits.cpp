@@ -20,7 +20,7 @@ class GeantinoEnergyDepositProcess: public G4VContinuousProcess {
   }
 
   G4VParticleChange* AlongStepDoIt(const G4Track& aTrack,
-     const G4Step&  aStep) {
+     const G4Step&  /*aStep*/) {
     aParticleChange.Initialize(aTrack);
     G4double kinEnergyStart = aTrack.GetKineticEnergy();  
     G4double edepo =  0.000001;
@@ -31,7 +31,7 @@ class GeantinoEnergyDepositProcess: public G4VContinuousProcess {
     return &aParticleChange;
   }
 
-  G4double GetContinuousStepLimit(const G4Track& aTrack,
+  G4double GetContinuousStepLimit(const G4Track& /*aTrack*/,
       G4double,
       G4double currentMinimumStep,
       G4double&) {
