@@ -5,6 +5,16 @@ from Gaudi.Configuration import *
 from Configurables import FCCDataSvc
 podioevent = FCCDataSvc("EventDataSvc")
 
+from FCCPileupScenarios import FCCPhase1PileupConf as pileupconf
+from Configurables import FlatSmearVertex
+smeartool = FlatSmearVertex(
+     xVertexMin=pileupconf['xVertexMin'],
+     xVertexMax=pileupconf['xVertexMax'],
+     yVertexMin=pileupconf['yVertexMin'],
+     yVertexMax=pileupconf['yVertexMax'],
+     zVertexMin=pileupconf['zVertexMin'],
+     zVertexMax=pileupconf['zVertexMax'])
+
 # DD4hep geometry service
 # Parses the given xml file
 from Configurables import GeoSvc
@@ -24,7 +34,7 @@ pythiafile_pileup="Generation/data/Pythia_minbias_pp_100TeV.cmd"
 from Configurables import PythiaInterface, GenAlg
 ### PYTHIA algorithm
 pythia8gentool = PythiaInterface("Pythia8Interface", Filename=pythiafile)
-pythia8gen = GenAlg("Pythia8", SignalProvider=pythia8gentool, PileUpProvider=pileupreader)
+pythia8gen = GenAlg("Pythia8", SignalProvider=pythia8gentool, PileUpProvider=pileupreader, VertexSmearingTool=smeartool)
 pythia8gen.PileUpTool = pileuptool
 pythia8gen.hepmc.Path = "hepmcevent"
 
