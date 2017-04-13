@@ -38,7 +38,7 @@ def main():
         legend = ROOT.TLegend(.75, .75, .94, .94)
         legend.SetLineColor(0)
         ths = ROOT.THStack()
-        for i, material in enumerate(histDict.keys()):
+        for i, material in enumerate(histDict.keys()[::-1]):
             linecolor = 1
             fillcolor = FCCStyle.fillcolors[i]
             histDict[material][plot].SetLineColor(linecolor)

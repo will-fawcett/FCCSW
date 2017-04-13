@@ -77,6 +77,7 @@ StatusCode MaterialScan::initialize() {
 
       std::map<DD4hep::Geometry::Material, double> phiAveragedMaterialsBetween;
       for (int iPhi = 0; iPhi < m_nPhiTrials; ++iPhi) {
+        std::cout << iPhi << "\t" << m_nPhiTrials << std::endl;
           phi = m_flatPhiDist();
           //phi = 0;
         vec.SetPtEtaPhi(1, eta, phi);
