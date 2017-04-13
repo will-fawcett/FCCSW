@@ -31,6 +31,5 @@
             <composite name="OuterECAPpos"/>
             <composite name="OuterECAPneg"/>
         </detector>
-        -->
     </detectors>
 </lccdd>
