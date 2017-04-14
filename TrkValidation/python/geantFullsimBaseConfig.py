@@ -41,7 +41,7 @@ pythia8gen.hepmc.Path = "hepmcevent"
 
 # option 2: particle gun
 from Configurables import GenAlg, MomentumRangeParticleGun
-guntool = MomentumRangeParticleGun("ParticleGunTool", PdgCodes=[13])
+guntool = MomentumRangeParticleGun("ParticleGunTool", PdgCodes=[11, -11, 13, -13, 22, 211, -211, 311, 321, 2212, -2212, 2112,])
 gunalg = GenAlg("ParticleGun", SignalProvider=guntool, VertexSmearingTool="FlatSmearVertex")
 gunalg.hepmc.Path = "hepmc"
 

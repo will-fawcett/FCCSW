@@ -21,7 +21,7 @@ topAlgList = [geantsim, out]
 from Configurables import ApplicationMgr
 ApplicationMgr( TopAlg = topAlgList,
                 EvtSel = 'NONE',
-                EvtMax   = 500,
+                EvtMax   = 5000,
                 # order is important, as GeoSvc is needed by SimG4Svc
                 ExtSvc = svcList,
                 OutputLevel=DEBUG
