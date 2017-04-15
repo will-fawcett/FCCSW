@@ -34,14 +34,14 @@ pythiafile_pileup="Generation/data/Pythia_minbias_pp_100TeV.cmd"
 from Configurables import PythiaInterface, GenAlg
 ### PYTHIA algorithm
 pythia8gentool = PythiaInterface("Pythia8Interface", Filename=pythiafile)
-pythia8gen = GenAlg("Pythia8", SignalProvider=pythia8gentool, PileUpProvider=pileupreader, VertexSmearingTool=smeartool)
+pythia8gen = GenAlg("Pythia8", SignalProvider=pythia8gentool, VertexSmearingTool=smeartool)
 pythia8gen.PileUpTool = pileuptool
 pythia8gen.hepmc.Path = "hepmcevent"
 
 
 # option 2: particle gun
 from Configurables import GenAlg, MomentumRangeParticleGun
-guntool = MomentumRangeParticleGun("ParticleGunTool", PdgCodes=[11, -11, 13, -13, 22, 211, -211, 311, 321, 2212, -2212, 2112,])
+guntool = MomentumRangeParticleGun("ParticleGunTool", PdgCodes=[11, -11, 13, -13, 22, 211, -211,-321, 321, 2212, -2212, 2112,])
 gunalg = GenAlg("ParticleGun", SignalProvider=guntool, VertexSmearingTool="FlatSmearVertex")
 gunalg.hepmc.Path = "hepmc"
 
@@ -91,8 +91,8 @@ from Configurables import SimG4PrimariesFromEdmTool
 particle_converter = SimG4PrimariesFromEdmTool("EdmConverter")
 particle_converter.genParticles.Path = "allGenParticles"
 
-from Configurables import SimG4SingleParticleGeneratorTool
-pgun = SimG4SingleParticleGeneratorTool("GeantinoGun", etaMin=-5, etaMax=5, particleName="geantino")
+#from Configurables import SimG4SingleParticleGeneratorTool
+#pgun = SimG4SingleParticleGeneratorTool("GeantinoGun", etaMin=-5, etaMax=5, particleName="geantino")
 
 from Configurables import SimG4Alg
 geantsim = SimG4Alg("SimG4Alg",
