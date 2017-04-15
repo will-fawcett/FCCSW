@@ -85,10 +85,11 @@ void MomentumRangeParticleGunPt::generateParticle(Gaudi::LorentzVector& momentum
   double phi = m_minPhi + m_flatGenerator() * (m_deltaPhi);
 
   // Transform to x,y,z coordinates
-  //double pt = p * sin(theta);
+  double tanhetasq = std::tanh(eta)*std::tanh(eta);
+  double pzsq = pt*pt * tanhetasq / (1. - tanhetasq);
   px = pt * cos(phi);
   py = pt * sin(phi);
-  pz = p * cos(theta);
+  pz = std::sqrt(pzsq);
 
   // randomly choose a particle type
   unsigned int currentType = (unsigned int)(m_pdgCodes.size() * m_flatGenerator());
