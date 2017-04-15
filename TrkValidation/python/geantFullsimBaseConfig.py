@@ -36,7 +36,7 @@ from Configurables import PythiaInterface, GenAlg
 pythia8gentool = PythiaInterface("Pythia8Interface", Filename=pythiafile)
 pythia8gen = GenAlg("Pythia8", SignalProvider=pythia8gentool, VertexSmearingTool=smeartool)
 pythia8gen.PileUpTool = pileuptool
-pythia8gen.hepmc.Path = "hepmcevent"
+pythia8gen.hepmc.Path = "hepmc"
 
 
 # option 2: particle gun
@@ -50,12 +50,6 @@ from Configurables import Gaudi__ParticlePropertySvc
 # list of possible particles is defined in ParticlePropertiesFile
 ppservice = Gaudi__ParticlePropertySvc("ParticlePropertySvc", ParticlePropertiesFile="Generation/data/ParticleTable.txt")
 
-from Configurables import HepMCConverter
-## Reads an HepMC::GenEvent from the data service and writes a collection of EDM Particles
-hepmc_converter = HepMCConverter("Converter")
-hepmc_converter.hepmc.Path="hepmc"
-hepmc_converter.genparticles.Path="allGenParticles"
-hepmc_converter.genvertices.Path="allGenVertices"
 
 from Configurables import HepMCConverter
 hepmc_converter = HepMCConverter("Converter")

@@ -15,6 +15,6 @@ ApplicationMgr( TopAlg = topAlgList,
                 EvtMax   = 5000,
                 # order is important, as GeoSvc is needed by SimG4Svc
                 ExtSvc = svcList,
-                OutputLevel=DEBUG
+                OutputLevel=INFO
  )
 
