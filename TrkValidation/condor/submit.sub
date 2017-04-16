@@ -1,0 +1,5 @@
+executable            = TrkValidation/condor/runCondor.sh
+output             = TrkValidation/condor/out.out
+log                   = TrkValidation/condor/log.log
+error                 = TrkValidation/condor/err.err
+queue

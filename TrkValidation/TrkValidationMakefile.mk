@@ -16,7 +16,6 @@ FILTER = $(foreach v,$(2),$(if $(findstring $(1),$(v)),$(v)))
 #PileupStudy/data/min_bias_pool.root: PileupStudy/options/min_bias_pool.py
 #	./run gaudirun.py $< > PileupStudy/data/min_bias_pool.log
 $(datadir)%.root: $(pwd)%.py
-		echo $@
 	 		./run gaudirun.py $< ${ARGS} > $(subst .root,.log,$@)
 .PHONY: all
 all: $(datafiles) 

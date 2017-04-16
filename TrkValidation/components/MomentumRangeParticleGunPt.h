@@ -31,21 +31,21 @@ private:
   /// Minimum momentum (Set by options)
   Gaudi::Property<double> m_minMom{this, "MomentumMin", 100.0 * Gaudi::Units::GeV, "Minimal transverse momentum"};
   /// Minimum theta angle (Set by options)
-  Gaudi::Property<double> m_minEta{this, "EMin", 0, "Minimal Eta"};
+  Gaudi::Property<double> m_minEta{this, "EtaMin", 0, "Minimal Eta"};
   /// Minimum phi angle (Set by options)
   Gaudi::Property<double> m_minPhi{this, "PhiMin", 0. * Gaudi::Units::rad, "Minimal phi"};
 
   /// Maximum momentum (Set by options)
   Gaudi::Property<double> m_maxMom{this, "MomentumMax", 100.0 * Gaudi::Units::GeV, "Maximal transverse momentum"};
   /// Maximum theta angle (Set by options)
-  Gaudi::Property<double> m_maxTheta{this, "EtaMax", 0.1, "Maximal Eta"};
+  Gaudi::Property<double> m_maxEta{this, "EtaMax", 0.1, "Maximal Eta"};
   /// Maximum phi angle (Set by options)
   Gaudi::Property<double> m_maxPhi{this, "PhiMax", Gaudi::Units::twopi* Gaudi::Units::rad, "Maximal phi"};
 
   /// Momentum range
   double m_deltaMom;
   /// Theta range
-  double m_deltaTheta;
+  double m_deltaEta;
   /// Phi range
   double m_deltaPhi;
 

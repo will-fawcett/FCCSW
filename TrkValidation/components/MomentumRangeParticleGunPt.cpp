@@ -38,12 +38,12 @@ StatusCode MomentumRangeParticleGunPt::initialize() {
   IParticlePropertySvc* ppSvc = svc<IParticlePropertySvc>("ParticlePropertySvc", true);
 
   // check momentum and angles
-  if ((m_minMom > m_maxMom) || (m_minTheta > m_maxTheta) || (m_minPhi > m_maxPhi))
+  if ((m_minMom > m_maxMom) || (m_minEta > m_maxEta) || (m_minPhi > m_maxPhi))
     return Error("Incorrect values for momentum, theta or phi!");
 
   m_deltaMom = m_maxMom - m_minMom;
   m_deltaPhi = m_maxPhi - m_minPhi;
-  m_deltaTheta = m_maxTheta - m_minTheta;
+  m_deltaEta = m_maxEta - m_minEta;
 
   // setup particle information
   m_masses.clear();
@@ -61,7 +61,7 @@ StatusCode MomentumRangeParticleGunPt::initialize() {
 
   info() << "Momentum range: " << m_minMom / Gaudi::Units::GeV << " GeV <-> " << m_maxMom / Gaudi::Units::GeV << " GeV"
          << endmsg;
-  info() << "Theta range: " << m_minTheta / Gaudi::Units::rad << " rad <-> " << m_maxTheta / Gaudi::Units::rad << " rad"
+  info() << "Theta range: " << m_minEta / Gaudi::Units::rad << " rad <-> " << m_maxEta / Gaudi::Units::rad << " rad"
          << endmsg;
   info() << "Phi range: " << m_minPhi / Gaudi::Units::rad << " rad <-> " << m_maxPhi / Gaudi::Units::rad << " rad"
          << endmsg;

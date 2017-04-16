@@ -5,7 +5,7 @@ gaudi_subdir(TrkValidation v1r0)
 
 
 # this declaration will not be needed in the future
-gaudi_depends_on_subdirs(GaudiAlg FWCore Sim/SimG4Common  Detector/DetInterface Sim/SimG4Interface)
+gaudi_depends_on_subdirs(GaudiAlg FWCore Sim/SimG4Common  Detector/DetInterface Sim/SimG4Interface Generation)
 
 find_package(Geant4)
 include(${Geant4_USE_FILE})
@@ -27,7 +27,7 @@ gaudi_install_python_modules()
 
 gaudi_add_module(TrkValidation
                  components/*.cpp
-                 INCLUDE_DIRS TrkValidation HepMC Pythia8 FWCore FCCEDM PODIO DD4hep ROOT DetInterface SimG4Common SimG4Interface
+                 INCLUDE_DIRS TrkValidation HepMC Pythia8 FWCore FCCEDM PODIO DD4hep ROOT DetInterface SimG4Common SimG4Interface Generation
                  LINK_LIBRARIES HepMC GaudiAlgLib Pythia8 FCCEDM PODIO DD4hep ${DD4hep_COMPONENT_LIBRARIES} ROOT Geant4)
 
 include(CTest)

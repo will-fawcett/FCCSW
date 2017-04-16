@@ -1,4 +1,6 @@
 *~
+*.out
+*.err
 *.pdf
 *.png
 *.log
