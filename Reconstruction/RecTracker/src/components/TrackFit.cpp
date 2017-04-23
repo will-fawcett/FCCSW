@@ -111,12 +111,12 @@ StatusCode TrackFit::execute() {
   GlobalPoint outerPoint;
 
  for (auto hit: *hits) {
-  auto seedmap = m_trackSeedingTool->findSeeds(hits);
-  for (auto it = seedmap.begin(); it != seedmap.end(); ++it) {
-    debug() << "trackID: " << it->first << endmsg;
-    if (it->first == 1) { // TrackID for primary particle
+ // auto seedmap = m_trackSeedingTool->findSeeds(hits);
+ // for (auto it = seedmap.begin(); it != seedmap.end(); ++it) {
+ //   debug() << "trackID: " << it->first << endmsg;
+    if (hit.core().bits == 1) { // TrackID for primary particle
 
-    auto hit = (*hits)[it->second]; // the TrackID maps to an index for the hit collection
+    //auto hit = (*hits)[it->second]; // the TrackID maps to an index for the hit collection
 
     long long int theCellId = hit.core().cellId;
     debug() << theCellId << endmsg;
@@ -156,7 +156,7 @@ StatusCode TrackFit::execute() {
     }
   }
  // }
-  }
+ // }
  }
 
   
@@ -165,17 +165,21 @@ StatusCode TrackFit::execute() {
   
 
   ActsVector<ParValue_t, NGlobalPars> pars;
-  pars << res.d0, res.z0, res.phi0, res.theta, res.qOverPt;
+  pars << res.d0, res.z0, res.phi0, M_PI * 0.5, res.qOverPt;
+  info() << "Estimated track parameters: " << res.d0 << "\t" << res.z0 << "\t" << res.phi0 << "\t" << res.theta << "\t" << res.qOverPt << endmsg;
   auto startCov =
       std::make_unique<ActsSymMatrix<ParValue_t, NGlobalPars>>(ActsSymMatrix<ParValue_t, NGlobalPars>::Identity());
 
-  const Surface* pSurf =  m_trkGeo->getBeamline();
+  const Surface* pSurf = surfVec[0]; //  m_trkGeo->getBeamline();
+
+  info() << "Beamline pointer: " << pSurf << endmsg;;
   auto startTP = std::make_unique<BoundParameters>(std::move(startCov), std::move(pars), *pSurf);
+  info() << "trying parameters" <<  *startTP << endmsg;
 
   ExtrapolationCell<TrackParameters> exCell(*startTP);
   exCell.addConfigurationMode(ExtrapolationMode::CollectSensitive);
   exCell.addConfigurationMode(ExtrapolationMode::CollectPassive);
-  exCell.addConfigurationMode(ExtrapolationMode::StopAtBoundary);
+  //exCell.addConfigurationMode(ExtrapolationMode::StopAtBoundary);
 
   m_exEngine->extrapolate(exCell);
 
