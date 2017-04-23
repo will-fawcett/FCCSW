@@ -1,11 +1,13 @@
 from Gaudi.Configuration import *
+from GaudiKernel import SystemOfUnits as units
+from GaudiKernel import PhysicalConstants as constants
 
 from Configurables import FCCDataSvc
 podioevent = FCCDataSvc("EventDataSvc")
 
 
 from Configurables import ParticleGunAlg, MomentumRangeParticleGun
-pgun_tool = MomentumRangeParticleGun(PdgCodes=[13], ThetaMin=0, ThetaMax=0, MomentumMin=10000, MomentumMax=100000)
+pgun_tool = MomentumRangeParticleGun(PdgCodes=[13], ThetaMin=constants.pi / 2., ThetaMax=constants.pi / 2., MomentumMin=10000, MomentumMax=100000)
 gen = ParticleGunAlg("ParticleGun", ParticleGunTool=pgun_tool, VertexSmearingToolPGun="FlatSmearVertex")
 gen.hepmc.Path = "hepmc"
 
