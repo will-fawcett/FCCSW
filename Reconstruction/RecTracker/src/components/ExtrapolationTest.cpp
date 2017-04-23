@@ -71,10 +71,6 @@ StatusCode ExtrapolationTest::initialize() {
 
 StatusCode ExtrapolationTest::execute() {
 
-    auto lcdd = m_geoSvc->lcdd();
-    auto allReadouts = lcdd->readouts();
-    auto readoutBarrel = lcdd->readout("TrackerBarrelReadout");
-    auto m_decoderBarrel = readoutBarrel.idSpec().decoder();
 
   fcc::PositionedTrackHitCollection* phitscoll = new fcc::PositionedTrackHitCollection();
   fcc::TrackHitCollection* hitscoll = new fcc::TrackHitCollection();
@@ -86,13 +82,15 @@ StatusCode ExtrapolationTest::execute() {
   double fcc_l2 = 0;
   int hitcounter = 0;
 
+  std::random_device rd;
+  std::mt19937 gen(rd());
   std::uniform_real_distribution<double> std_loc1(1, 5);
   std::uniform_real_distribution<double> random_angle(0.0, 1.57);
   std::normal_distribution<double> g(0, 1);
   
 
   ActsVector<ParValue_t, NGlobalPars> pars;
-  pars << 0,0,0,1, 0.001;
+  pars << 0,0,random_angle(gen),random_angle(gen), 0.001;
   std::cout << pars << std::endl;
   auto startCov =
       std::make_unique<ActsSymMatrix<ParValue_t, NGlobalPars>>(ActsSymMatrix<ParValue_t, NGlobalPars>::Identity());
@@ -109,7 +107,7 @@ StatusCode ExtrapolationTest::execute() {
 
   auto propConfig = RungeKuttaEngine<>::Config();
   /// @todo: use magnetic field service
-  propConfig.fieldService = std::make_shared<ConstantBField>(0, 0, 0.004);
+  propConfig.fieldService = std::make_shared<ConstantBField>(0, 0, 0.002);
   auto propEngine = std::make_shared<RungeKuttaEngine<>>(propConfig);
 
   auto matConfig = MaterialEffectsEngine::Config();
@@ -133,15 +131,14 @@ StatusCode ExtrapolationTest::execute() {
   exEngineConfig.navigationEngine = navEngine;
   exEngineConfig.extrapolationEngines = {statEngine};
   m_exEngine = std::make_shared<ExtrapolationEngine>(exEngineConfig);
-  std::cout << "start extrapolation ..." << std::endl;
-  m_exEngine->extrapolate(exCell);
 
+  debug() << "start extrapolation ..." << endmsg;
+  m_exEngine->extrapolate(exCell);
   debug() << "got " << exCell.extrapolationSteps.size() << " extrapolation steps" << endmsg;
 
 
 
 
-  double std1, std2, l1, l2;
   for (const auto& step : exCell.extrapolationSteps) {
     const auto& tp = step.parameters;
     //if (tp->associatedSurface().type() != Surface::Plane) continue;
