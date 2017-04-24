@@ -85,7 +85,7 @@ StatusCode TrackFit::initialize() {
 StatusCode TrackFit::execute() {
   info() << "get tracking_geo " << endmsg;
   m_trkGeo = m_trkGeoSvc->trackingGeometry();
-  m_exEngine = initExtrapolator(m_trkGeo);
+  m_exEngine = initMyExtrapolator(m_trkGeo);
   Acts::KalmanFitter<MyExtrapolator, CacheGenerator, NoCalibration, Acts::GainMatrixUpdator> m_KF;
   m_KF.m_oCacheGenerator = CacheGenerator();
   m_KF.m_oCalibrator = NoCalibration();
@@ -130,6 +130,8 @@ StatusCode TrackFit::execute() {
     int module_id = (*m_decoderBarrel)["module"];
     debug() << "\t module " << module_id;
     debug() << endmsg;
+    fcc_l1 = (*m_decoderBarrel)["x"] * 0.005;
+    fcc_l2 = (*m_decoderBarrel)["z"] * 0.01;
     (*m_decoderBarrel)["x"] = 0; // workaround for broken `volumeID` method --
     (*m_decoderBarrel)["z"] = 0; // set everything not connected with the VolumeID to zero,
     // so the cellID can be used to look up the tracking surface
@@ -221,7 +223,7 @@ StatusCode TrackFit::execute() {
     debug() << m << endmsg;
 
 
-  auto track = m_KF.fit(fccMeasurements, std::make_unique<BoundParameters>(*startTP));
+  auto track = m_KF.fit(vMeasurements, std::make_unique<BoundParameters>(*startTP));
 
   // dump track
   for (const auto& p : track) {
