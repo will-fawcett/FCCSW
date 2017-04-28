@@ -4,7 +4,6 @@
 #include "DetInterface/IGeoSvc.h"
 #include "RecInterface/ITrackSeedingTool.h"
 
-#include "datamodel/TrackHitCollection.h"
 
 #include "ACTS/Utilities/Identifier.hpp"
 #include "ACTS/Detector/TrackingGeometry.hpp"
@@ -24,6 +23,7 @@
 #include "ACTS/Utilities/Definitions.hpp"
 #include "ACTS/Utilities/Logger.hpp"
 
+#include "datamodel/TrackHitCollection.h"
 #include "datamodel/PositionedTrackHitCollection.h"
 #include "datamodel/TrackHitCollection.h"
 
@@ -40,7 +40,6 @@
 #include "TrackFit.h"
 #include "FastHelix.h"
 #include "TrackParameterConversions.h"
-
 #include "ACTSLogger.h"
 
 using namespace Acts;
@@ -77,14 +76,11 @@ StatusCode TrackFit::initialize() {
     return StatusCode::FAILURE;
   }
 
-
-
+  m_trkGeo = m_trkGeoSvc->trackingGeometry();
   return sc;
 }
 
 StatusCode TrackFit::execute() {
-  info() << "get tracking_geo " << endmsg;
-  m_trkGeo = m_trkGeoSvc->trackingGeometry();
   m_exEngine = initMyExtrapolator(m_trkGeo);
   Acts::KalmanFitter<MyExtrapolator, CacheGenerator, NoCalibration, Acts::GainMatrixUpdator> m_KF;
   m_KF.m_oCacheGenerator = CacheGenerator();
@@ -92,12 +88,13 @@ StatusCode TrackFit::execute() {
   m_KF.m_oExtrapolator = MyExtrapolator(m_exEngine);
   m_KF.m_oUpdator = GainMatrixUpdator();
 
-    auto lcdd = m_geoSvc->lcdd();
-    auto allReadouts = lcdd->readouts();
-    auto readoutBarrel = lcdd->readout("TrackerBarrelReadout");
-    auto m_decoderBarrel = readoutBarrel.idSpec().decoder();
+  auto lcdd = m_geoSvc->lcdd();
+  auto allReadouts = lcdd->readouts();
+  auto readoutBarrel = lcdd->readout("TrackerBarrelReadout");
+  auto m_decoderBarrel = readoutBarrel.idSpec().decoder();
 
   const fcc::PositionedTrackHitCollection* hits = m_positionedTrackHits.get();
+
 
   std::vector<FitMeas_t> fccMeasurements;
   std::vector<const Acts::Surface*> surfVec;
@@ -130,7 +127,7 @@ StatusCode TrackFit::execute() {
     int module_id = (*m_decoderBarrel)["module"];
     debug() << "\t module " << module_id;
     debug() << endmsg;
-    fcc_l1 = (*m_decoderBarrel)["x"] * 0.005;
+    fcc_l1 =  -1 * (*m_decoderBarrel)["x"] * 0.005;
     fcc_l2 = (*m_decoderBarrel)["z"] * 0.01;
     (*m_decoderBarrel)["x"] = 0; // workaround for broken `volumeID` method --
     (*m_decoderBarrel)["z"] = 0; // set everything not connected with the VolumeID to zero,
@@ -165,27 +162,28 @@ StatusCode TrackFit::execute() {
   FastHelix helix(outerPoint, middlePoint, GlobalPoint(0,0,0), 0.002);
   PerigeeTrackParameters res = ParticleProperties2TrackParameters(GlobalPoint(0,0,0), helix.getPt(), 0.002, 1);
   
-
   ActsVector<ParValue_t, NGlobalPars> pars;
-  pars << res.d0, res.z0, res.phi0, M_PI * 0.5, res.qOverPt;
+  pars << res.d0, res.z0, res.phi0, res.theta, res.qOverPt;
   info() << "Estimated track parameters: " << res.d0 << "\t" << res.z0 << "\t" << res.phi0 << "\t" << res.theta << "\t" << res.qOverPt << endmsg;
+  //pars << 0, 0, M_PI * 0.5, M_PI * 0.5, 0.001;
   auto startCov =
       std::make_unique<ActsSymMatrix<ParValue_t, NGlobalPars>>(ActsSymMatrix<ParValue_t, NGlobalPars>::Identity());
 
-  const Surface* pSurf = surfVec[0]; //  m_trkGeo->getBeamline();
+  const Surface* pSurf =  m_trkGeo->getBeamline();
 
   info() << "Beamline pointer: " << pSurf << endmsg;;
   auto startTP = std::make_unique<BoundParameters>(std::move(startCov), std::move(pars), *pSurf);
-  info() << "trying parameters" <<  *startTP << endmsg;
+  //info() << "trying parameters" <<  *startTP << endmsg;
 
   ExtrapolationCell<TrackParameters> exCell(*startTP);
   exCell.addConfigurationMode(ExtrapolationMode::CollectSensitive);
   exCell.addConfigurationMode(ExtrapolationMode::CollectPassive);
-  //exCell.addConfigurationMode(ExtrapolationMode::StopAtBoundary);
+  exCell.addConfigurationMode(ExtrapolationMode::CollectBoundary);
 
   m_exEngine->extrapolate(exCell);
 
   info() << "got " << exCell.extrapolationSteps.size() << " extrapolation steps" << endmsg;
+
 
   std::vector<FitMeas_t> vMeasurements;
   vMeasurements.reserve(exCell.extrapolationSteps.size());
@@ -202,7 +200,9 @@ StatusCode TrackFit::execute() {
   double std1, std2, l1, l2;
   for (const auto& step : exCell.extrapolationSteps) {
     const auto& tp = step.parameters;
-    if (tp->referenceSurface().type() != Surface::Plane) continue;
+    auto detPtr = tp->referenceSurface().associatedDetectorElement();
+    //if (tp->referenceSurface().type() != Surface::Plane) continue;
+    if (detPtr == nullptr) continue;
 
     std1 = 1;//std_loc1(e);
     std2 = 1; //std_loc2(e);
@@ -218,19 +218,18 @@ StatusCode TrackFit::execute() {
   for (const auto& m : vMeasurements)
     debug() << m << endmsg;
 
+
   info() << "created " << fccMeasurements.size() << " fcc-measurements" << endmsg;
   for (const auto& m : fccMeasurements)
     debug() << m << endmsg;
 
-
   auto track = m_KF.fit(vMeasurements, std::make_unique<BoundParameters>(*startTP));
 
   // dump track
-  for (const auto& p : track) {
-    debug() << *p->getCalibratedMeasurement() << endmsg;
-    debug() << *p->getSmoothedState() << endmsg;
-  }
-
+  //for (const auto& p : track) {
+    //debug() << *p->getCalibratedMeasurement() << endmsg;
+    //debug() << *p->getSmoothedState() << endmsg;
+  //}
   return StatusCode::SUCCESS;
 }
 
