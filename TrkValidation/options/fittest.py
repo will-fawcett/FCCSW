@@ -43,7 +43,7 @@ out.filename = sys.argv[1].replace("options/", "data/").replace(".py", ".root")
 from Configurables import ApplicationMgr
 ApplicationMgr( TopAlg = [exTest, out],
                 EvtSel = 'NONE',
-                EvtMax   = 1000,
+                EvtMax   = 10,
                 # order is important, as GeoSvc is needed by SimG4Svc
                 ExtSvc = [podioevent, geoservice, geantservice, trkgeoservice, ],
                 OutputLevel=DEBUG,
