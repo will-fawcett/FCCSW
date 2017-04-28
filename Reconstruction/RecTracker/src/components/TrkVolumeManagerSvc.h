@@ -37,7 +37,7 @@ public:
 
   void dumpTrackingLayer(std::shared_ptr<const Acts::Layer> layer);
 
-  void dumpTrackingVolume(std::shared_ptr<const Acts::TrackingVolume> volume);
+  void dumpTrackingVolume(/*std::shared_ptr<const Acts::TrackingVolume>*/ const Acts::TrackingVolume* volume);
 
   const Acts::Surface* lookUpTrkSurface(const Identifier id);
 

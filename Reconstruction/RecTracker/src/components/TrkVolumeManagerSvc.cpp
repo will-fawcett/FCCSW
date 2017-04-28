@@ -21,13 +21,13 @@ DECLARE_SERVICE_FACTORY(TrkVolumeManagerSvc)
 TrkVolumeManagerSvc::TrkVolumeManagerSvc(const std::string& aName, ISvcLocator* aSL) : base_class(aName, aSL) {
 }
 
-void TrkVolumeManagerSvc::dumpTrackingVolume(std::shared_ptr<const Acts::TrackingVolume> vol) {
+void TrkVolumeManagerSvc::dumpTrackingVolume(/*std::shared_ptr<const Acts::TrackingVolume>*/ const Acts::TrackingVolume* vol) {
   info() << "Dumping TrackingVolume" << vol->volumeName() << endmsg;
   auto volVec = vol->confinedVolumes();
   if (nullptr != volVec) {
     auto objVec = volVec->arrayObjects();
     for (auto o : objVec) {
-      dumpTrackingVolume(o);
+      dumpTrackingVolume(o.get());
     }
   }
   auto layArr = vol->confinedLayers();
@@ -66,7 +66,7 @@ StatusCode TrkVolumeManagerSvc::initialize() {
   auto highestVol = tgeo->highestTrackingVolume();
   info() << "Passing TrackingVolume" << highestVol->volumeName() << endmsg;
   // recurse through tracking geometry
-  dumpTrackingVolume(std::shared_ptr<const Acts::TrackingVolume>(highestVol));
+  dumpTrackingVolume( highestVol);
   return StatusCode::SUCCESS;
 }
 
