@@ -1,0 +1,6 @@
+executable            = TrkValidation/condor/runCondor.sh
+arguments          = TrkValidation/options/minBias_noBfield3.py
+output             = TrkValidation/condor/minBias_noBfield3.out
+log                   = TrkValidation/condor/minBias_noBfield3.log
+error                 = TrkValidation/condor/minBias_noBfield3.err
+queue
