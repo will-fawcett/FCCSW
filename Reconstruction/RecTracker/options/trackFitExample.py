@@ -56,11 +56,17 @@ from Configurables import TruthSeedingTool
 
 truthseedtool = TruthSeedingTool()
 
+from Configurables import SaveTrackStateTool
+
+savetrackstatetool = SaveTrackStateTool()
+savetrackstatetool.trackStates.Path = "trackStates"
 
 from Configurables import TrackFit
 trackFitAlg = TrackFit()
 trackFitAlg.trackSeedingTool = truthseedtool
+trackFitAlg.SaveTrackStateTool = savetrackstatetool
 trackFitAlg.positionedTrackHits.Path = "positionedHits"
+
 #trackFitAlg.trackHits.Path = "hits"
 
 # PODIO algorithm

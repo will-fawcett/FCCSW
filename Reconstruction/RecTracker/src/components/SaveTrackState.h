@@ -33,9 +33,14 @@ public:
    */
   virtual StatusCode saveOutput(float d0, float z0, float phi, float theta, float qOp, fcc::Point referencePoint, std::array<float, 15> cov) final;
 
+  virtual StatusCode saveTrackInCollection(const Acts::TrackParametersBase& theActsResult) final;
+
+  virtual StatusCode newCollection() final;
+
 private:
   /// Handle for track states
   DataHandle<fcc::TrackStateCollection> m_trackStates{"tracks/trackStates", Gaudi::DataHandle::Writer, this};
 };
+fcc::TrackStateCollection* m_trackStateCollection;
 
 #endif

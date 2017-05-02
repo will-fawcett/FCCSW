@@ -13,6 +13,7 @@ class IGeoSvc;
 class ITrackingGeoSvc;
 class ITrkVolumeManagerSvc;
 class ITrackSeedingTool;
+class ISaveTrackStateTool;
 
 
 namespace fcc {
@@ -41,6 +42,7 @@ private:
   SmartIF<IGeoSvc> m_geoSvc;
 
   ToolHandle<ITrackSeedingTool> m_trackSeedingTool{"TrackSeedingTool/TruthSeedingTool", this};
+  ToolHandle<ISaveTrackStateTool> m_saveTrackStateTool{"SaveTrackStateTool/SaveTrackStateTool", this};
 
   std::shared_ptr<Acts::TrackingGeometry> m_trkGeo;
   std::shared_ptr<Acts::IExtrapolationEngine> m_exEngine;
