@@ -80,6 +80,21 @@ StatusCode TrackFit::initialize() {
   }
 
   m_trkGeo = m_trkGeoSvc->trackingGeometry();
+  m_exEngine = initMyExtrapolator(m_trkGeo);
+
+  m_KF.m_oCacheGenerator = CacheGenerator();
+  m_KF.m_oCalibrator = NoCalibration();
+  m_KF.m_oExtrapolator = MyExtrapolator(m_exEngine);
+  m_KF.m_oUpdator = GainMatrixUpdator();
+
+  auto lcdd = m_geoSvc->lcdd();
+  auto allReadouts = lcdd->readouts();
+  auto readoutBarrel = lcdd->readout("TrackerBarrelReadout");
+  m_decoderBarrel = readoutBarrel.idSpec().decoder();
+  auto segmentationXZ = dynamic_cast<DD4hep::DDSegmentation::CartesianGridXZ*>(
+          readoutBarrel.segmentation().segmentation());
+  m_segGridSizeX = segmentationXZ->gridSizeX() * CM_2_MM;
+  m_segGridSizeZ = segmentationXZ->gridSizeZ() * CM_2_MM;
   return sc;
 }
 
@@ -90,28 +105,12 @@ StatusCode TrackFit::execute() {
   // get hits from event store
   const fcc::PositionedTrackHitCollection* hits = m_positionedTrackHits.get();
 
-  m_exEngine = initMyExtrapolator(m_trkGeo);
-  Acts::KalmanFitter<MyExtrapolator, CacheGenerator, NoCalibration, Acts::GainMatrixUpdator> m_KF;
-  m_KF.m_oCacheGenerator = CacheGenerator();
-  m_KF.m_oCalibrator = NoCalibration();
-  m_KF.m_oExtrapolator = MyExtrapolator(m_exEngine);
-  m_KF.m_oUpdator = GainMatrixUpdator();
-
-  auto lcdd = m_geoSvc->lcdd();
-  auto allReadouts = lcdd->readouts();
-  auto readoutBarrel = lcdd->readout("TrackerBarrelReadout");
-  auto m_decoderBarrel = readoutBarrel.idSpec().decoder();
-  auto segmentationXZ = dynamic_cast<DD4hep::DDSegmentation::CartesianGridXZ*>(
-          readoutBarrel.segmentation().segmentation());
-
-
   double fcc_l1 = 0;
   double fcc_l2 = 0;
   GlobalPoint middlePoint;
   GlobalPoint outerPoint;
 
   std::multimap<unsigned int, unsigned int>  seedmap = m_trackSeedingTool->findSeeds(hits);
-
 
   for (std::multimap<unsigned int, unsigned int>::iterator it = seedmap.begin(); it != seedmap.end(); ++it) {
     // loop over hits belonging to one track by checking that their ids match
@@ -122,7 +121,6 @@ StatusCode TrackFit::execute() {
     unsigned int l_currentTrackID = it->first;
     int hitcounter = 0;
     do {
-      debug() << std::distance(it, seedmap.begin()) << "\t" << it->first << endmsg;
       debug() << "trackID: " << it->first << endmsg;
       auto hit = (*hits)[it->second]; // the TrackID maps to an index for the hit collection
       long long int theCellId = hit.core().cellId;
@@ -139,12 +137,12 @@ StatusCode TrackFit::execute() {
       debug() << endmsg;
       // The conventions in DD4hep and ACTS for the local coordinates differ,
       // and the conversion needs to reflect this. See the detector factories for details.
-      fcc_l1 =  (*m_decoderBarrel)["x"] * segmentationXZ->gridSizeX() * CM_2_MM;
-      fcc_l2 = -1 *  (*m_decoderBarrel)["z"] * segmentationXZ->gridSizeZ() * CM_2_MM;
+      fcc_l1 =  (*m_decoderBarrel)["x"] * m_segGridSizeX;
+      fcc_l2 = -1 *  (*m_decoderBarrel)["z"] * m_segGridSizeZ;
       (*m_decoderBarrel)["x"] = 0; // workaround for broken `volumeID` method --
       (*m_decoderBarrel)["z"] = 0; // set everything not connected with the VolumeID to zero,
       // so the cellID can be used to look up the tracking surface
-      if (hitcounter == 0) {
+      if (hitcounter == 0) { // workaround to select three hits for fast fit
         middlePoint = GlobalPoint(hit.position().x, hit.position().y, hit.position().z);
       } else if (hitcounter == 1) {
         outerPoint = GlobalPoint(hit.position().x, hit.position().y, hit.position().z);
@@ -161,87 +159,84 @@ StatusCode TrackFit::execute() {
         surfVec.push_back(fccSurf);
         ++hitcounter;
       }
-      debug() << it->first << " " << it->second << endmsg;
       ++it;
-      debug() << it->first << " " << it->second << endmsg;
     } while ((it->first == l_currentTrackID) && (it != seedmap.end()));
+    --it; // preceding while loop incremented one too many times
 
-    
-    debug() << "Estimating parameters..." << endmsg;
-    FastHelix helix(outerPoint, middlePoint, GlobalPoint(0,0,0), 0.002);
-    PerigeeTrackParameters res = ParticleProperties2TrackParameters(GlobalPoint(0,0,0), helix.getPt(), 0.002, 1);
-    
-    ActsVector<ParValue_t, NGlobalPars> pars;
-    pars << res.d0, res.z0, res.phi0, res.theta, res.qOverPt;
-    info() << "Estimated track parameters: " << res.d0 << "\t" << res.z0 << "\t" << res.phi0 << "\t" << res.theta << "\t" << res.qOverPt << endmsg;
-    //pars << 0, 0, M_PI * 0.5, M_PI * 0.5, 0.001;
-    auto startCov =
-        std::make_unique<ActsSymMatrix<ParValue_t, NGlobalPars>>(ActsSymMatrix<ParValue_t, NGlobalPars>::Identity());
-    (*startCov) *= 0.01; // starting values of 1 are too big for qop
-    
+    if (fccMeasurements.size() < 2 ) {
+      debug() << "Estimating parameters..." << endmsg;
+      /// @todo: use magnetic field service
+      FastHelix helix(outerPoint, middlePoint, GlobalPoint(0,0,0), 0.004);
+      PerigeeTrackParameters res = ParticleProperties2TrackParameters(GlobalPoint(0,0,0), helix.getPt(), 0.004, 1);
+      
+      ActsVector<ParValue_t, NGlobalPars> pars;
+      pars << res.d0, res.z0, res.phi0, res.theta, res.qOverPt;
+      if (pars.hasNaN()) { // if the same point is used twice for estimation it cannot be used
+        warning() << "parameter estimation failed. skipping track ..." << endmsg;
+      } else {
+        info() << "Estimated track parameters: " << res.d0 << "\t" << res.z0 << "\t" << res.phi0 << "\t" << res.theta << "\t" << res.qOverPt << endmsg;
+        auto startCov =
+            std::make_unique<ActsSymMatrix<ParValue_t, NGlobalPars>>(ActsSymMatrix<ParValue_t, NGlobalPars>::Identity());
+        (*startCov) *= 0.01; // starting values of 1 are too big for qop
+        
 
-    const Surface* pSurf =  m_trkGeo->getBeamline();
+        const Surface* pSurf =  m_trkGeo->getBeamline();
 
-    info() << "Beamline pointer: " << pSurf << endmsg;;
-    auto startTP = std::make_unique<BoundParameters>(std::move(startCov), std::move(pars), *pSurf);
-    //info() << "trying parameters" <<  *startTP << endmsg;
+        debug() << "Beamline pointer: " << pSurf << endmsg;;
+        auto startTP = std::make_unique<BoundParameters>(std::move(startCov), std::move(pars), *pSurf);
 
-    ExtrapolationCell<TrackParameters> exCell(*startTP);
-    exCell.addConfigurationMode(ExtrapolationMode::CollectSensitive);
-    exCell.addConfigurationMode(ExtrapolationMode::CollectPassive);
-    exCell.addConfigurationMode(ExtrapolationMode::CollectBoundary);
+        ExtrapolationCell<TrackParameters> exCell(*startTP);
+        exCell.addConfigurationMode(ExtrapolationMode::CollectSensitive);
+        exCell.addConfigurationMode(ExtrapolationMode::CollectPassive);
+        exCell.addConfigurationMode(ExtrapolationMode::CollectBoundary);
 
-    m_exEngine->extrapolate(exCell);
+        m_exEngine->extrapolate(exCell);
 
-    info() << "got " << exCell.extrapolationSteps.size() << " extrapolation steps" << endmsg;
-
-
-    std::vector<FitMeas_t> vMeasurements;
-    vMeasurements.reserve(exCell.extrapolationSteps.size());
-
-    // identifier
-    long int id = 0;
-    // random numbers for smearing measurements
-    /// @todo: use random number service
-    std::default_random_engine e;
-    std::uniform_real_distribution<double> std_loc1(1, 5);
-    std::uniform_real_distribution<double> std_loc2(0.1, 2);
-    std::normal_distribution<double> g(0, 1);
-
-    double std1, std2, l1, l2;
-    for (const auto& step : exCell.extrapolationSteps) {
-      const auto& tp = step.parameters;
-      auto detPtr = tp->referenceSurface().associatedDetectorElement();
-      if (detPtr == nullptr) continue;
-
-      std1 = 1;
-      std2 = 1;
-      l1 = tp->get<eLOC_0>();
-      l2 = tp->get<eLOC_1>();
-      ActsSymMatrixD<2> cov;
-      cov << std1* std1, 0, 0, std2* std2;
-      vMeasurements.push_back(Meas_t<eLOC_0, eLOC_1>(tp->referenceSurface(), id, std::move(cov), l1, l2));
-      ++id;
-    }
-
-    info() << "created " << vMeasurements.size() << " pseudo-measurements" << endmsg;
-    //for (const auto& m : vMeasurements)
-    //  debug() << m << endmsg;
+        debug() << "got " << exCell.extrapolationSteps.size() << " extrapolation steps" << endmsg;
 
 
-    info() << "created " << fccMeasurements.size() << " fcc-measurements" << endmsg;
-    //for (const auto& m : fccMeasurements)
-    //  debug() << m << endmsg;
+        std::vector<FitMeas_t> vMeasurements;
+        vMeasurements.reserve(exCell.extrapolationSteps.size());
 
-    auto track = m_KF.fit(vMeasurements, std::make_unique<BoundParameters>(*startTP));
+        // identifier
+        long int id = 0;
+        // random numbers for smearing measurements
+        /// @todo: use random number service
+        std::default_random_engine e;
+        std::uniform_real_distribution<double> std_loc1(1, 5);
+        std::uniform_real_distribution<double> std_loc2(0.1, 2);
+        std::normal_distribution<double> g(0, 1);
 
-    // dump track
-   unsigned int trackStateCounter = 0;
-   for (const auto& p : track) {
-      if (trackStateCounter == vMeasurements.size()) { // use the last track state for persistency
-        m_saveTrackStateTool->saveTrackInCollection(*p->getFilteredState());
+        double std1, std2, l1, l2;
+        for (const auto& step : exCell.extrapolationSteps) {
+          const auto& tp = step.parameters;
+          auto detPtr = tp->referenceSurface().associatedDetectorElement();
+          if (detPtr == nullptr) continue;
+
+          std1 = 1;
+          std2 = 1;
+          l1 = tp->get<eLOC_0>();
+          l2 = tp->get<eLOC_1>();
+          ActsSymMatrixD<2> cov;
+          cov << std1* std1, 0, 0, std2* std2;
+          vMeasurements.push_back(Meas_t<eLOC_0, eLOC_1>(tp->referenceSurface(), id, std::move(cov), l1, l2));
+          ++id;
+        }
+
+        debug() << "created " << vMeasurements.size() << " pseudo-measurements" << endmsg;
+        debug() << "created " << fccMeasurements.size() << " fcc-measurements" << endmsg;
+
+        auto track = m_KF.fit(fccMeasurements, std::make_unique<BoundParameters>(*startTP));
+
+        // dump track
+       unsigned int trackStateCounter = 0;
+       for (const auto& p : track) {
+          if (trackStateCounter == vMeasurements.size()) { // use the last track state for persistency
+            m_saveTrackStateTool->saveTrackInCollection(*p->getFilteredState());
+          }
+          ++trackStateCounter;
+        }
       }
-      ++trackStateCounter;
     }
   }
   return StatusCode::SUCCESS;

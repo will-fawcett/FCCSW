@@ -46,6 +46,11 @@ private:
 
   std::shared_ptr<Acts::TrackingGeometry> m_trkGeo;
   std::shared_ptr<Acts::IExtrapolationEngine> m_exEngine;
+  Acts::KalmanFitter<MyExtrapolator, CacheGenerator, NoCalibration, Acts::GainMatrixUpdator> m_KF;
+
+  float m_segGridSizeZ;
+  float m_segGridSizeX;
+  DD4hep::DDSegmentation::BitField64* m_decoderBarrel;
 
 
   DataHandle<fcc::PositionedTrackHitCollection> m_positionedTrackHits{"positionedHits", Gaudi::DataHandle::Reader, this};
