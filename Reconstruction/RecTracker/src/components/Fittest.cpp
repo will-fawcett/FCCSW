@@ -206,7 +206,7 @@ StatusCode Fittest::execute() {
 
     
     fcc::TrackState l_trackState = trackStateCollection->create();
-    std::cout << "phi: " << l_trackState.phi() << std::endl;
+    //std::cout << "phi: " << l_trackState.phi() << std::endl;
     l_trackState.phi(166.);
 
 
