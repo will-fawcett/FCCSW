@@ -228,7 +228,7 @@
         </layers>
     </detector>
     <detector name="InnerBRL_1" id="BarTrackerInner_id + 16" type="TkLayoutBrlTracker" readout="TrackerBarrelReadout">
-        <dimensions rmin="196.425*mm" rmax="459.289*mm" zmin="-820.000*mm" zmax="820.000*mm"/>
+        <dimensions rmin="196.425*mm" rmax="459.0*mm" zmin="-820.000*mm" zmax="820.000*mm"/>
         <sensitive type="SimpleTrackerSD"/>
         <layers repeat="3">
             <layer id="1" radius="205.000*mm" rmin="196.425*mm" rmax="215.104*mm" bigDelta="5.000*mm" phi0="1.570796*rad">
@@ -367,7 +367,7 @@
                     </rodEven>
                 </rods>
             </layer>
-            <layer id="3" radius="450.000*mm" rmin="441.425*mm" rmax="459.289*mm" bigDelta="5.000*mm" phi0="1.570796*rad">
+            <layer id="3" radius="450.000*mm" rmin="441.425*mm" rmax="459.0*mm" bigDelta="5.000*mm" phi0="1.570796*rad">
                 <rods repeat="56" smallDelta="2.500*mm" rPhiOverlap="0.000*mm" nRPhiSegments="2" zOverlap="0.000*mm" nModules="17">
                     <rodOdd id="1">
                         <modules>
