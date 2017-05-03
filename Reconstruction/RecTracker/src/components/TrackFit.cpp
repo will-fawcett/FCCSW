@@ -99,6 +99,7 @@ StatusCode TrackFit::initialize() {
 }
 
 StatusCode TrackFit::execute() {
+  
 
   // initialize collection for tracks
   m_saveTrackStateTool->newCollection();
@@ -107,8 +108,7 @@ StatusCode TrackFit::execute() {
 
   double fcc_l1 = 0;
   double fcc_l2 = 0;
-  GlobalPoint middlePoint;
-  GlobalPoint outerPoint;
+  GlobalPoint innerPoint, middlePoint, outerPoint;
 
   std::multimap<unsigned int, unsigned int>  seedmap = m_trackSeedingTool->findSeeds(hits);
 
@@ -119,6 +119,7 @@ StatusCode TrackFit::execute() {
     std::vector<const Acts::Surface*> surfVec;
     fccMeasurements.reserve(hits->size());
     unsigned int l_currentTrackID = it->first;
+    if (l_currentTrackID != 1) continue; // debug: select only primary particle
     int hitcounter = 0;
     do {
       debug() << "trackID: " << it->first << endmsg;
@@ -143,8 +144,10 @@ StatusCode TrackFit::execute() {
       (*m_decoderBarrel)["z"] = 0; // set everything not connected with the VolumeID to zero,
       // so the cellID can be used to look up the tracking surface
       if (hitcounter == 0) { // workaround to select three hits for fast fit
+        innerPoint = GlobalPoint(hit.position().x, hit.position().y, hit.position().z);
+      } else if (hitcounter == 2) {
         middlePoint = GlobalPoint(hit.position().x, hit.position().y, hit.position().z);
-      } else if (hitcounter == 1) {
+      } else if (hitcounter == 5) {
         outerPoint = GlobalPoint(hit.position().x, hit.position().y, hit.position().z);
       }
       // need to use cellID without segmentation bits
@@ -163,15 +166,15 @@ StatusCode TrackFit::execute() {
     } while ((it->first == l_currentTrackID) && (it != seedmap.end()));
     --it; // preceding while loop incremented one too many times
 
-    if (fccMeasurements.size() < 2 ) {
+    if (fccMeasurements.size() > 5 ) {
       debug() << "Estimating parameters..." << endmsg;
       /// @todo: use magnetic field service
-      FastHelix helix(outerPoint, middlePoint, GlobalPoint(0,0,0), 0.004);
+      FastHelix helix(outerPoint, middlePoint, innerPoint, 0.004);
       PerigeeTrackParameters res = ParticleProperties2TrackParameters(GlobalPoint(0,0,0), helix.getPt(), 0.004, 1);
       
       ActsVector<ParValue_t, NGlobalPars> pars;
       pars << res.d0, res.z0, res.phi0, res.theta, res.qOverPt;
-      if (pars.hasNaN()) { // if the same point is used twice for estimation it cannot be used
+      if (pars.hasNaN() || !pars.allFinite()) { // if the same point is used twice for estimation it cannot be used
         warning() << "parameter estimation failed. skipping track ..." << endmsg;
       } else {
         info() << "Estimated track parameters: " << res.d0 << "\t" << res.z0 << "\t" << res.phi0 << "\t" << res.theta << "\t" << res.qOverPt << endmsg;
@@ -231,7 +234,7 @@ StatusCode TrackFit::execute() {
         // dump track
        unsigned int trackStateCounter = 0;
        for (const auto& p : track) {
-          if (trackStateCounter == vMeasurements.size()) { // use the last track state for persistency
+          if (trackStateCounter == track.size() - 1) { // use the last track state for persistency
             m_saveTrackStateTool->saveTrackInCollection(*p->getFilteredState());
           }
           ++trackStateCounter;

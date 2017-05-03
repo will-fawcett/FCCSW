@@ -9,7 +9,8 @@ from Configurables import PodioInput
 #podioinput = PodioInput("PodioReader", collections=["positionedHits"], OutputLevel=DEBUG)
 
 from Configurables import ParticleGunAlg, MomentumRangeParticleGun
-pgun_tool = MomentumRangeParticleGun(PdgCodes=[13], PhiMin=0., PhiMax=constants.pi*0.5, ThetaMin=constants.pi / 2., ThetaMax=constants.pi*0.9, MomentumMin=10000, MomentumMax=100000)
+#pgun_tool = MomentumRangeParticleGun(PdgCodes=[13], PhiMin=0., PhiMax=constants.pi*0.5, ThetaMin=constants.pi / 2., ThetaMax=constants.pi*0.9, MomentumMin=100000, MomentumMax=100000)
+pgun_tool = MomentumRangeParticleGun(PdgCodes=[13], PhiMin=0., PhiMax=0., ThetaMin=constants.pi / 2., ThetaMax=constants.pi / 2., MomentumMin=50000, MomentumMax=50000)
 gen = ParticleGunAlg("ParticleGun", ParticleGunTool=pgun_tool, VertexSmearingToolPGun="FlatSmearVertex")
 gen.hepmc.Path = "hepmc"
 
@@ -18,8 +19,7 @@ ppservice = Gaudi__ParticlePropertySvc("ParticlePropertySvc", ParticleProperties
 
 from Configurables import GeoSvc
 geoservice = GeoSvc("GeoSvc", detectors=['file:Detector/DetFCChhBaseline1/compact/FCChh_DectEmptyMaster.xml',
-  "file:TrkValidation/compact/Tracker_Small.xml",
-  #'file:Detector/DetFCChhTrackerTkLayout/compact/Tracker.xml',
+  'file:Detector/DetFCChhTrackerTkLayout/compact/Tracker.xml',
   ],
   )
 from Configurables import TrackingGeoSvc
@@ -79,7 +79,7 @@ out.filename="trkFit_Example.root"
 from Configurables import ApplicationMgr
 ApplicationMgr( TopAlg = [gen, hepmc_converter, geantsim, trackFitAlg, out],
                 EvtSel = 'NONE',
-                EvtMax   = 10,
+                EvtMax   = 1000,
                 # order is important, as GeoSvc is needed by SimG4Svc
                 ExtSvc = [podioevent, geoservice, geantservice, trkgeoservice, trkvolmanservice, ppservice,],
                 OutputLevel=DEBUG
