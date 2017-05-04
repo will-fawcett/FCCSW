@@ -25,16 +25,16 @@ gun.hepmc.Path = "hepmc"
 
 
 
-from Configurables import HepMCConverter
-hepmc_converter = HepMCConverter("Converter")
+from Configurables import HepMCToEDMConverter
+hepmc_converter = HepMCToEDMConverter("Converter")
 hepmc_converter.hepmc.Path="hepmc"
 hepmc_converter.genparticles.Path="allGenParticles"
 hepmc_converter.genvertices.Path="allGenVertices"
 
 
 # convert (final state) EDM back to HepMC
-from Configurables import EDMConverter
-edm_converter = EDMConverter("BackConverter")
+from Configurables import EDMToHepMCConverter
+edm_converter = EDMToHepMCConverter("BackConverter")
 edm_converter.hepmc.Path="hepmcconverted"
 edm_converter.genparticles.Path="allGenParticles"
 edm_converter.genvertices.Path="allGenVertices"

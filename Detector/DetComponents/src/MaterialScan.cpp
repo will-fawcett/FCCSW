@@ -16,10 +16,6 @@
 #include "TVector3.h"
 
 MaterialScan::MaterialScan(const std::string& name, ISvcLocator* svcLoc) : Service(name, svcLoc) {
-  declareProperty("filename", m_filename, "file name to save the tree to");
-  declareProperty("etaBinning", m_etaBinning, "eta bin size");
-  declareProperty("etaMax", m_etaMax, "maximum eta value");
-  declareProperty("nPhiTrials", m_nPhiTrials, "number of random phi values to average over");
 }
 
 StatusCode MaterialScan::initialize() {
@@ -35,12 +31,13 @@ StatusCode MaterialScan::initialize() {
   SmartIF<IRndmGenSvc> randSvc;
   randSvc = service("RndmGenSvc");
   StatusCode sc = m_flatPhiDist.initialize(randSvc, Rndm::Flat(0., M_PI / 2.));
-  if (sc.isFailure()) {
+  if (sc == StatusCode::FAILURE) {
+    error() << "Unable to initialize random number generator." << endmsg;
     return sc;
   }
-  
 
-  std::unique_ptr<TFile> rootFile(TFile::Open(m_filename.c_str(), "RECREATE"));
+
+  std::unique_ptr<TFile> rootFile(TFile::Open(m_filename.value().c_str(), "RECREATE"));
   // no smart pointers possible because TTree is owned by rootFile (root mem management FTW!)
   TTree* tree = new TTree("materials", "");
   double eta = 0;
@@ -70,6 +67,8 @@ StatusCode MaterialScan::initialize() {
   std::array<Double_t, 3> dir = {0, 0, 0};
   TVector3 vec(0, 0, 0);
   for (eta = -m_etaMax; eta < m_etaMax; eta += m_etaBinning) {
+      for (int i = 0; i < m_nPhiTrials; ++i) {
+      phi = m_flatPhiDist();
       nX0->clear();
       nLambda->clear();
       matDepth->clear();
@@ -77,7 +76,6 @@ StatusCode MaterialScan::initialize() {
 
       std::map<DD4hep::Geometry::Material, double> phiAveragedMaterialsBetween;
       for (int iPhi = 0; iPhi < m_nPhiTrials; ++iPhi) {
-        std::cout << iPhi << "\t" << m_nPhiTrials << std::endl;
           phi = m_flatPhiDist();
           //phi = 0;
         vec.SetPtEtaPhi(1, eta, phi);
@@ -101,6 +99,7 @@ StatusCode MaterialScan::initialize() {
         nX0->push_back(matpair.second / mat->GetRadLen()); 
         nLambda->push_back(matpair.second / mat->GetIntLen()); 
       }
+    }
     tree->Fill();
 
   }
