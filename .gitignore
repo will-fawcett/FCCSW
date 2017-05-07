@@ -1,15 +1,13 @@
 *~
-<<<<<<< HEAD
 vavolkl.cc
 *.out
 *.err
 *.pdf
 *.png
-=======
->>>>>>> origin/gaudi_v28_acts_dev
 *.log
 *.pyc
 *.root
+TrkValidation/data
 
 build.*.log
 Makefile
