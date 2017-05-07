@@ -58,9 +58,11 @@ def main():
 
         legend.Draw()
         cv.Print(plot + ".pdf")
+        cv.Print(plot + ".png")
 
         ths.GetXaxis().SetRangeUser(0, args.etaMax)
         cv.Print(plot + "pos.pdf")
+        cv.Print(plot + "pos.png")
 
 if __name__ == "__main__":
     FCCStyle.initialize()
