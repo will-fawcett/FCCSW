@@ -122,7 +122,7 @@ bool FCCEventHandler::NextEvent() {
   m_hasEvent = true;
   m_data.clear();
   /// TODO: move to configuration
-  m_data["clusters"].push_back(std::make_pair("clusters", 1));
+  m_data["positionedHits"].push_back(std::make_pair("positionedHits", 1));
   m_data["caloClusters"].push_back(std::make_pair("caloClusters", 1));
   return 1;
 }
