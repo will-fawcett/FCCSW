@@ -26,6 +26,12 @@ MaterialScan: TrkValidation/data/MaterialScan/material_scan.root
 
 .PHONY: GeantinoScan
 GeantinoScan: $(call FILTER,eantino, $(datafiles))
+	python  TrkValidation/scripts/plot_pos.py TrkValidation/data/GeantinoScan/chargedGeantinoScan-etaSlice.root
+
+.PHONY: ExtrapolationScan
+ExtrapolationScan: $(call FILTER,extrapolationTests, $(datafiles))
+	python  TrkValidation/scripts/plot_pos.py TrkValidation/data/extrapolationTest.py
+
 
 	
 	
