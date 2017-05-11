@@ -16,7 +16,7 @@ static DD4hep::Geometry::Ref_t createTkLayoutTrackerEndcap(DD4hep::Geometry::LCD
   // shorthands
   DD4hep::XML::DetElement xmlDet = static_cast<DD4hep::XML::DetElement>(xmlElement);
   Dimension dimensions(xmlDet.dimensions());
-  double l_overlapMargin = 0.00001;
+  double l_overlapMargin = 0.0000;
 
   // get sensitive detector type from xml
   DD4hep::XML::Dimension sdTyp = xmlElement.child(_Unicode(sensitive));  // retrieve the type
@@ -31,6 +31,7 @@ static DD4hep::Geometry::Ref_t createTkLayoutTrackerEndcap(DD4hep::Geometry::LCD
   DD4hep::Geometry::Tube envelopeShape(
       dimensions.rmin() - l_overlapMargin, dimensions.rmax() + l_overlapMargin, envelopeThickness + l_overlapMargin);
   Volume envelopeVolume(detName, envelopeShape, lcdd.air());
+  /*
   envelopeVolume.setVisAttributes(lcdd.invisible());
 
   Component xDiscs = xmlElement.child(_Unicode(discs));
@@ -129,15 +130,22 @@ static DD4hep::Geometry::Ref_t createTkLayoutTrackerEndcap(DD4hep::Geometry::LCD
   disc_det.setPlacement(placedDiscVolume);
   }
 
+  */
   // top of the hierarchy
   Volume motherVol = lcdd.pickMotherVolume(worldDetElement);
-  DD4hep::Geometry::Translation3D envelopeTranslation(0, 0, dimensions.zmin() + envelopeThickness);
+  double sign = 1;
   double envelopeNegRotAngle = 0;
   if (dimensions.reflect()) {
     envelopeNegRotAngle = dd4hep::pi;
+  } else {
+    sign = 1;
+
   }
-  DD4hep::Geometry::RotationX envelopeNegRotation(envelopeNegRotAngle);
-  PlacedVolume placedEnvelopeVolume = motherVol.placeVolume(envelopeVolume, envelopeNegRotation * envelopeTranslation);
+
+  DD4hep::Geometry::Translation3D envelopeTranslation(0, 0, sign * ( dimensions.zmin() + envelopeThickness));
+    //envelopeNegRotAngle = dd4hep::pi;
+  DD4hep::Geometry::RotationY envelopeNegRotation(envelopeNegRotAngle);
+  PlacedVolume placedEnvelopeVolume = motherVol.placeVolume(envelopeVolume, envelopeNegRotation *  envelopeTranslation);
   placedEnvelopeVolume.addPhysVolID("system", xmlDet.id());
   worldDetElement.setPlacement(placedEnvelopeVolume);
   return worldDetElement;

@@ -24,7 +24,8 @@ createSimpleCone(DD4hep::Geometry::LCDD& lcdd, xml_h e, DD4hep::Geometry::Sensit
   if (fabs(zoff) > 0.000000000001) {
     DD4hep::Geometry::Position trans(0., 0., zoff);
     conePhys =
-        experimentalHall.placeVolume(coneVol, DD4hep::Geometry::Transform3D(DD4hep::Geometry::RotationZ(0.), trans));
+        //experimentalHall.placeVolume(coneVol, DD4hep::Geometry::Transform3D(DD4hep::Geometry::RotationZ(0.), trans));
+        experimentalHall.placeVolume(coneVol, DD4hep::Geometry::RotationY(0)* trans);
   } else
     conePhys = experimentalHall.placeVolume(coneVol);
 

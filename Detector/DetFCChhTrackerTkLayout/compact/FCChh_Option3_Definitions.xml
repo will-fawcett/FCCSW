@@ -1,4 +1,5 @@
 <detectors>
+   <!--
     <detector name="InnerBRL_0" id="BarTrackerInner_id" type="TkLayoutBrlTracker" readout="TrackerBarrelReadout">
         <dimensions rmin="23.283*mm" rmax="102.519*mm" zmin="-820.000*mm" zmax="820.000*mm"/>
         <sensitive type="SimpleTrackerSD"/>
@@ -2642,8 +2643,9 @@
             </discZPls>
         </discs>
     </detector>
+    -->
     <detector name="FwdECAPneg" id="28" type="TkLayoutEcapTracker" readout="TrackerEndcapReadout">
-        <dimensions rmin="60.000*mm" rmax="1549.848*mm" zmin="9990.350*mm" zmax="16009.650*mm" reflect="true"/>
+        <dimensions rmin="60.000*mm" rmax="1549.848*mm" zmin="10100.350*mm" zmax="16009.650*mm" reflect="true"/>
         <sensitive type="SimpleTrackerSD"/>
         <discs repeat="12">
             <discZPls id="1" z="10000.000*mm" zmin="9990.350*mm" zmax="10009.650*mm" bigDelta="5.000*mm">
