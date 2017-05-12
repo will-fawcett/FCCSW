@@ -35,7 +35,7 @@
       <dimensions rmin="60*mm" rmax="1549.848*mm" dz="2954.6499999999996*mm" phi0="0" deltaphi="360*deg" z_offset="13000*mm" material="Iron"/>
     </detector>
     <detector id="2" name="ShieldingLowerConeNeg" type="SimpleCone" vis="TrackerVis">
-      <dimensions rmin2="1371.9*mm" rmax2="2063.72*mm" rmin1="1735.5*mm" rmax1="2610.73*mm" dz="1100*mm" z_offset="9400*mm"  material="Iron"/>
+      <dimensions rmin2="1371.9*mm" rmax2="2063.72*mm" rmin1="1735.5*mm" rmax1="2610.73*mm" dz="1100*mm" z_offset="-9400*mm"  material="Iron"/>
       </detector>
     </detectors>
 

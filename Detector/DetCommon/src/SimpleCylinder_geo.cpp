@@ -24,12 +24,12 @@ createSimpleCylinder(DD4hep::Geometry::LCDD& lcdd, xml_h e, DD4hep::Geometry::Se
   DD4hep::Geometry::PlacedVolume cylinderPhys;
 
   double zoff = cylinderDim.z_offset();
-  //if (fabs(zoff) > 0.000000000001) {
+  if (fabs(zoff) > 0.000000000001) {
     DD4hep::Geometry::Position trans(0., 0., zoff);
     cylinderPhys = experimentalHall.placeVolume(cylinderVol,
                                                 DD4hep::Geometry::RotationY(M_PI)* trans);
-  //} else
-  //  cylinderPhys = experimentalHall.placeVolume(cylinderVol);
+  } else
+    cylinderPhys = experimentalHall.placeVolume(cylinderVol);
 
   cylinderPhys.addPhysVolID("system", x_det.id()).addPhysVolID("side", 0);
 
