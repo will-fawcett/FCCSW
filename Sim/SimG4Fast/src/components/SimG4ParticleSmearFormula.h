@@ -7,8 +7,8 @@
 class IRndmGenSvc;
 class IRndmGen;
 
-//ROOT
-class TFormula;
+// ROOT
+#include "TFormula.h"
 
 // FCCSW
 #include "SimG4Interface/ISimG4ParticleSmearTool.h"
@@ -16,17 +16,16 @@ class TFormula;
 /** @class SimG4ParticleSmearFormula SimG4Fast/src/components/SimG4ParticleSmearFormula.h SimG4ParticleSmearFormula.h
  *
  *  Formula particle smearing tool.
- *  Momentum/energy dependent smearing.
  *  The resolution dependence can be expressed by an arbitrary formula in the configuration.
- *  Smears momentum/energy of the particle following a Gaussian distribution, using the evaluated formula as the mean.
+ *  Smears momentum of the particle following a Gaussian distribution, using the evaluated formula as the mean.
+ *  [For more information please see](@ref md_sim_doc_geant4fastsim).
  *
  *  @author Anna Zaborowska
  */
 
-class SimG4ParticleSmearFormula: public GaudiTool, virtual public ISimG4ParticleSmearTool {
+class SimG4ParticleSmearFormula : public GaudiTool, virtual public ISimG4ParticleSmearTool {
 public:
-  explicit SimG4ParticleSmearFormula(const std::string& type , const std::string& name,
-    const IInterface* parent);
+  explicit SimG4ParticleSmearFormula(const std::string& type, const std::string& name, const IInterface* parent);
   virtual ~SimG4ParticleSmearFormula();
 
   /**  Initialize the tool and a random number generator.
@@ -45,25 +44,26 @@ public:
    */
   virtual StatusCode smearMomentum(CLHEP::Hep3Vector& aMom, int aPdg = 0) final;
 
-  /**  Smear the energy of the particle
-   *   @param aEn Particle energy to be smeared.
-   *   @param[in] aPdg Particle PDG code.
+  /**  Check conditions of the smearing model, especially if the given parametrs do not exceed the parameters of the
+   * model.
+   *   @param[in] aMinMomentum Minimum momentum.
+   *   @param[in] aMaxMomentum Maximum momentum.
+   *   @param[in] aMaxEta Maximum pseudorapidity.
    *   @return status code
    */
-  virtual StatusCode smearEnergy(double& aEn, int aPdg = 0) final;
+  inline virtual StatusCode checkConditions(double, double, double) const final { return StatusCode::SUCCESS; }
+
 private:
-  /// string defining a TFormula representing resolution energy-dependent for the smearing (set by job options)
-  std::string m_resolutionEnergyStr;
-  /// string defining a TFormula representing resolution momentum-dependent for the smearing (set by job options)
-  std::string m_resolutionMomentumStr;
-  /// TFormula representing resolution energy-dependent for the smearing
-  std::unique_ptr<TFormula> m_resolutionEnergy;
   /// TFormula representing resolution momentum-dependent for the smearing
-  std::unique_ptr<TFormula> m_resolutionMomentum;
+  TFormula m_resolutionMomentum;
   /// Random Number Service
   SmartIF<IRndmGenSvc> m_randSvc;
   /// Gaussian random number generator used for smearing with a constant resolution (m_sigma)
   IRndmGen* m_gauss;
+  /// string defining a TFormula representing resolution momentum-dependent for the smearing (set by job options)
+  Gaudi::Property<std::string> m_resolutionMomentumStr{
+      this, "resolutionMomentum", "",
+      "string defining a TFormula representing resolution momentum-dependent for the smearing"};
 };
 
 #endif /* SIMG4FAST_G4PARTICLESMEARSIMPLE_H */

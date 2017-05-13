@@ -12,6 +12,7 @@ find_package(DD4hep COMPONENTS DDG4)
 find_package(ROOT COMPONENTS MathCore GenVector Geom REQUIRED)
 
 gaudi_install_headers(SimG4Components)
+gaudi_install_python_modules()
 
 gaudi_add_module(SimG4Components
                  src/*.cpp
@@ -20,12 +21,6 @@ gaudi_add_module(SimG4Components
 
 
 include(CTest)
-gaudi_add_test(GeantFullSimHCal
-               WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-               FRAMEWORK tests/options/geant_fullsim_hcal.py)
-gaudi_add_test(GeantFullSimECal
-               WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-               FRAMEWORK tests/options/geant_fullsim_ecal.py)
 gaudi_add_test(GeantFullSimGdml
                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                FRAMEWORK tests/options/geant_fullsim_gdml.py)
