@@ -4,6 +4,7 @@
 // GAUDI
 #include "GaudiAlg/GaudiAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/RndmGenerators.h"
 
 // FCCSW
 #include "FWCore/DataHandle.h"
@@ -44,7 +45,7 @@ private:
 
   DataHandle<fcc::PositionedTrackHitCollection> m_positionedTrackHits{"positionedHits", Gaudi::DataHandle::Writer,
                                                                       this};
-  std::default_random_engine m_e;
+  Rndm::Numbers m_flatDist;
 };
 
 using namespace Acts;

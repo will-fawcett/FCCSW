@@ -3,7 +3,8 @@
 #include "DetInterface/ITrackingGeoSvc.h"
 #include "RecInterface/ITrackSeedingTool.h"
 
-#include "datamodel/TrackHitCollection.h"
+#include "GaudiKernel/IRndmGenSvc.h"
+
 
 #include "ACTS/Detector/TrackingGeometry.hpp"
 #include "ACTS/EventData/Measurement.hpp"
@@ -47,6 +48,8 @@ ExtrapolationTest::~ExtrapolationTest() {}
 
 StatusCode ExtrapolationTest::initialize() {
 
+  IRndmGenSvc* randSvc = svc<IRndmGenSvc>("RndmGenSvc", true);
+
   m_geoSvc = service("GeoSvc");
 
   StatusCode sc = GaudiAlgorithm::initialize();
@@ -59,37 +62,9 @@ StatusCode ExtrapolationTest::initialize() {
   }
 
   m_trkGeo = m_trkGeoSvc->trackingGeometry();
-
-  return sc;
-}
-
-StatusCode ExtrapolationTest::execute() {
-
-  fcc::PositionedTrackHitCollection* phitscoll = new fcc::PositionedTrackHitCollection();
-  fcc::TrackHitCollection* hitscoll = new fcc::TrackHitCollection();
-
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_real_distribution<double> std_loc1(1, 5);
-  std::uniform_real_distribution<double> random_angle(0.0, 1.57);
-  std::normal_distribution<double> g(0, 1);
-
-  ActsVector<ParValue_t, NGlobalPars> pars;
-  pars << 0, 0, random_angle(gen), random_angle(gen), 0.001;
-  auto startCov =
-      std::make_unique<ActsSymMatrix<ParValue_t, NGlobalPars>>(ActsSymMatrix<ParValue_t, NGlobalPars>::Identity());
-
-  const Surface* pSurf = m_trkGeo->getBeamline();
-  auto startTP = std::make_unique<BoundParameters>(std::move(startCov), std::move(pars), *pSurf);
-
-  ExtrapolationCell<TrackParameters> exCell(*startTP);
-  exCell.addConfigurationMode(ExtrapolationMode::CollectSensitive);
-  exCell.addConfigurationMode(ExtrapolationMode::CollectPassive);
-  exCell.addConfigurationMode(ExtrapolationMode::CollectBoundary);
-
   auto propConfig = RungeKuttaEngine<>::Config();
   /// @todo: use magnetic field service
-  propConfig.fieldService = std::make_shared<ConstantBField>(0, 0, 0.002);
+  propConfig.fieldService = std::make_shared<ConstantBField>(0, 0, 0.004);
   auto propEngine = std::make_shared<RungeKuttaEngine<>>(propConfig);
 
   auto matConfig = MaterialEffectsEngine::Config();
@@ -113,6 +88,31 @@ StatusCode ExtrapolationTest::execute() {
   exEngineConfig.navigationEngine = navEngine;
   exEngineConfig.extrapolationEngines = {statEngine};
   m_exEngine = std::make_shared<ExtrapolationEngine>(exEngineConfig);
+
+
+  sc = m_flatDist.initialize(randSvc, Rndm::Flat(0., 1.));
+  return sc;
+}
+
+StatusCode ExtrapolationTest::execute() {
+
+  fcc::PositionedTrackHitCollection* phitscoll = new fcc::PositionedTrackHitCollection();
+  fcc::TrackHitCollection* hitscoll = new fcc::TrackHitCollection();
+
+
+  ActsVector<ParValue_t, NGlobalPars> pars;
+  pars << 0, 0, m_flatDist() * M_PI * 0.5, m_flatDist() * M_PI*0.45, 0.001;
+  auto startCov =
+      std::make_unique<ActsSymMatrix<ParValue_t, NGlobalPars>>(ActsSymMatrix<ParValue_t, NGlobalPars>::Identity());
+
+  const Surface* pSurf = m_trkGeo->getBeamline();
+  auto startTP = std::make_unique<BoundParameters>(std::move(startCov), std::move(pars), *pSurf);
+
+  ExtrapolationCell<TrackParameters> exCell(*startTP);
+  exCell.addConfigurationMode(ExtrapolationMode::CollectSensitive);
+  exCell.addConfigurationMode(ExtrapolationMode::CollectPassive);
+  exCell.addConfigurationMode(ExtrapolationMode::CollectBoundary);
+
 
   debug() << "start extrapolation ..." << endmsg;
   m_exEngine->extrapolate(exCell);
