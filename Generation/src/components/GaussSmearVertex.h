@@ -2,53 +2,48 @@
 #define GENERATION_GAUSSSMEARVERTEX_H
 
 #include "GaudiAlg/GaudiTool.h"
+#include "GaudiKernel/PhysicalConstants.h"
 #include "GaudiKernel/RndmGenerators.h"
 
 #include "Generation/IVertexSmearingTool.h"
 
-/** @class FlatSmearVertex FlatSmearVertex.h "FlatSmearVertex.h"
+/** @class GaussSmearVertex GaussSmearVertex.h "GaussSmearVertex.h"
  *
- *  Tool to smear vertex with flat smearing along the x- y- and z-axis.
+ *  Tool to smear vertex with gaussian smearing along the x- y- z- and t-axis.
  *  Concrete implementation of a IVertexSmearingTool.
  *
- *  @author Patrick Robbe
- *  @author Daniel Funke
- *  @date   2008-05-18
  */
-class FlatSmearVertex : public GaudiTool, virtual public IVertexSmearingTool {
+class GaussSmearVertex : public GaudiTool, virtual public IVertexSmearingTool {
 public:
   /// Standard constructor
-  FlatSmearVertex( const std::string& type , const std::string& name,
-                    const IInterface* parent ) ;
+  GaussSmearVertex(const std::string& type, const std::string& name, const IInterface* parent);
 
-  virtual ~FlatSmearVertex( ); ///< Destructor
+  virtual ~GaussSmearVertex();  ///< Destructor
 
   /// Initialize method
-  virtual StatusCode initialize( ) ;
+  virtual StatusCode initialize();
 
   /** Implements IVertexSmearingTool::smearVertex.
    */
-  virtual StatusCode smearVertex( HepMC::GenEvent& theEvent ) ;
+  virtual StatusCode smearVertex(HepMC::GenEvent& theEvent);
 
 private:
-  /// Minimum value for the x coordinate of the vertex (set by options)
-  double m_xsig   ;
+  Gaudi::Property<double> m_xsig{this, "xVertexSigma", 0.0 * Gaudi::Units::mm, "Spread of x coordinate"};
+  Gaudi::Property<double> m_ysig{this, "yVertexSigma", 0.0 * Gaudi::Units::mm, "Spread of y coordinate"};
+  Gaudi::Property<double> m_zsig{this, "zVertexSigma", 0.0 * Gaudi::Units::mm, "Spread of z coordinate"};
+  Gaudi::Property<double> m_tsig{this, "tVertexSigma", 0.0 * Gaudi::Units::mm, "Spread of t coordinate"};
 
-  /// Minimum value for the y coordinate of the vertex (set by options)
-  double m_ysig   ;
-
-  /// Minimum value for the z coordinate of the vertex (set by options)
-  double m_zsig   ;
-
+  Gaudi::Property<double> m_xmean{this, "xVertexMean", 0.0 * Gaudi::Units::mm, "Mean of x coordinate"};
+  Gaudi::Property<double> m_ymean{this, "yVertexMean", 0.0 * Gaudi::Units::mm, "Mean of y coordinate"};
+  Gaudi::Property<double> m_zmean{this, "zVertexMean", 0.0 * Gaudi::Units::mm, "Mean of z coordinate"};
+  Gaudi::Property<double> m_tmean{this, "tVertexMean", 0.0 * Gaudi::Units::mm, "Mean of t coordinate"};
 
   /// Direction of the beam to take into account TOF vs nominal IP8, can have
   /// only values -1 or 1, or 0 to switch off the TOF and set time of
   /// interaction to zero (default = 1, as for beam 1)
-  int m_zDir;
+  Gaudi::Property<int> m_zDir{"beamDirection", 0, "Direction of the beam, possible values: -1, 1 or 0"};
 
-  Rndm::Numbers m_gaussDistX ;
-  Rndm::Numbers m_gaussDistY ; 
-  Rndm::Numbers m_gaussDistZ ;
+  Rndm::Numbers m_gaussDist;
 };
 
-#endif // GENERATION_GAUSSSMEARVERTEX_H
+#endif  // GENERATION_GAUSSSMEARVERTEX_H
