@@ -1,0 +1,2 @@
+executable            = TrkValidation/condor/runCondor.sh
+queue

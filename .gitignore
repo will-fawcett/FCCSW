@@ -1,4 +1,10 @@
 *~
+*.png
+*.dat
+*.pdf
+*.out
+*.err
+*.log
 *.pyc
 *.root
 

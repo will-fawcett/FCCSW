@@ -1,0 +1,6 @@
+executable            = TrkValidation/condor/runCondor.sh
+arguments          = TrkValidation/options/minBias_Gauss4.py
+output             = TrkValidation/condor/minBias_Gauss4.out
+log                   = TrkValidation/condor/minBias_Gauss4.log
+error                 = TrkValidation/condor/minBias_Gauss4.err
+queue
