@@ -19,6 +19,7 @@ class ISaveTrackStateTool;
 namespace fcc {
 class TrackHitCollection;
 class PositionedTrackHitCollection;
+class MCParticleCollection;
 }
 
 
@@ -54,5 +55,6 @@ private:
 
 
   DataHandle<fcc::PositionedTrackHitCollection> m_positionedTrackHits{"positionedHits", Gaudi::DataHandle::Reader, this};
+  DataHandle<fcc::MCParticleCollection> m_genParticles{"allGenParticles", Gaudi::DataHandle::Reader, this};
 };
 #endif /* RECTRACKER_TRACKFIT_H */

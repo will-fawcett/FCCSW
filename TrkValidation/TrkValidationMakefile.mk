@@ -1,6 +1,6 @@
 
 fccsw = ${PWD}
-pwd = ${PWD}/TrkValidation/options
+pwd = ${PWD}/TrkValidation/options/Tracking
 datadir = $(subst options,data,$(pwd))
 $(info datadir  is $(datadir))
 plotdir = $(subst options,data,$(pwd))
@@ -31,6 +31,9 @@ GeantinoScan: $(call FILTER,eantino, $(datafiles))
 .PHONY: ExtrapolationScan
 ExtrapolationScan: $(call FILTER,extrapolationTests, $(datafiles))
 	python  TrkValidation/scripts/plot_pos.py TrkValidation/data/extrapolationTest.py
+
+.PHONY: SingleParticleMomentumResolution
+SingleParticleMomentumResolution: $(call FILTER,fit_gean, $(datafiles))
 
 
 	

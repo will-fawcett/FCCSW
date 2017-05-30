@@ -63,7 +63,7 @@ public:
 inline std::shared_ptr<Acts::IExtrapolationEngine> initMyExtrapolator(const std::shared_ptr<const Acts::TrackingGeometry>& geo) {
   auto propConfig = Acts::RungeKuttaEngine<>::Config();
   /// @todo: use magnetic field service
-  propConfig.fieldService = std::make_shared<Acts::ConstantBField>(0, 0, 0.002); // kT
+  propConfig.fieldService = std::make_shared<Acts::ConstantBField>(0, 0, 0.004); // kT
   auto propEngine = std::make_shared<Acts::RungeKuttaEngine<>>(propConfig);
 
   auto matConfig = Acts::MaterialEffectsEngine::Config();

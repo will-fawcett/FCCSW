@@ -27,6 +27,7 @@
 #include "datamodel/TrackHitCollection.h"
 #include "datamodel/PositionedTrackHitCollection.h"
 #include "datamodel/TrackHitCollection.h"
+#include "datamodel/MCParticleCollection.h"
 
 
 
@@ -51,6 +52,7 @@ DECLARE_ALGORITHM_FACTORY(TrackFit)
 TrackFit::TrackFit(const std::string& name, ISvcLocator* svcLoc) : GaudiAlgorithm(name, svcLoc) {
 
   declareProperty("positionedTrackHits", m_positionedTrackHits, "Tracker hits (Input)");
+  declareProperty("allGenParticles", m_genParticles, "Tracker hits (Input)");
   declareProperty("trackSeedingTool", m_trackSeedingTool, "Track seeding tool" );
   declareProperty("SaveTrackStateTool", m_saveTrackStateTool, "Track saving tool" );
 
@@ -103,6 +105,9 @@ StatusCode TrackFit::execute() {
   m_saveTrackStateTool->newCollection();
   // get hits from event store
   const fcc::PositionedTrackHitCollection* hits = m_positionedTrackHits.get();
+  const fcc::MCParticleCollection* mcparticles = m_genParticles.get();
+  auto particle = (*mcparticles)[0];
+    const fcc::BareParticle& mccore = particle.core();
 
   double fcc_l1 = 0;
   double fcc_l2 = 0;
@@ -116,6 +121,7 @@ StatusCode TrackFit::execute() {
     // check ids of the next hit, except for the last hit check for the previous hit
     std::vector<FitMeas_t> fccMeasurements;
     std::vector<const Acts::Surface*> surfVec;
+    std::vector<int> layerIds = {};
     fccMeasurements.reserve(hits->size());
 
     unsigned int l_currentTrackID = it->first;
@@ -126,50 +132,53 @@ StatusCode TrackFit::execute() {
       debug() << "trackID: " << it->first << endmsg;
       auto hit = (*hits)[it->second]; // the TrackID maps to an index for the hit collection
       long long int theCellId = hit.core().cellId;
-      debug() << theCellId << endmsg;
-      debug() << "position: x: " << hit.position().x << "\t y: " << hit.position().y << "\t z: " << hit.position().z << endmsg; 
-      debug() << "phi: " << std::atan2(hit.position().y, hit.position().x) << endmsg;
-      m_decoderBarrel->setValue(theCellId);
-      int system_id = (*m_decoderBarrel)["system"];
-      int system_id2 = theCellId & 31;
-      if (system_id != system_id2) {
-        return StatusCode::FAILURE;
-      }
-      debug() << " hit in system: " << system_id;
-      int layer_id = (*m_decoderBarrel)["layer"];
-      debug() << "\t layer " << layer_id;
-      int module_id = (*m_decoderBarrel)["module"];
-      debug() << "\t module " << module_id;
-      debug() << endmsg;
-      // The conventions in DD4hep and ACTS for the local coordinates differ,
-      // and the conversion needs to reflect this. See the detector factories for details.
-      fcc_l1 =  (*m_decoderBarrel)["x"] * m_segGridSizeX;
-      fcc_l2 = -1 *  (*m_decoderBarrel)["z"] * m_segGridSizeZ;
-      (*m_decoderBarrel)["x"] = 0; // workaround for broken `volumeID` method --
-      (*m_decoderBarrel)["z"] = 0; // set everything not connected with the VolumeID to zero,
-      // so the cellID can be used to look up the tracking surface
-      if (hitcounter == 0) { // workaround to select three hits for fast fit
-        middlePoint = GlobalPoint(hit.position().x, hit.position().y, hit.position().z);
-      } else if (hitcounter == 1) {
-        outerPoint = GlobalPoint(hit.position().x, hit.position().y, hit.position().z);
-      }
-      // need to use cellID without segmentation bits
-      const Acts::Surface* fccSurf = m_trkVolMan->lookUpTrkSurface(Identifier(m_decoderBarrel->getValue()));
-      debug() << " found surface pointer: " << fccSurf<< endmsg;
-      if (nullptr != fccSurf) {
-        double std1 = 1;
-        double std2 = 1;
-        ActsSymMatrixD<2> cov;
-        cov << std1* std1, 0, 0, std2* std2;
-        fccMeasurements.push_back(Meas_t<eLOC_0, eLOC_1>(*fccSurf, hit.core().cellId, std::move(cov), fcc_l1, fcc_l2));
-        surfVec.push_back(fccSurf);
-        ++hitcounter;
+      if(std::find(layerIds.begin(), layerIds.end(), theCellId % 1024) == layerIds.end()) {
+          layerIds.push_back(theCellId % 1024);
+        debug() << theCellId << endmsg;
+        debug() << "position: x: " << hit.position().x << "\t y: " << hit.position().y << "\t z: " << hit.position().z << endmsg; 
+        debug() << "phi: " << std::atan2(hit.position().y, hit.position().x) << endmsg;
+        m_decoderBarrel->setValue(theCellId);
+        int system_id = (*m_decoderBarrel)["system"];
+        int system_id2 = theCellId & 31;
+        if (system_id != system_id2) {
+          return StatusCode::FAILURE;
+        }
+        debug() << " hit in system: " << system_id;
+        int layer_id = (*m_decoderBarrel)["layer"];
+        debug() << "\t layer " << layer_id;
+        int module_id = (*m_decoderBarrel)["module"];
+        debug() << "\t module " << module_id;
+        debug() << endmsg;
+        // The conventions in DD4hep and ACTS for the local coordinates differ,
+        // and the conversion needs to reflect this. See the detector factories for details.
+        fcc_l1 =  (*m_decoderBarrel)["x"] * m_segGridSizeX;
+        fcc_l2 = -1 *  (*m_decoderBarrel)["z"] * m_segGridSizeZ;
+        (*m_decoderBarrel)["x"] = 0; // workaround for broken `volumeID` method --
+        (*m_decoderBarrel)["z"] = 0; // set everything not connected with the VolumeID to zero,
+        // so the cellID can be used to look up the tracking surface
+        if (hitcounter == 0) { // workaround to select three hits for fast fit
+          middlePoint = GlobalPoint(hit.position().x, hit.position().y, hit.position().z);
+        } else if (hitcounter == 1) {
+          outerPoint = GlobalPoint(hit.position().x, hit.position().y, hit.position().z);
+        }
+        // need to use cellID without segmentation bits
+        const Acts::Surface* fccSurf = m_trkVolMan->lookUpTrkSurface(Identifier(m_decoderBarrel->getValue()));
+        debug() << " found surface pointer: " << fccSurf<< endmsg;
+        if (nullptr != fccSurf) {
+          double std1 = 1;
+          double std2 = 1;
+          ActsSymMatrixD<2> cov;
+          cov << std1* std1, 0, 0, std2* std2;
+          fccMeasurements.push_back(Meas_t<eLOC_0, eLOC_1>(*fccSurf, hit.core().cellId, std::move(cov), fcc_l1, fcc_l2));
+          surfVec.push_back(fccSurf);
+          ++hitcounter;
+        }
       }
       ++it;
     } while ((it->first == l_currentTrackID) && (it != seedmap.end()));
     --it; // preceding while loop incremented one too many times
 
-    if (fccMeasurements.size() > 2 ) {
+    if (fccMeasurements.size() > 7 || true ) {
       debug() << "Estimating parameters..." << endmsg;
       /// @todo: use magnetic field service
       FastHelix helix(outerPoint, middlePoint, GlobalPoint(0,0,0), 0.004);
@@ -183,13 +192,17 @@ StatusCode TrackFit::execute() {
         info() << "Estimated track parameters: " << res.d0 << "\t" << res.z0 << "\t" << res.phi0 << "\t" << res.theta << "\t" << res.qOverPt << endmsg;
         auto startCov =
             std::make_unique<ActsSymMatrix<ParValue_t, NGlobalPars>>(ActsSymMatrix<ParValue_t, NGlobalPars>::Identity());
-        (*startCov) *= 0.01; // starting values of 1 are too big for qop
+        (*startCov) *= 0.00001; // starting values of 1 are too big for qop
         
 
         const Surface* pSurf =  m_trkGeo->getBeamline();
 
+        Acts::Vector3D momentum {mccore.p4.px, mccore.p4.py, mccore.p4.pz};
+        Acts::Vector3D position {0,0,0};
         debug() << "Beamline pointer: " << pSurf << endmsg;;
-        auto startTP = std::make_unique<BoundParameters>(std::move(startCov), std::move(pars), *pSurf);
+        //auto startTP = std::make_unique<BoundParameters>(std::move(startCov), std::move(pars), *pSurf);
+        auto startTP = std::make_unique<BoundParameters>(std::move(startCov), position, momentum, -1 , *pSurf);
+        //
 
         ExtrapolationCell<TrackParameters> exCell(*startTP);
         exCell.addConfigurationMode(ExtrapolationMode::CollectSensitive);
@@ -219,8 +232,8 @@ StatusCode TrackFit::execute() {
           auto detPtr = tp->referenceSurface().associatedDetectorElement();
           if (detPtr == nullptr) continue;
 
-          std1 = 1;
-          std2 = 1;
+          std1 = .01;
+          std2 = .01;
           l1 = tp->get<eLOC_0>();
           l2 = tp->get<eLOC_1>();
           ActsSymMatrixD<2> cov;
@@ -232,13 +245,17 @@ StatusCode TrackFit::execute() {
         debug() << "created " << vMeasurements.size() << " pseudo-measurements" << endmsg;
         debug() << "created " << fccMeasurements.size() << " fcc-measurements" << endmsg;
 
-        auto track = m_KF.fit(fccMeasurements, std::make_unique<BoundParameters>(*startTP));
+        auto track = m_KF.fit(vMeasurements, std::make_unique<BoundParameters>(*startTP));
 
         // dump track
        unsigned int trackStateCounter = 0;
        for (const auto& p : track) {
-          if (trackStateCounter == fccMeasurements.size() -1) { // use the last track state for persistency
-            m_saveTrackStateTool->saveTrackInCollection(*p->getFilteredState());
+
+            auto fstate =  (*p->getFilteredState());
+
+            std::cout << fstate.momentum().x() << std::endl;
+          if (trackStateCounter == vMeasurements.size() -1) { // use the last track state for persistency
+            m_saveTrackStateTool->saveTrackInCollection(*p->getSmoothedState());
           }
           ++trackStateCounter;
         }

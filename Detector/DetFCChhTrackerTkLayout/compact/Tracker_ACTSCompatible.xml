@@ -16,7 +16,7 @@
     <include ref="FCChh_Option3_Definitions_ACTSCompatible.xml"/>
     <detectors>
         <detector id="0" name="beampipe" type="BeamTube">
-            <dimensions rmin="CentralBeamTube_rmin" rmax="CentralBeamTube_rmax" z="CentralBeamTube_dz" material="Beryllium" vis="violet"/>
+            <dimensions rmin="15*mm" rmax="18*mm" z="800*mm" material="Beryllium" vis="violet"/>
         </detector>
         <detector id="100" name="FCChhInner0" type="DD4hep_SubdetectorAssembly" vis="BlueVisTrans">
             <composite name="InnerBRL_0"/>

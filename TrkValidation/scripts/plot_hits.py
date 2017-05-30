@@ -2,6 +2,8 @@
 Quick plotting script for visualizing FCCSW tracker hits.
 Reads space point from a plain text file -- generate the spacepoints with the corresponding read_cluster* script.
 """
+import matplotlib
+matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
@@ -90,5 +92,7 @@ if __name__ == "__main__":
     cellIds = id_data[:,1] % 32
     print cellIds[:100], hits[:100]
     plot_data_rz(hits, ids, cellIds, data_epos, title="rphi-endcap")
+    plt.savefig(basefilename + "_rz.png")
     plot_data_rphi(hits, ids, cellIds, data_epos, title="rz-endcap")
+    plt.savefig(basefilename + "_rphi.png")
     plt.show()

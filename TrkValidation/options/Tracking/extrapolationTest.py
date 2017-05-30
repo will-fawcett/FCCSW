@@ -5,7 +5,7 @@ podioevent   = FCCDataSvc("EventDataSvc")
 
 from Configurables import GeoSvc
 geoservice = GeoSvc("GeoSvc", detectors=['file:Detector/DetFCChhBaseline1/compact/FCChh_DectEmptyMaster.xml',
-  'file:Detector/DetFCChhTrackerTkLayout/compact/Tracker.xml'])
+  'file:Detector/DetFCChhTrackerTkLayout/compact/Tracker_ACTSCompatible.xml'])
 from Configurables import TrackingGeoSvc
 trkgeoservice = TrackingGeoSvc("TrackingGeometryService")
 
