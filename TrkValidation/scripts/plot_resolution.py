@@ -39,33 +39,29 @@ for filename in sys.argv[1:]:
   plt.semilogy(eta, np.abs(qOverP), 'o', label=str(pt))
   plt.xlabel(r"$\eta$")
   plt.ylabel(r"$ q / P$")
-  plt.legend(title='$p_T$')
+  plt.legend(title='$p_T $ [GeV]')
   plt.savefig('trk_qOverP.png')
-  plt.savefig('trk_qOverP.pdf')
 
   plt.figure('deltaQOverP')
   plt.semilogy(eta, deltaQOverP, 'o', label=str(pt))
   plt.xlabel(r"$\eta$")
   plt.ylabel(r"$\delta q / P$")
-  plt.legend(title='$p_T$')
+  plt.legend(title='$p_T$ [GeV]')
   plt.savefig("trk_deltaQOverP.png")
-  plt.savefig("trk_deltaQOverP.pdf")
 
   plt.figure('resqOverP')
   plt.semilogy(eta, 1. /  np.abs(qOverP) * deltaQOverP, "o", label=str(pt))
   plt.xlabel(r"$\eta$")
   plt.ylabel(r"$\delta P / P$")
-  plt.legend(title='$p_T$')
+  plt.legend(title='$p_T$ [GeV]')
   plt.savefig("trk_qOverP_res.png")
-  plt.savefig("trk_qOverP_res.pdf")
 
   plt.figure('px')
   plt.semilogy(eta, px, "o", label=str(pt))
   plt.xlabel(r"$\eta$")
   plt.ylabel(r"$P_x$")
-  plt.legend(title='$p_T$')
+  plt.legend(title='$p_T$ [GeV]')
   plt.savefig("trk_px_res.png")
-  plt.savefig("trk_px_res.pdf")
 
 
 
