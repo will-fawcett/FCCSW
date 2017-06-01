@@ -1,7 +1,6 @@
 
 #include "DetInterface/IGeoSvc.h"
 
-#include "datamodel/TrackHitCollection.h"
 #include "datamodel/PositionedTrackHitCollection.h"
 #include "datamodel/TrackHitCollection.h"
 
@@ -31,7 +30,39 @@ OccupancyMap::OccupancyMap(const std::string& name, ISvcLocator* svcLoc) : Gaudi
 void OccupancyMap::visitDetElement(const DD4hep::Geometry::DetElement& det) {
   for (auto d: det.children()) {
     debug() << "DetElement Name: " << d.first << endmsg;
-    debug() d.second()
+    if (d.first.find("module") != std::string::npos) {
+    auto solid = d.second.volume().solid();
+    // get the envelope of the shape
+    TGeoBBox* box = (dynamic_cast<TGeoBBox*>(solid.ptr()));
+    // get half-widths
+    //return CLHEP::Hep3Vector(box->GetDX(), box->GetDY(), box->GetDZ());
+    //debug() << "Bounding box dimensions: " << box->GetDX() << "\t" << box->GetDY() << "\t" << box->GetDZ() << endmsg;
+    //debug() << "Segmentation size: " <<   m_segGridSizeX  << "\t" << m_segGridSizeZ  << endmsg;
+    // default dd4hep units differ from fcc ones
+    int cellsX = ceil((box->GetDX()  - m_segGridSizeX  / 2.) / m_segGridSizeX)  ;
+    int cellsZ = ceil((box->GetDZ()  - m_segGridSizeZ  / 2.) / m_segGridSizeZ) ;
+    //debug() << "number of cells: "  << cellsX << "\t" << cellsX *  m_segGridSizeX  << endmsg;
+    for (int l_x = -1*cellsX; l_x < cellsX; ++l_x) {
+      for (int l_z = -1*cellsZ; l_z < cellsZ; ++l_z) {
+        m_globalPos.fill(0);
+        m_localPos.fill(0);
+        m_localPos[0] = l_x * m_segGridSizeX; // / static_cast<double>(m_segZoomFactor) * 5;
+        m_localPos[2] = l_z * m_segGridSizeZ; // / static_cast<double>(m_segZoomFactor) * 5;
+    d.second.worldTransformation().LocalToMaster(m_localPos.data(), m_globalPos.data());
+    auto position = fcc::Point();
+    position.x = m_globalPos[0] * CM_2_MM ;
+    position.y = m_globalPos[1] * CM_2_MM ;
+    position.z = m_globalPos[2] * CM_2_MM;
+    fcc::TrackHit edmHit = m_hitscoll->create();
+    fcc::BareHit& edmHitCore = edmHit.core();
+    m_phitscoll->create(position, edmHitCore);
+      }
+    }
+
+
+
+
+    }
     visitDetElement(d.second);
   }
 }
@@ -53,14 +84,14 @@ StatusCode OccupancyMap::initialize() {
   m_decoderBarrel = readoutBarrel.idSpec().decoder();
   auto segmentationXZ = dynamic_cast<DD4hep::DDSegmentation::CartesianGridXZ*>(
           readoutBarrel.segmentation().segmentation());
-  m_segGridSizeX = segmentationXZ->gridSizeX() * CM_2_MM;
-  m_segGridSizeZ = segmentationXZ->gridSizeZ() * CM_2_MM;
+  m_segGridSizeX = m_segZoomFactor* segmentationXZ->gridSizeX();
+  m_segGridSizeZ = m_segZoomFactor* segmentationXZ->gridSizeZ();
   return sc;
 }
 
 StatusCode OccupancyMap::execute() {
-  fcc::PositionedTrackHitCollection* phitscoll = new fcc::PositionedTrackHitCollection();
-  fcc::TrackHitCollection* hitscoll = new fcc::TrackHitCollection();
+   m_phitscoll = new fcc::PositionedTrackHitCollection();
+   m_hitscoll = new fcc::TrackHitCollection();
 
 
   auto lcdd = m_geoSvc->lcdd();
@@ -68,17 +99,9 @@ StatusCode OccupancyMap::execute() {
 
 
 
-  for (int i = 0; i < 10; ++i) {
-    fcc::TrackHit edmHit = hitscoll->create();
-    fcc::BareHit& edmHitCore = edmHit.core();
-    auto position = fcc::Point();
-    position.x = i;
-    position.y = i;
-    position.z = i;
-    phitscoll->create(position, edmHitCore);
-  }
 
-  m_positionedTrackHits.put(phitscoll);
+
+  m_positionedTrackHits.put(m_phitscoll);
 
   return StatusCode::SUCCESS;
 }
