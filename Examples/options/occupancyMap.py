@@ -9,8 +9,8 @@ from Configurables import PodioInput
 
 from Configurables import GeoSvc
 geoservice = GeoSvc("GeoSvc", detectors=['file:Detector/DetFCChhBaseline1/compact/FCChh_DectEmptyMaster.xml',
-  "file:/afs/cern.ch/work/v/vavolkl/FCCSW/TrkValidation/compact/Tracker_Small.xml",
-  #'file:Detector/DetFCChhTrackerTkLayout/compact/Tracker.xml',
+  #"file:/afs/cern.ch/work/v/vavolkl/FCCSW/TrkValidation/compact/Tracker_Small.xml",
+  'file:Detector/DetFCChhTrackerTkLayout/compact/Tracker.xml',
   ],
   )
 
