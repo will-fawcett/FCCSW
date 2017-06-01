@@ -115,7 +115,7 @@ static DD4hep::Geometry::Ref_t createTkLayoutTrackerEndcap(DD4hep::Geometry::LCD
         if (xComp.isSensitive()) {
           placedComponentVolume.addPhysVolID("component", compCounter);
           componentVolume.setSensitiveDetector(sensDet);
-          DetElement comp_det(disc_det, "comp" + std::to_string(compCounter), compCounter);
+          DetElement comp_det(disc_det, "module" + std::to_string(compCounter), compCounter);
           comp_det.setPlacement(placedComponentVolume);
           ++compCounter;
         }
