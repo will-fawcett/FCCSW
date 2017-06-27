@@ -4,6 +4,7 @@
 #include "RecInterface/ITrackSeedingTool.h"
 
 #include "GaudiKernel/IRndmGenSvc.h"
+#include "GaudiKernel/SystemOfUnits.h"
 
 
 #include "ACTS/Detector/TrackingGeometry.hpp"
@@ -37,34 +38,28 @@
 
 #include "ExtrapolationTest.h"
 
+using namespace Acts;
+using DefaultCovMatrix = ActsSymMatrix<ParValue_t, NGlobalPars>;
+
 DECLARE_ALGORITHM_FACTORY(ExtrapolationTest)
 
-ExtrapolationTest::ExtrapolationTest(const std::string& name, ISvcLocator* svcLoc) : GaudiAlgorithm(name, svcLoc) {
+ExtrapolationTest::ExtrapolationTest(const std::string& name, ISvcLocator* svcLoc) : GaudiAlgorithm(name, svcLoc),
+  m_geoSvc("GeoSvc", "ExtrapolationTest"),
+  m_trkGeoSvc("TrackingGeoSvc", "ExtrapolationTest") {
 
   declareProperty("positionedTrackHits", m_positionedTrackHits, "hits/TrackerPositionedHits");
 }
-
-ExtrapolationTest::~ExtrapolationTest() {}
 
 StatusCode ExtrapolationTest::initialize() {
 
   IRndmGenSvc* randSvc = svc<IRndmGenSvc>("RndmGenSvc", true);
 
-  m_geoSvc = service("GeoSvc");
-
   StatusCode sc = GaudiAlgorithm::initialize();
   if (sc.isFailure()) return sc;
 
-  m_trkGeoSvc = service("TrackingGeoSvc");
-  if (nullptr == m_trkGeoSvc) {
-    error() << "Unable to locate Tracking Geometry Service. " << endmsg;
-    return StatusCode::FAILURE;
-  }
-
   m_trkGeo = m_trkGeoSvc->trackingGeometry();
   auto propConfig = RungeKuttaEngine<>::Config();
-  /// @todo: use magnetic field service
-  propConfig.fieldService = std::make_shared<ConstantBField>(0, 0, 0.004);
+  propConfig.fieldService = std::make_shared<ConstantBField>(0, 0, m_magneticFieldBz * Gaudi::Units::perThousand * Gaudi::Units::tesla); // needs to be in kT
   auto propEngine = std::make_shared<RungeKuttaEngine<>>(propConfig);
 
   auto matConfig = MaterialEffectsEngine::Config();
@@ -96,14 +91,18 @@ StatusCode ExtrapolationTest::initialize() {
 
 StatusCode ExtrapolationTest::execute() {
 
-  fcc::PositionedTrackHitCollection* phitscoll = new fcc::PositionedTrackHitCollection();
-  fcc::TrackHitCollection* hitscoll = new fcc::TrackHitCollection();
+  fcc::PositionedTrackHitCollection* posHitCollection = new fcc::PositionedTrackHitCollection();
+  fcc::TrackHitCollection* hitCollection = new fcc::TrackHitCollection();
 
-
+  // initial value for the track parameters, following Acts conventions
   ActsVector<ParValue_t, NGlobalPars> pars;
-  pars << 0, 0, m_flatDist() * M_PI * 0.5, m_flatDist() * M_PI*0.45, 0.001;
+  pars << 0, // local coordinate 1
+          0, // local coordinate 2
+          m_flatDist() * M_PI * 0.5, // phi 
+          m_flatDist() * M_PI*0.45,  // theta
+          0.001; // qOverP
   auto startCov =
-      std::make_unique<ActsSymMatrix<ParValue_t, NGlobalPars>>(ActsSymMatrix<ParValue_t, NGlobalPars>::Identity());
+      std::make_unique<DefaultCovMatrix>(DefaultCovMatrix::Identity());
 
   const Surface* pSurf = m_trkGeo->getBeamline();
   auto startTP = std::make_unique<BoundParameters>(std::move(startCov), std::move(pars), *pSurf);
@@ -120,16 +119,16 @@ StatusCode ExtrapolationTest::execute() {
 
   for (const auto& step : exCell.extrapolationSteps) {
     const auto& tp = step.parameters;
-    fcc::TrackHit edmHit = hitscoll->create();
+    fcc::TrackHit edmHit = hitCollection->create();
     fcc::BareHit& edmHitCore = edmHit.core();
     auto position = fcc::Point();
     position.x = tp->position().x();
     position.y = tp->position().y();
     position.z = tp->position().z();
-    phitscoll->create(position, edmHitCore);
+    posHitCollection->create(position, edmHitCore);
   }
 
-  m_positionedTrackHits.put(phitscoll);
+  m_positionedTrackHits.put(posHitCollection);
   return StatusCode::SUCCESS;
 }
 

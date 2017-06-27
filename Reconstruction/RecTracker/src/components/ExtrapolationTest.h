@@ -27,31 +27,36 @@ class ExtrapolationTest : public GaudiAlgorithm {
 public:
   ExtrapolationTest(const std::string& name, ISvcLocator* svcLoc);
 
-  ~ExtrapolationTest();
+  ~ExtrapolationTest() = default;
 
-  StatusCode initialize();
+  StatusCode initialize() override final;
 
-  StatusCode execute();
+  StatusCode execute() override final;
 
-  StatusCode finalize();
+  StatusCode finalize() override final;
 
 private:
   /// Pointer to the geometry service
-  SmartIF<ITrackingGeoSvc> m_trkGeoSvc;
-  SmartIF<IGeoSvc> m_geoSvc;
+  ServiceHandle<IGeoSvc> m_geoSvc;
+  /// Tracking geometry service
+  ServiceHandle<ITrackingGeoSvc> m_trkGeoSvc;
 
+  /// pointer to tracking geometry world
   std::shared_ptr<Acts::TrackingGeometry> m_trkGeo;
+  /// pointer to Acts extrapolation engine
   std::shared_ptr<const Acts::IExtrapolationEngine> m_exEngine;
 
+  /// output of points along track
   DataHandle<fcc::PositionedTrackHitCollection> m_positionedTrackHits{"positionedHits", Gaudi::DataHandle::Writer,
                                                                       this};
+  Gaudi::Property<float> m_magneticFieldBz{this, "magneticFieldBz", 4., "const magnetic field strength in z"};
+  /// Random number generator for the track parameters
   Rndm::Numbers m_flatDist;
 };
 
-using namespace Acts;
 
-typedef FittableMeasurement<long int> FitMeas_t;
-template <ParID_t... pars>
-using Meas_t = Measurement<long int, pars...>;
+typedef Acts::FittableMeasurement<long int> FitMeas_t;
+template <Acts::ParID_t... pars>
+using Meas_t = Acts::Measurement<long int, pars...>;
 
 #endif /* RECTRACKER_EXTRAPOLATIONTEST_H */

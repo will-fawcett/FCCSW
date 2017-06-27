@@ -11,24 +11,25 @@ from GaudiKernel import SystemOfUnits as units
 
 _CommonFCCPileupConf = {
           "xVertexMean": 0 * units.mm,
-          "xVertexSigma": 0.5 * units.mm,
+          "xVertexSigma" : 0.5 * units.mm,
           "yVertexMean": 0 * units.mm,
           "yVertexSigma": 0.5 * units.mm,
           "zVertexMean": 0 * units.mm,
-          "zVertexSigma": 70 * units.mm, 
+          "zVertexSigma": 70 * units.mm,
           "tVertexMean": 0 * units.picosecond,
-          "tVertexSigma": 120 * units.picosecond }
+          "tVertexSigma": 120 * units.picosecond,
+           }
 
 
 # for flat distributions
-_CommonFCCPileupConf['xVertexMin'] = _CommonFCCPileupConf["xVertexMean"] - 2 * _CommonFCCPileupConf["xVertexSigma"]
-_CommonFCCPileupConf['xVertexMax'] = _CommonFCCPileupConf["xVertexMean"] + 2 * _CommonFCCPileupConf["xVertexSigma"]
-_CommonFCCPileupConf['yVertexMin'] = _CommonFCCPileupConf["yVertexMean"] - 2 * _CommonFCCPileupConf["yVertexSigma"]
-_CommonFCCPileupConf['yVertexMax'] = _CommonFCCPileupConf["yVertexMean"] + 2 * _CommonFCCPileupConf["yVertexSigma"]
-_CommonFCCPileupConf['zVertexMin'] = _CommonFCCPileupConf["zVertexMean"] - 2 * _CommonFCCPileupConf["zVertexSigma"]
-_CommonFCCPileupConf['zVertexMax'] = _CommonFCCPileupConf["zVertexMean"] + 2 * _CommonFCCPileupConf["zVertexSigma"]
-_CommonFCCPileupConf['tVertexMin'] = _CommonFCCPileupConf["tVertexMean"] - 2 * _CommonFCCPileupConf["tVertexSigma"]
-_CommonFCCPileupConf['tVertexMax'] = _CommonFCCPileupConf["tVertexMean"] + 2 * _CommonFCCPileupConf["tVertexSigma"]
+_CommonFCCPileupConf['xVertexMin'] = _CommonFCCPileupConf['xVertexMean'] - 2 * _CommonFCCPileupConf['xVertexSigma']
+_CommonFCCPileupConf['xVertexMax'] = _CommonFCCPileupConf['xVertexMean'] + 2 * _CommonFCCPileupConf['xVertexSigma']
+_CommonFCCPileupConf['yVertexMin'] = _CommonFCCPileupConf['yVertexMean'] - 2 * _CommonFCCPileupConf['yVertexSigma']
+_CommonFCCPileupConf['yVertexMax'] = _CommonFCCPileupConf['yVertexMean'] + 2 * _CommonFCCPileupConf['yVertexSigma']
+_CommonFCCPileupConf['zVertexMin'] = _CommonFCCPileupConf['zVertexMean'] - 2 * _CommonFCCPileupConf['zVertexSigma']
+_CommonFCCPileupConf['zVertexMax'] = _CommonFCCPileupConf['zVertexMean'] + 2 * _CommonFCCPileupConf['zVertexSigma']
+_CommonFCCPileupConf['tVertexMin'] = _CommonFCCPileupConf['tVertexMean'] - 2 * _CommonFCCPileupConf['tVertexSigma']
+_CommonFCCPileupConf['tVertexMax'] = _CommonFCCPileupConf['tVertexMean'] + 2 * _CommonFCCPileupConf['tVertexSigma']
 
 
 FCCPhase1PileupConf = _CommonFCCPileupConf.copy()

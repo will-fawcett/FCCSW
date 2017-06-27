@@ -35,23 +35,20 @@ class TrackingGeoSvc : public extends1<Service, ITrackingGeoSvc> {
 public:
   /// Default constructor
   TrackingGeoSvc(const std::string& name, ISvcLocator* svc);
-
-  /// Destructor
-  virtual ~TrackingGeoSvc();
-  //!< Retrieve interface ID
-  //        static const InterfaceID& interfaceID() { return IID_ITrackingGeoSvc; }
+  /// Default destructor
+  virtual ~TrackingGeoSvc() = default;
   /// Initialize function
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override final;
   /// Finalize function
-  virtual StatusCode finalize();
+  virtual StatusCode finalize() override final;
   // receive DD4hep Geometry
   virtual std::shared_ptr<Acts::TrackingGeometry> trackingGeometry() const;
 
 private:
-  /// Handle to the FCC geometry service
-  SmartIF<IGeoSvc> m_geoSvc;
   // Tracking  Geometry
   std::shared_ptr<Acts::TrackingGeometry> m_trackingGeo;
+  /// Handle to the FCC geometry service
+  ServiceHandle<IGeoSvc> m_geoSvc;
 };
 
 inline std::shared_ptr<Acts::TrackingGeometry> TrackingGeoSvc::trackingGeometry() const { return m_trackingGeo; }

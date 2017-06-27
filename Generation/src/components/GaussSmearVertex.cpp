@@ -33,20 +33,9 @@ StatusCode GaussSmearVertex::initialize() {
   sc = m_gaussDist.initialize(randSvc, Rndm::Gauss(0., 1));
   if (sc.isFailure()) return sc;
 
-  std::string infoMsg = " applying TOF of interaction with ";
-  if (m_zDir == -1) {
-    infoMsg = infoMsg + "negative beam direction";
-  } else if (m_zDir == 1) {
-    infoMsg = infoMsg + "positive beam direction";
-  } else if (m_zDir == 0) {
-    infoMsg = " with TOF of interaction equal to zero ";
-  } else {
-    return Error("BeamDirection can only be set to -1 or 1, or 0 to switch off TOF");
-  }
 
   info() << "Smearing of interaction point with normal distribution "
          << " in x, y and z " << endmsg;
-  info() << infoMsg << endmsg;
   info() << " with " << m_xsig / Gaudi::Units::mm << " mm  standard deviation in x " << m_ysig / Gaudi::Units::mm
          << " mm in y and " << m_zsig / Gaudi::Units::mm << " mm in z." << endmsg;
 
@@ -58,12 +47,11 @@ StatusCode GaussSmearVertex::initialize() {
 
 /// Smearing function
 StatusCode GaussSmearVertex::smearVertex(HepMC::GenEvent& theEvent) {
-  double dx, dy, dz, dt;
 
-  dx = m_gaussDist() * sqrt(m_xsig) + m_xmean;
-  dy = m_gaussDist() * sqrt(m_ysig) + m_ymean;
-  dz = m_gaussDist() * sqrt(m_zsig) + m_zmean;
-  dt = m_gaussDist() * sqrt(m_tsig) + m_tmean;
+  double dx = m_gaussDist() * sqrt(m_xsig) + m_xmean;
+  double dy = m_gaussDist() * sqrt(m_ysig) + m_ymean;
+  double dz = m_gaussDist() * sqrt(m_zsig) + m_zmean;
+  double dt = m_gaussDist() * sqrt(m_tsig) + m_tmean;
 
   Gaudi::LorentzVector dpos(dx, dy, dz, dt);
 

@@ -19,7 +19,7 @@ static DD4hep::Geometry::Ref_t createTkLayoutTrackerEndcap(DD4hep::Geometry::LCD
   // shorthands
   DD4hep::XML::DetElement xmlDet = static_cast<DD4hep::XML::DetElement>(xmlElement);
   Dimension dimensions(xmlDet.dimensions());
-  double l_overlapMargin = 0.00001;
+  double l_overlapMargin = 0.01;
 
   // get sensitive detector type from xml
   DD4hep::XML::Dimension sdTyp = xmlElement.child(_Unicode(sensitive));  // retrieve the type
@@ -82,11 +82,11 @@ static DD4hep::Geometry::Ref_t createTkLayoutTrackerEndcap(DD4hep::Geometry::LCD
                                                            0.5 * xSensorProperties.attr<double>("sensorLength")),
                                lcdd.material(xComp.materialStr()));
       unsigned int nPhi = xRing.attr<int>("nModules");
+      double phi = 0;
       for (unsigned int phiIndex = 0; phiIndex < nPhi; ++phiIndex) {
         double lX = 0;
         double lY = 0;
         double lZ = 0;
-        double phi = 0;
         double phiTilt = 0;
         double thetaTilt = 0;
         if (0 == phiIndex % 2) {
@@ -137,7 +137,7 @@ static DD4hep::Geometry::Ref_t createTkLayoutTrackerEndcap(DD4hep::Geometry::LCD
   Acts::ActsExtension::Config layConfig;
   // the local coordinate systems of modules in dd4hep and acts differ
   // see http://acts.web.cern.ch/ACTS/latest/doc/group__DD4hepPlugins.html
-  layConfig.axes = "ZXY"; // correct translation of local x axis in dd4hep to local x axis in acts
+  layConfig.axes = "XZY"; // correct translation of local x axis in dd4hep to local x axis in acts
   layConfig.isLayer = true;
   Acts::ActsExtension* detlayer = new Acts::ActsExtension(layConfig);
   disc_det.addExtension<Acts::IActsExtension>(detlayer);
