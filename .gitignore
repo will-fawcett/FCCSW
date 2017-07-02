@@ -2,6 +2,7 @@
 *.png
 *.dat
 *.pdf
+*.gdml
 *.out
 *.err
 *.log
