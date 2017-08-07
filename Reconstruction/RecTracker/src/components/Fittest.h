@@ -43,7 +43,7 @@ private:
   SmartIF<IGeoSvc> m_geoSvc;
 
 
-  std::shared_ptr<Acts::TrackingGeometry> m_trkGeo;
+  std::shared_ptr<const Acts::TrackingGeometry> m_trkGeo;
   std::shared_ptr<const Acts::IExtrapolationEngine> m_exEngine;
 
   DataHandle<fcc::PositionedTrackHitCollection> m_positionedTrackHits{"positionedHits", Gaudi::DataHandle::Writer, this};

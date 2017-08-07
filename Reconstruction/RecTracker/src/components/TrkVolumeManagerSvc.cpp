@@ -13,7 +13,6 @@
 #include "ACTS/Tools/LayerArrayCreator.hpp"
 #include "ACTS/Layers/Layer.hpp"
 #include "ACTS/Tools/TrackingVolumeArrayCreator.hpp"
-#include "ACTS/Examples/BuildGenericDetector.hpp"
 #include "ACTS/Utilities/Identifier.hpp"
 
 DECLARE_SERVICE_FACTORY(TrkVolumeManagerSvc)
