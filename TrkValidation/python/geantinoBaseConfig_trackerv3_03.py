@@ -11,7 +11,7 @@ geoservice = GeoSvc("GeoSvc",
                     detectors=[
                       'file:Detector/DetFCChhBaseline1/compact/FCChh_DectEmptyMaster.xml',
                       #'file:TrkValidation/compact/Tracker.xml',
-                      'Detector/DetFCChhTrackerTkLayout/compact/Tracker.xml',
+                      'Detector/DetFCChhTrackerTkLayoutv3.03/compact/Tracker.xml',
                       ],
                     OutputLevel = INFO
                     )

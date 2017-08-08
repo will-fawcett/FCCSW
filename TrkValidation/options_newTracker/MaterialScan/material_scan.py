@@ -10,7 +10,7 @@ geoservice = GeoSvc("GeoSvc", detectors=['file:Detector/DetFCChhBaseline1/compac
   'file:Detector/DetFCChhTrackerTkLayout/compact/Tracker.xml'])
 from Configurables import MaterialScan
 material_filename = sys.argv[1].replace("options/", "data/").replace(".py", ".root")
-materialservice = MaterialScan("GeoDump", filename=material_filename, etaBinning=0.06, etaMax=6, nPhiTrials=1)
+materialservice = MaterialScan("GeoDump", filename=material_filename, etaBinning=0.05, etaMax=6, nPhiTrials=100)
 
 from Configurables import PodioOutput
 ## PODIO algorithm

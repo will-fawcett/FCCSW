@@ -70,8 +70,8 @@ def plot_data_rz(hits, ids, cells, data_epos, title="rz"):
     rmax = np.max(r)
     hmax = np.max(h[:,2])
     hmin = np.min(h[:,2])
-    ax2.set_xlim((0, 5000))
-    ax2.set_ylim((0, 1700))
+    ax2.set_xlim((0, 15000))
+    ax2.set_ylim((0, 2000))
 
 
 
