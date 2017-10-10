@@ -7,6 +7,7 @@
 #include "datamodel/MCParticleCollection.h"
 
 #include "Generation/Units.h"
+#include "HepPDT/ParticleID.hh"
 
 DECLARE_COMPONENT(HepMCToEDMConverter)
 
@@ -17,7 +18,6 @@ HepMCToEDMConverter::HepMCToEDMConverter(const std::string& name, ISvcLocator* s
 }
 
 StatusCode HepMCToEDMConverter::initialize() { 
-  m_ppSvc = svc<IParticlePropertySvc>("ParticlePropertySvc", true);
   return GaudiAlgorithm::initialize();
    }
 
@@ -54,9 +54,9 @@ StatusCode HepMCToEDMConverter::execute() {
       tmp = (*particle_i)->momentum();
       fcc::MCParticle particle = particles->create();
       particle.pdgId((*particle_i)->pdg_id());
-      const ParticleProperty* particleProperty = m_ppSvc->find((*particle_i)->pdg_id());
       particle.status((*particle_i)->status());
-      particle.charge(particleProperty->charge());
+      HepPDT::ParticleID particleID((*particle_i)->pdg_id());
+      particle.charge(particleID.charge());
       auto& p4 = particle.p4();
       p4.px = tmp.px() * hepmc2EdmEnergy;
       p4.py = tmp.py() * hepmc2EdmEnergy;
@@ -72,5 +72,4 @@ StatusCode HepMCToEDMConverter::execute() {
 }
 
 StatusCode HepMCToEDMConverter::finalize() {
-   release(m_ppSvc);
    return GaudiAlgorithm::finalize(); }
