@@ -43,6 +43,14 @@ StatusCode TrickTrackSeedingTool::initialize() {
   auto lcdd = m_geoSvc->lcdd();
   auto readout = lcdd->readout(m_readoutName);
   m_decoder = readout.idSpec().decoder();
+
+  // get layer graph from tool and create automaton
+  m_layerGraph = m_layerGraphTool->getGraph();
+
+  debug() << "Create automaton ..." << endmsg;
+  m_automaton = std::make_unique<HitChainMaker<Hit>>(m_layerGraph);
+  m_trackingRegion = std::make_unique<tricktrack::TrackingRegion>(m_regionOriginX, m_regionOriginY, m_regionOriginRadius, m_ptMin);
+  debug() << "Create and connect cells ..." << endmsg;
   return sc;
 }
 
@@ -55,9 +63,9 @@ void TrickTrackSeedingTool::createBarrelSpacePoints(std::vector<Hit>& thePoints,
     if ((*m_decoder)["system"] == sIndex.first) {
       if ((*m_decoder)["layer"] == sIndex.second) {
         thePoints.emplace_back(hit.position().x, hit.position().y, hit.position().z, hitCounter);
+        ++hitCounter;
       }
     }
-    ++hitCounter;
   }
 }
 
@@ -76,19 +84,19 @@ TrickTrackSeedingTool::findSeeds(const fcc::PositionedTrackHitCollection* theHit
   createBarrelSpacePoints(pointsLayer2, theHits, m_seedingLayerIndices1);
   createBarrelSpacePoints(pointsLayer3, theHits, m_seedingLayerIndices2);
 
-
   std::vector<HitDoublets<Hit>*> doublets;
   auto doublet1 = new HitDoublets<Hit>(pointsLayer1, pointsLayer2);
   auto doublet2 = new HitDoublets<Hit>(pointsLayer2, pointsLayer3);
 
+  // brute force doublet creation
   for (const auto& p0 : pointsLayer1) {
     for (const auto& p1 : pointsLayer2) {
-      doublets[0]->add(p0.identifier(), p1.identifier());
+      doublet1->add(p0.identifier(), p1.identifier());
     }
   }
   for (const auto& p1 : pointsLayer2) {
     for (const auto& p2 : pointsLayer3) {
-      doublets[1]->add(p1.identifier(), p2.identifier());
+      doublet2->add(p1.identifier(), p2.identifier());
     }
   }
 
@@ -96,40 +104,34 @@ TrickTrackSeedingTool::findSeeds(const fcc::PositionedTrackHitCollection* theHit
   doublets.push_back(doublet2);
 
 
+  debug() << "found "  << doublet1->size() << " doublets on the first layer "  << endmsg;
+  debug() << "found "  << doublet2->size() << " doublets on the second layer "  << endmsg;
 
-  // get layer graph from tool and create automaton
-  auto theLayerGraph = m_layerGraphTool->getGraph();
-  auto automaton = new HitChainMaker<Hit>(theLayerGraph);
-  TrackingRegion* myRegion2 = new TrackingRegion(10,0,0,1000);
-  automaton->createAndConnectCells(doublets, *myRegion2, 1, 1000, 1000);
+  m_automaton->createAndConnectCells(doublets, *m_trackingRegion, m_thetaCut, m_phiCut, m_hardPtCut);
+  debug() << "... cells connected and created." << endmsg;
 
-  automaton->evolve(3);
+  m_automaton->evolve(3);
   std::vector<CMCell<Hit>::CMntuplet> foundTracklets;
-  automaton->findNtuplets(foundTracklets, 3);
-  std::cerr << "found " << foundTracklets.size() <<  " tracklets!" << std::endl;
-  std::cout << foundTracklets.size() << std::endl;
+  m_automaton->findNtuplets(foundTracklets, 3);
+
+  debug() << "found " << foundTracklets.size()<< " tracklets" << endmsg;
 
 
-   /*
-  findHelixSeeds(seedFinderCfg, pointsLayer1, pointsLayer2, pointsLayer3, seeds);
-
-  debug() << "found " << seeds.size() << " track seeds" << endmsg;
-
+  // prepare output
   unsigned int trackCounter = 0;
-  for (const auto& seed : seeds) {
+  for (const auto& tracklet : foundTracklets) {
     std::array<float, 15> edmCov;
-    float l_phi = seed.phi();
-    float l_theta = seed.theta();
-    float l_curvature = seed.curvature();
+    float l_phi = 0;
+    float l_theta = 0;
+    float l_curvature = 0;
     trackSeedCollection->create(l_phi, l_theta, l_curvature, 0.f, 0.f, fcc::Point(), edmCov);
-    for (const auto& id : seed.identifiers()) {
+    for (const auto& id : tracklet) {
       theSeeds.insert(std::pair<unsigned int, unsigned int>(trackCounter, id));
     }
 
     ++trackCounter;
   }
 
-   */
   return theSeeds;
 }
 

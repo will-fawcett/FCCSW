@@ -38,6 +38,11 @@ gaudi_add_test(CombinatorialTrackSeeding
 			         FRAMEWORK options/combinatorialTrackSeedingTest.py
 			         DEPENDS Examples.GeantFullSimTrackerHits)
 
+gaudi_add_test(TrickTrackSeeding
+               WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+			         FRAMEWORK options/TrickTrackSeedingTest.py
+			         DEPENDS Examples.GeantFullSimTrackerHits)
+
 gaudi_add_test(ExtrapolationTest
                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 			         FRAMEWORK options/extrapolationTest.py)
