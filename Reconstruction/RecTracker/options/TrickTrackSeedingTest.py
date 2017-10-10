@@ -29,10 +29,7 @@ hepmc_converter.hepmc.Path="hepmc"
 hepmc_converter.genparticles.Path="allGenParticles"
 hepmc_converter.genvertices.Path="allGenVertices"
 
-from Configurables import SimG4SingleParticleGeneratorTool
-pgung = SimG4SingleParticleGeneratorTool("GeantinoGun", etaMin=-5, etaMax=5, particleName="geantino")
 from Configurables import SimG4Svc
-#geantservice = SimG4Svc("SimG4Svc", detector='SimG4DD4hepDetector', physicslist="SimG4GeantinoDeposits", actions="SimG4FullSimActions")
 geantservice = SimG4Svc("SimG4Svc", detector='SimG4DD4hepDetector', physicslist="SimG4FtfpBert", actions="SimG4FullSimActions")
 
 from Configurables import SimG4ConstantMagneticFieldTool
@@ -76,10 +73,9 @@ out.outputCommands = ["keep *"]
 out.filename="tricktrackSeeding_Example.root"
 
 from Configurables import ApplicationMgr
-ApplicationMgr( TopAlg = [gen, hepmc_converter, 
-                        geantsim, combi_seeding, out],
+ApplicationMgr( TopAlg = [gen, hepmc_converter, geantsim, combi_seeding, out],
                 EvtSel = 'NONE',
-                EvtMax   = 20,
+                EvtMax   = 2,
                 # order is important, as GeoSvc is needed by SimG4Svc
                 ExtSvc = [podioevent, geoservice, geantservice, ppservice,],
                 OutputLevel=DEBUG
