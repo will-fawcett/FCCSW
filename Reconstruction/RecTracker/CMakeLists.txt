@@ -12,6 +12,7 @@ find_package(HepMC)
 find_package(DD4hep COMPONENTS DDG4 DDSegmentation DDRec REQUIRED)
 find_package(ROOT)
 find_package(ACTS COMPONENTS Core Examples TGeoPlugin DD4hepPlugin)
+find_package(tricktrack)
 
 
 gaudi_install_headers(RecTracker)
@@ -22,7 +23,7 @@ gaudi_add_library(TrackingUtils
                  PUBLIC_HEADERS RecTracker) 
 gaudi_add_module(RecTracker
                  src/components/*.cpp
-                 INCLUDE_DIRS ROOT FWCore HepMC FCCEDM PODIO DD4hep DetInterface RecInterface TrackingUtils ACTS
+                 INCLUDE_DIRS ROOT FWCore HepMC FCCEDM PODIO DD4hep DetInterface RecInterface TrackingUtils ACTS ${tricktrack_INCLUDE_DIR}
                  LINK_LIBRARIES ROOT GaudiAlgLib FCCEDM PODIO HepMC DD4hep TrackingUtils ${DD4hep_COMPONENT_LIBRARIES} ACTS::ACTSCore ACTS::ACTSDD4hepPlugin)
 
 include(CTest)
