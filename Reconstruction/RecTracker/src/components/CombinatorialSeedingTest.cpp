@@ -40,7 +40,7 @@ StatusCode CombinatorialSeedingTest::execute() {
   auto seedmap = m_trackSeedingTool->findSeeds(hits);
 
   for (auto seedIdPair: seedmap) {
-    debug() << "trackseed: " << seedIdPair.first << "\t" << seedIdPair.second << endmsg;
+    debug() << " found trackseed: " << seedIdPair.first << "\t" << seedIdPair.second << endmsg;
   }
 
   return StatusCode::SUCCESS;
