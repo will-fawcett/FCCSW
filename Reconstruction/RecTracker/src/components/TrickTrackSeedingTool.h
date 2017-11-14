@@ -7,10 +7,13 @@
 // FCCSW
 #include "FWCore/DataHandle.h"
 #include "RecInterface/ITrackSeedingTool.h"
+#include "RecInterface/IDoubletCreationTool.h"
 #include "RecInterface/ILayerGraphTool.h"
 #include "datamodel/PositionedTrackHitCollection.h"
 #include "datamodel/TrackHitCollection.h"
 #include "datamodel/TrackStateCollection.h"
+#include "datamodelExt/HitQuadrupletCollection.h"
+#include "datamodelExt/HitTripletCollection.h"
 
 #include "tricktrack/SpacePoint.h"
 #include "tricktrack/CMGraph.h"
@@ -38,8 +41,8 @@ public:
   virtual StatusCode finalize() override final;
 
   virtual std::multimap<unsigned int, unsigned int> findSeeds(const fcc::PositionedTrackHitCollection* theHits) override final;
-  void createBarrelSpacePoints(std::vector<tricktrack::SpacePoint<size_t>>& thePoints,
-                               const fcc::PositionedTrackHitCollection* theHits, std::pair<int, int> sIndex);
+  void createBarrelSpacePoints(std::vector<tricktrack::SpacePoint<size_t>>& thePoints, std::map<int, unsigned long int>&,
+                               const fcc::PositionedTrackHitCollection* theHits, std::pair<int, int> sIndex, int trackCutoff);
 
 private:
   ServiceHandle<IGeoSvc> m_geoSvc;
@@ -53,7 +56,7 @@ private:
   /// readout used for the barrel seeding layers
   Gaudi::Property<std::string> m_readoutName{this, "readoutName", "TrackerBarrelReadout"};
   /// output trackStates for found seeds
-  DataHandle<fcc::TrackStateCollection> m_trackSeeds{"tracks/trackSeeds", Gaudi::DataHandle::Writer, this};
+  DataHandle<fccextedm::HitTripletCollection> m_trackSeeds{"tracks/trackSeeds", Gaudi::DataHandle::Writer, this};
   /// Parameter for TrickTrack's TrackingRegion
   /// coordinate of the center of the luminous region
   Gaudi::Property<double> m_regionOriginX {this, "regionOriginX", 0};
@@ -62,18 +65,19 @@ private:
   Gaudi::Property<double> m_regionOriginY {this, "regionOriginY", 0};
   /// Parameter for TrickTrack's TrackingRegion
   /// radius of the luminous region
-  Gaudi::Property<double> m_regionOriginRadius {this, "regionOriginRadius", 1000};
+  Gaudi::Property<double> m_regionOriginRadius {this, "regionOriginRadius", 0.02};
   /// Parameter for TrickTrack's TrackingRegion
   /// minimum transverse momentum for tracks coming from the luminous region
-  Gaudi::Property<double> m_ptMin {this, "ptMin", 0};
+  Gaudi::Property<double> m_ptMin {this, "ptMin", 0.8};
   /// Parameter for TrickTrack's cell connection
-  Gaudi::Property<double> m_thetaCut {this, "thetaCut", 1};
+  Gaudi::Property<double> m_thetaCut {this, "thetaCut", 0.002};
   /// Parameter for TrickTrack's cell connection
-  Gaudi::Property<double> m_phiCut {this, "phiCut", 1000};
+  Gaudi::Property<double> m_phiCut {this, "phiCut", 0.2};
   /// Parameter for TrickTrack's cell connection
-  Gaudi::Property<double> m_hardPtCut {this, "hardPtCut", 1000};
+  Gaudi::Property<double> m_hardPtCut {this, "hardPtCut", 0.0};
 
   ToolHandle<ILayerGraphTool> m_layerGraphTool;
+  ToolHandle<IDoubletCreationTool> m_doubletCreationTool;
 
   std::unique_ptr<tricktrack::HitChainMaker<tricktrack::SpacePoint<size_t>>> m_automaton;
   std::unique_ptr<tricktrack::TrackingRegion> m_trackingRegion;
