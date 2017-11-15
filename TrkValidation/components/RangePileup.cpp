@@ -1,5 +1,6 @@
 
 #include "RangePileup.h"
+#include "datamodelExt/Point.h"
 
 #include "GaudiKernel/DeclareFactoryEntries.h"
 

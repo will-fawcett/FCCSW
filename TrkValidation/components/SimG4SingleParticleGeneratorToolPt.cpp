@@ -64,6 +64,7 @@ G4Event* SimG4SingleParticleGeneratorToolPt::g4Event() {
   G4double mass = particleDef->GetPDGMass();
   debug() << "particle mass = " << mass << endmsg;
 
+  for (int i = 0; i < m_repeat; ++i) {
   double particleEnergy = CLHEP::RandFlat::shoot(m_energyMin, m_energyMax);
 
   debug() << "particle energy = " << particleEnergy << endmsg;
@@ -95,8 +96,9 @@ G4Event* SimG4SingleParticleGeneratorToolPt::g4Event() {
 
   vertex->SetPrimary(part);
   theEvent->AddPrimaryVertex(vertex);
-  if (m_saveEdm) {
-    saveToEdm(vertex, part);
+  //if (m_saveEdm) {
+  //  saveToEdm(vertex, part);
+  //}
   }
   return theEvent;
 }

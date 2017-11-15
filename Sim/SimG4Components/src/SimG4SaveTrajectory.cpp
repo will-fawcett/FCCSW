@@ -14,6 +14,8 @@
 #include "datamodel/PositionedTrackHitCollection.h"
 #include "datamodel/TrackHitCollection.h"
 
+#include "datamodelExt/SimTrackCollection.h"
+
 DECLARE_TOOL_FACTORY(SimG4SaveTrajectory)
 
 SimG4SaveTrajectory::SimG4SaveTrajectory(const std::string& aType, const std::string& aName,
@@ -22,6 +24,7 @@ SimG4SaveTrajectory::SimG4SaveTrajectory(const std::string& aType, const std::st
   declareInterface<ISimG4SaveOutputTool>(this);
   declareProperty("trajectoryPoints", m_positionedTrackHits, "Handle for trajectory hits");
   declareProperty("trajectory", m_trackHits, "Handle for trajectory hits including position");
+  declareProperty("simTracks", m_simTracks, "Handle for trajectory hits including position");
 }
 
 SimG4SaveTrajectory::~SimG4SaveTrajectory() {}
@@ -39,10 +42,17 @@ StatusCode SimG4SaveTrajectory::saveOutput(const G4Event& aEvent) {
   // one collection for all the 
   auto edmPositions = m_positionedTrackHits.createAndPut();
   auto edmHits = m_trackHits.createAndPut();
+  auto edmSimTracks = m_simTracks.createAndPut();
 
   G4TrajectoryContainer* trajectoryContainer = aEvent.GetTrajectoryContainer();
   for (size_t trajectoryIndex = 0; trajectoryIndex < trajectoryContainer->size(); ++trajectoryIndex) {
     G4VTrajectory* theTrajectory =  (*trajectoryContainer)[trajectoryIndex];
+    fccextedm::SimTrack theTrack = edmSimTracks->create();
+    auto mom = theTrajectory->GetInitialMomentum();
+    theTrack.charge(theTrajectory->GetCharge());
+    theTrack.trackId(theTrajectory->GetTrackID());
+    theTrack.eta(mom.getEta());
+    theTrack.pT( mom.perp());
     for (int pointIndex = 0; pointIndex < theTrajectory->GetPointEntries(); ++pointIndex) {
       auto trajectoryPoint = theTrajectory->GetPoint(pointIndex)->GetPosition();
       fcc::TrackHit edmHit = edmHits->create();

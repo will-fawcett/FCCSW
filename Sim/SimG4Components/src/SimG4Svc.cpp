@@ -54,10 +54,9 @@ StatusCode SimG4Svc::initialize() {
   m_runManager.SetUserInitialization(m_detectorTool->detectorConstruction());
 
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
-  for (auto command: m_g4PreInitCommands) {
+  for (auto command : m_g4PreInitCommands) {
     UImanager->ApplyCommand(command);
   }
-
 
   m_runManager.Initialize();
   // Attach user actions
@@ -74,7 +73,7 @@ StatusCode SimG4Svc::initialize() {
   for (auto& tool : m_regionTools) {
     tool->create();
   }
- for (auto command: m_g4PostInitCommands) {
+  for (auto command : m_g4PostInitCommands) {
     UImanager->ApplyCommand(command);
   }
 

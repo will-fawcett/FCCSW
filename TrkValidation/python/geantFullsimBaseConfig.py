@@ -73,6 +73,7 @@ geantservice = SimG4Svc(
   physicslist="SimG4FtfpBert", 
   actions="SimG4FullSimActions"
   )
+geantservice.g4PostInitCommands  += ["/tracking/storeTrajectory 1"]
 
 from Configurables import SimG4ConstantMagneticFieldTool
 field = SimG4ConstantMagneticFieldTool("SimG4ConstantMagneticFieldTool", FieldOn=True, IntegratorStepper="ClassicalRK4")
@@ -88,6 +89,13 @@ savetrackertool = SimG4SaveTrackerHits(
 savetrackertool.positionedTrackHits.Path = "positionedHits"
 savetrackertool.trackHits.Path = "hits"
 
+from Configurables import SimG4SaveTrajectory
+savetrajectorytool = SimG4SaveTrajectory("saveTrajectory")
+savetrajectorytool.trajectory.Path = "trajectory"
+savetrajectorytool.trajectoryPoints.Path = "trajectoryPoints"
+
+
+
 from Configurables import SimG4PrimariesFromEdmTool
 particle_converter = SimG4PrimariesFromEdmTool("EdmConverter")
 particle_converter.genParticles.Path = "allGenParticles"
@@ -97,7 +105,7 @@ particle_converter.genParticles.Path = "allGenParticles"
 
 from Configurables import SimG4Alg
 geantsim = SimG4Alg("SimG4Alg",
-                    outputs = ["SimG4SaveTrackerHits/saveTrackerHits"],
+                    outputs = ["SimG4SaveTrackerHits/saveTrackerHits", "SimG4SaveTrajectory/saveTrajectory"],
                     eventProvider=particle_converter)
 
 ### Persistency ###############################################################

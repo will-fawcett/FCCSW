@@ -27,9 +27,9 @@ tricktrack::CMGraph BarrelLayerGraphTool::getGraph() {
   
   auto g = tricktrack::CMGraph();
 
-  auto l1 = tricktrack::CMLayer("innerLayer", 10);
-  auto l2 = tricktrack::CMLayer("middleLayer", 10);
-  auto l3 = tricktrack::CMLayer("outerLayer", 10);
+  auto l1 = tricktrack::CMLayer("innerLayer", 100000);
+  auto l2 = tricktrack::CMLayer("middleLayer", 10000);
+  auto l3 = tricktrack::CMLayer("outerLayer", 10000);
 
   auto lp1 = tricktrack::CMLayerPair(0, 1);
   auto lp2 = tricktrack::CMLayerPair(1, 2);

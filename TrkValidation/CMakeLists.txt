@@ -13,6 +13,7 @@ find_package(DD4hep COMPONENTS DDG4)
 find_package(ROOT COMPONENTS MathCore GenVector Geom REQUIRED)
 
 
+find_package(fccedmext)
 
 
 find_package(HepMC)
@@ -27,8 +28,8 @@ gaudi_install_python_modules()
 
 gaudi_add_module(TrkValidation
                  components/*.cpp
-                 INCLUDE_DIRS TrkValidation HepMC Pythia8 FWCore FCCEDM PODIO DD4hep ROOT DetInterface SimG4Common SimG4Interface Generation
-                 LINK_LIBRARIES HepMC GaudiAlgLib Pythia8 FCCEDM PODIO DD4hep ${DD4hep_COMPONENT_LIBRARIES} ROOT Geant4)
+                 INCLUDE_DIRS TrkValidation HepMC Pythia8 FWCore FCCEDM PODIO DD4hep ROOT DetInterface SimG4Common SimG4Interface Generation fccedmext
+                 LINK_LIBRARIES HepMC GaudiAlgLib Pythia8 FCCEDM PODIO DD4hep ${DD4hep_COMPONENT_LIBRARIES} ROOT Geant4 fccedmext)
 
 include(CTest)
 

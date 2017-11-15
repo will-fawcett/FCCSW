@@ -65,6 +65,7 @@ private:
   Gaudi::Property<double> m_vertexY{this, "vertexY", 0};
   /// z position of the vertex associated with the particles generated, set with vertexZ
   Gaudi::Property<double> m_vertexZ{this, "vertexZ", 0};
+  Gaudi::Property<int> m_repeat{this, "repeat", 10};
   /// Name of the generated particle, set with particleName
   Gaudi::Property<std::string> m_particleName{this, "particleName", "geantino", "Name of the generated particles"};
   /// Flag whether to save primary particle to EDM, set with saveEdm

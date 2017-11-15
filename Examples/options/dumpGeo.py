@@ -1,8 +1,18 @@
 import os
+import sys
 from Gaudi.Configuration import *
 
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('--inputfile', type=str, default='', help='specify an input file')
+parser.add_argument('--outputfile', type=str, default='', help='specify an output file')
+parser.add_argument('--nevents', type=int, default=None, help='specify number of events to process')
+parser.add_argument('--geo', type=str, default=None, help='specify compact file for the geometry')
+args, _ = parser.parse_known_args()
+
+
 from Configurables import GeoSvc
-geoservice = GeoSvc("GeoSvc", detectors=['file:../Detector/DetSensitive/tests/compact/Box_simpleTrackerSD.xml'], OutputLevel = DEBUG)
+geoservice = GeoSvc("GeoSvc", detectors=[args.geo], OutputLevel = DEBUG)
 
 from Configurables import SimG4Svc
 geantservice = SimG4Svc("SimG4Svc",

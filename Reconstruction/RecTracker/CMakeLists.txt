@@ -14,6 +14,9 @@ find_package(ROOT)
 find_package(ACTS COMPONENTS Core Examples TGeoPlugin DD4hepPlugin)
 find_package(tricktrack)
 
+find_package(fccedmext)
+LINK_DIRECTORIES(/build/vavolkl/FCC/fcc-extedm/install/lib)
+
 
 gaudi_install_headers(RecTracker)
 gaudi_add_library(TrackingUtils
@@ -23,8 +26,9 @@ gaudi_add_library(TrackingUtils
                  PUBLIC_HEADERS RecTracker) 
 gaudi_add_module(RecTracker
                  src/components/*.cpp
-                 INCLUDE_DIRS ROOT FWCore HepMC FCCEDM PODIO DD4hep DetInterface RecInterface TrackingUtils ACTS ${tricktrack_INCLUDE_DIR}
-                 LINK_LIBRARIES ROOT GaudiAlgLib FCCEDM PODIO HepMC DD4hep TrackingUtils ${DD4hep_COMPONENT_LIBRARIES} ACTS::ACTSCore ACTS::ACTSDD4hepPlugin)
+                 INCLUDE_DIRS ROOT FWCore HepMC FCCEDM PODIO DD4hep DetInterface RecInterface TrackingUtils ACTS ${tricktrack_INCLUDE_DIR} fccedmext
+                 LINK_LIBRARIES ROOT GaudiAlgLib FCCEDM PODIO HepMC DD4hep TrackingUtils ${DD4hep_COMPONENT_LIBRARIES} ACTS::ACTSCore ACTS::ACTSDD4hepPlugin fccedmext ${FCCEXTEDM_LIBRARIES} /build/vavolkl/FCC/fcc-extedm/install/lib/libdatamodelExt.so)
+
 
 include(CTest)
 

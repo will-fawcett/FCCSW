@@ -421,6 +421,7 @@
             </layer>
         </layers>
     </detector>
+    <!--
     <detector name="InnerBRL_1" id="BarTrackerInner_id + 16" type="TkLayoutBrlTracker" readout="TrackerBarrelReadout">
         <dimensions rmin="261.066*mm" rmax="409.734*mm" zmin="-820.000*mm" zmax="820.000*mm"/>
         <sensitive type="SimpleTrackerSD"/>
@@ -3829,4 +3830,5 @@
             </discZPls>
         </discs>
     </detector>
+    -->
 </detectors>

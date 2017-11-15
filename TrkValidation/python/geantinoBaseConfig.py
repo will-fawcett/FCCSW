@@ -44,18 +44,25 @@ savetrackertool = SimG4SaveTrackerHitsWithTrackID("saveTrackerHits",
 savetrackertool.positionedTrackHits.Path = "positionedHits"
 savetrackertool.trackHits.Path = "hits"
 
+from Configurables import SimG4SaveTrajectory
+savetrajectorytool = SimG4SaveTrajectory("saveTrajectory")
+savetrajectorytool.trajectory.Path = "trajectory"
+savetrajectorytool.trajectoryPoints.Path = "trajectoryPoints"
+
 from Configurables import SimG4SingleParticleGeneratorTool
 pgun = SimG4SingleParticleGeneratorTool("GeantinoGun", 
                                         etaMin=-6, 
                                         etaMax=6, 
                                         particleName="chargedgeantino",
                                         saveEdm=True,
+                                        repeat = 20,
                                         )
 
 from Configurables import SimG4SingleParticleGeneratorToolPt
 pgunPt = SimG4SingleParticleGeneratorToolPt("GeantinoGunPt", 
-                                        etaMin=-6, 
-                                        etaMax=6, 
+                                        etaMin=-0, 
+                                        etaMax=0, 
+                                        repeat = 100,
                                         particleName="chargedgeantino",
                                         saveEdm=True,
                                         )
@@ -65,7 +72,7 @@ pgunPt = SimG4SingleParticleGeneratorToolPt("GeantinoGunPt",
 from Configurables import SimG4Alg
 # create the G4 algorithm, giving the list of names of tools ("XX/YY")
 geantsim = SimG4Alg("SimG4Alg",
-                    outputs= ["SimG4SaveTrackerHitsWithTrackID/saveTrackerHits" ],
+                    outputs= ["SimG4SaveTrackerHitsWithTrackID/saveTrackerHits", "SimG4SaveTrajectory/saveTrajectory"],
                     eventProvider=pgunPt
                     )
 
@@ -73,4 +80,7 @@ geantsim = SimG4Alg("SimG4Alg",
 from Configurables import PodioOutput
 out = PodioOutput("out", OutputLevel=DEBUG)
 out.outputCommands = ["keep *"]
+
+topAlgList = [geantsim, out]
+svcList = [podioevent, geoservice, geantservice]
 
