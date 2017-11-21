@@ -19,7 +19,7 @@ barrel_ids = []
 for i, store in enumerate(events):
       if i > 100000:
         break
-      clusters = store.get('trajectoryPoints')
+      clusters = store.get('positionedHits')
       for c in clusters:
           cor = c.position()
             
@@ -27,3 +27,5 @@ for i, store in enumerate(events):
           ids.append([c.bits(), c.cellId()])
       print pos
 
+np.savetxt(basefilename + 'hit_positions.dat', pos)
+np.savetxt(basefilename + 'hit_ids.dat', ids, fmt="%i")

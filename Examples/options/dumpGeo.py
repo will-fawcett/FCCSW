@@ -12,7 +12,9 @@ args, _ = parser.parse_known_args()
 
 
 from Configurables import GeoSvc
-geoservice = GeoSvc("GeoSvc", detectors=[args.geo], OutputLevel = DEBUG)
+#geoservice = GeoSvc("GeoSvc", detectors=[args.geo], OutputLevel = DEBUG)
+geoservice = GeoSvc("GeoSvc", detectors=['file:Detector/DetFCChhBaseline1/compact/FCChh_DectEmptyMaster.xml',
+  'file:Detector/DetFCChhTrackerTkLayout/compact/Tracker.xml'])
 
 from Configurables import SimG4Svc
 geantservice = SimG4Svc("SimG4Svc",
@@ -20,7 +22,7 @@ geantservice = SimG4Svc("SimG4Svc",
                         physicslist="SimG4FtfpBert",
                         actions="SimG4FullSimActions")
 
-export_fname = "TestBox.gdml"
+export_fname = "TestTracker.gdml"
 # check if file exists and delete it:
 if os.path.isfile(export_fname):
     os.remove(export_fname)

@@ -84,10 +84,10 @@ if __name__ == "__main__":
     #cellIds = id_data[:,1]
     #plot_data_rphi(hits, ids, cellIds, title="rphi-barrel")
     #plot_data_rz(hits, ids, cellIds, title="rz-barrel")
-    data = load_data(basefilename + 'hit_positions_b.dat')
+    data = load_data(basefilename + 'hit_positions.dat')
     data_epos = [] #load_data("epos.dat")
     hits = data
-    id_data = load_data_int(basefilename + 'hit_ids_b.dat')
+    id_data = load_data_int(basefilename + 'hit_ids.dat')
     ids = id_data[:,0]
     cellIds = id_data[:,1] % 32
     print cellIds[:100], hits[:100]
