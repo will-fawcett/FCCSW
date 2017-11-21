@@ -75,10 +75,10 @@ void TrickTrackSeedingTool::createBarrelSpacePoints(std::vector<Hit>& thePoints,
 
         indexToTrackId.insert(std::pair<int, unsigned long int>(hitCounter, hit.core().bits));
         debug() << hitCounter << "\t" <<  hit.core().bits << endmsg;
-        ++hitCounter;
         }
       }
     }
+        ++hitCounter;
   }
 }
 
@@ -88,7 +88,7 @@ TrickTrackSeedingTool::findSeeds(const fcc::PositionedTrackHitCollection* theHit
   fccextedm::HitTripletCollection* trackSeedCollection = m_trackSeeds.createAndPut();
   std::multimap<unsigned int, unsigned int> theSeeds;
 
-  for (int trackCutoff = 1; trackCutoff < 30; ++trackCutoff) {
+  for (int trackCutoff = 12; trackCutoff < 13; ++trackCutoff) {
 
   std::vector<Hit> pointsLayer1;
   std::vector<Hit> pointsLayer2;
