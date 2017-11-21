@@ -4,18 +4,9 @@ from GaudiKernel import PhysicalConstants as constants
 from Gaudi.Configuration import *
 
 from Configurables import FCCDataSvc
-podioevent   = FCCDataSvc("EventDataSvc")
+podioevent   = FCCDataSvc("EventDataSvc", input="geantinosForSeeding.root")
 from Configurables import PodioInput
-
-from Configurables import GenAlg, MomentumRangeParticleGun, PoissonPileUp 
-pileuptool = PoissonPileUp("PileUp", numPileUpEvents=0)
-pgun_tool = MomentumRangeParticleGun(PdgCodes=[13], PhiMin=constants.pi*0.0, PhiMax=constants.pi*0.5, ThetaMin=constants.pi *0.5, ThetaMax=constants.pi*0.51, MomentumMin=100000, MomentumMax=100000)
-pgun_tool2 = MomentumRangeParticleGun(PdgCodes=[13], PhiMin=constants.pi*0.0, PhiMax=constants.pi*0.5, ThetaMin=constants.pi *0.5, ThetaMax=constants.pi*0.51, MomentumMin=100000, MomentumMax=100000)
-gen = GenAlg("ParticleGun", SignalProvider=pgun_tool, PileUpProvider=pgun_tool2, PileUpTool=pileuptool)
-gen.hepmc.Path = "hepmc"
-
-from Configurables import Gaudi__ParticlePropertySvc
-ppservice = Gaudi__ParticlePropertySvc("ParticlePropertySvc", ParticlePropertiesFile="Generation/data/ParticleTable.txt")
+podioinput = PodioInput("PodioReader", collections=[ "hits", "positionedHits", "trajectory", "trajectoryPoints"], OutputLevel=DEBUG)
 
 from Configurables import GeoSvc
 geoservice = GeoSvc("GeoSvc", detectors=['file:Detector/DetFCChhBaseline1/compact/FCChh_DectEmptyMaster.xml',
@@ -23,41 +14,21 @@ geoservice = GeoSvc("GeoSvc", detectors=['file:Detector/DetFCChhBaseline1/compac
   ],
   )
 
-from Configurables import HepMCToEDMConverter
-hepmc_converter = HepMCToEDMConverter("Converter")
-hepmc_converter.hepmc.Path="hepmc"
-hepmc_converter.genparticles.Path="allGenParticles"
-hepmc_converter.genvertices.Path="allGenVertices"
-
-from Configurables import SimG4Svc
-geantservice = SimG4Svc("SimG4Svc", detector='SimG4DD4hepDetector', physicslist="SimG4FtfpBert", actions="SimG4FullSimActions")
-
-from Configurables import SimG4ConstantMagneticFieldTool
-field = SimG4ConstantMagneticFieldTool("SimG4ConstantMagneticFieldTool", FieldOn=True, IntegratorStepper="ClassicalRK4")
-
-from Configurables import SimG4Alg, SimG4SaveTrackerHits, SimG4PrimariesFromEdmTool
-savetrackertool = SimG4SaveTrackerHits("saveTrackerHits", readoutNames = ["TrackerBarrelReadout"])
-savetrackertool.positionedTrackHits.Path = "positionedHits"
-savetrackertool.trackHits.Path = "hits"
-particle_converter = SimG4PrimariesFromEdmTool("EdmConverter")
-particle_converter.genParticles.Path = "allGenParticles"
-geantsim = SimG4Alg("SimG4Alg",
-                    outputs = ["SimG4SaveTrackerHits/saveTrackerHits"],
-                    eventProvider=particle_converter)
-
-
 
 from Configurables import CombinatorialSeedingTest, TrickTrackSeedingTool, BarrelLayerGraphTool
 
+from Configurables import DoubletCreationTool
+
 
 layergraphtool = BarrelLayerGraphTool()
+
+doublet_tool = DoubletCreationTool()
 
 seed_tool = TrickTrackSeedingTool()
 seed_tool.LayerGraphTool = layergraphtool
 seed_tool.seedingLayerIndices0=(0,0)
 seed_tool.seedingLayerIndices1=(0,1)
 seed_tool.seedingLayerIndices2=(0,2)
-seed_tool.trackSeeds.Path = "trackSeeds"
 seed_tool.readoutName = "TrackerBarrelReadout"
 
 combi_seeding = CombinatorialSeedingTest()
@@ -73,10 +44,10 @@ out.outputCommands = ["keep *"]
 out.filename="tricktrackSeeding_Example.root"
 
 from Configurables import ApplicationMgr
-ApplicationMgr( TopAlg = [gen, hepmc_converter, geantsim, combi_seeding, out],
+ApplicationMgr( TopAlg = [podioinput, combi_seeding, out],
                 EvtSel = 'NONE',
-                EvtMax   = 2,
+                EvtMax   = 1,
                 # order is important, as GeoSvc is needed by SimG4Svc
-                ExtSvc = [podioevent, geoservice, geantservice, ppservice,],
+                ExtSvc = [podioevent, geoservice],
                 OutputLevel=DEBUG
  )
