@@ -48,14 +48,14 @@ static DD4hep::Geometry::Ref_t createTkLayoutTrackerEndcap(DD4hep::Geometry::LCD
   // create disc volume
   l_overlapMargin *= 0.9;
   double discThickness = 0.5 * (xFirstDisc.zmax() - xFirstDisc.zmin());
-  DD4hep::Geometry::Tube discShape(dimensions.rmin() - l_overlapMargin, dimensions.rmax() + l_overlapMargin, discThickness + l_overlapMargin);
-  Volume discVolume("disc", discShape, lcdd.air());
 
 
   unsigned int discCounter = 0;
   unsigned int compCounter = 0;
   double currentZ;
   for (DD4hep::XML::Collection_t xDiscColl(xDiscs, _Unicode(discZPls)); nullptr != xDiscColl; ++xDiscColl) {
+    DD4hep::Geometry::Tube discShape(dimensions.rmin() - l_overlapMargin, dimensions.rmax() + l_overlapMargin, discThickness + l_overlapMargin);
+    Volume discVolume("disc" + std::to_string(discCounter), discShape, lcdd.air());
     Component xDisc = static_cast<Component>(xDiscColl);
     currentZ = xDisc.z() - dimensions.zmin() - envelopeThickness;
     DetElement disc_det(worldDetElement, "disc" + std::to_string(discCounter), discCounter);
