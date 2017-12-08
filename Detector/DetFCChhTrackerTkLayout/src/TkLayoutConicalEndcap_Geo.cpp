@@ -28,7 +28,6 @@ static DD4hep::Geometry::Ref_t createTkLayoutTrackerConicalEndcap(DD4hep::Geomet
   std::string detName = xmlDet.nameStr();
   DetElement worldDetElement(detName, xmlDet.id());
   DetElement posEcapDetElement(worldDetElement, "posEcap", 0);
-  DetElement negEcapDetElement(worldDetElement, "negEcap", 1);
 
   Acts::ActsExtension::Config actsBarrelConfig;
   actsBarrelConfig.isEndcap = true;
@@ -60,7 +59,6 @@ static DD4hep::Geometry::Ref_t createTkLayoutTrackerConicalEndcap(DD4hep::Geomet
     double discThickness = 0.5 * (xDisc.zmax() - xDisc.zmin());
     currentZ = xDisc.z() - dimensions.zmin() - envelopeThickness;
     DetElement disc_det_pos(posEcapDetElement, "posDisc" + std::to_string(discCounter), discCounter);
-    DetElement disc_det_neg(negEcapDetElement, "negDisc" + std::to_string(discCounter), discCounter);
     if(xCurrentRings.hasChild(_Unicode(ring))) { // we have information to construct a new volume
       DD4hep::Geometry::Tube discShape(
           xDisc.rmin() - l_overlapMargin, xDisc.rmax() + l_overlapMargin, discThickness + l_overlapMargin);
@@ -133,9 +131,7 @@ static DD4hep::Geometry::Ref_t createTkLayoutTrackerConicalEndcap(DD4hep::Geomet
               placedComponentVolume.addPhysVolID("component", compCounter);
               componentVolume.setSensitiveDetector(sensDet);
               DetElement comp_det_pos(disc_det_pos, "posComp" + std::to_string(compCounter), compCounter);
-              DetElement comp_det_neg(disc_det_neg, "negComp" + std::to_string(compCounter), compCounter);
               comp_det_pos.setPlacement(placedComponentVolume);
-              comp_det_neg.setPlacement(placedComponentVolume);
               ++compCounter;
             }
           }
@@ -153,10 +149,8 @@ static DD4hep::Geometry::Ref_t createTkLayoutTrackerConicalEndcap(DD4hep::Geomet
     layConfig.isLayer = true;
     Acts::ActsExtension* detlayer = new Acts::ActsExtension(layConfig);
     disc_det_pos.addExtension<Acts::IActsExtension>(detlayer);
-    disc_det_neg.addExtension<Acts::IActsExtension>(detlayer);
 
     disc_det_pos.setPlacement(placedDiscVolume);
-    disc_det_neg.setPlacement(placedDiscVolume);
   }
 
   DD4hep::Geometry::Assembly bothEndcaps("bothEndcapsEnvelope");
@@ -171,6 +165,7 @@ static DD4hep::Geometry::Ref_t createTkLayoutTrackerConicalEndcap(DD4hep::Geomet
       bothEndcaps.placeVolume(envelopeVolume, envelopeNegRotation * envelopeTranslation);
   placedEnvelopeVolume.addPhysVolID("posneg", 0);
   placedNegEnvelopeVolume.addPhysVolID("posneg", 1);
+  auto negEcapDetElement = posEcapDetElement.clone("negEndcap");
   posEcapDetElement.setPlacement(placedEnvelopeVolume);
   negEcapDetElement.setPlacement(placedNegEnvelopeVolume);
   // top of the hierarchy
