@@ -4,7 +4,7 @@
 gaudi_subdir(RecTracker v1r0)
 
 # this declaration will not be needed in the future
-gaudi_depends_on_subdirs(GaudiAlg FWCore Detector/DetInterface Reconstruction/RecInterface)
+gaudi_depends_on_subdirs(GaudiAlg FWCore Detector/DetInterface Reconstruction/RecInterface Test/TestReconstruction)
 
 find_package(FCCEDM)
 find_package(PODIO)
@@ -37,18 +37,16 @@ include(CTest)
 
 gaudi_add_test(FastDigiTest
                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-			         FRAMEWORK options/fastDigiTest.py
-			         DEPENDS TestReconstruction.GeantFullSimTrackerHits)
+			         FRAMEWORK options/fastDigiTest.py)
 
 gaudi_add_test(CombinatorialTrackSeeding
                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-			         FRAMEWORK options/combinatorialTrackSeedingTest.py
-			         DEPENDS TestReconstruction.GeantFullSimTrackerHits)
+			         FRAMEWORK options/combinatorialTrackSeedingTest.py)
 
 gaudi_add_test(TrickTrackSeeding
                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 			         FRAMEWORK options/TrickTrackSeedingTest.py
-			         DEPENDS TestReconstruction.GeantFullSimTrackerHits)
+			         DEPENDS TestReconstruction.GeantFullSimWithGeantino)
 
 # TODO: to be re-enabled once ACTS DD4hepPlugin is up to date
 #gaudi_add_test(ExtrapolationTest
