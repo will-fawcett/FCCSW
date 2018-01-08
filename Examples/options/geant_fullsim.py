@@ -7,6 +7,7 @@
 
 
 from Gaudi.Configuration import *
+from GaudiKernel import SystemOfUnits as units
 
 # Data service
 from Configurables import FCCDataSvc
@@ -17,6 +18,25 @@ from Configurables import GenAlg, HepMCFileReader
 filereadertool = HepMCFileReader("HepMCFileReader", Filename="/eos/project/f/fccsw-web/testsamples/FCC_minbias_100TeV.dat")
 reader = GenAlg("Reader", SignalProvider=filereadertool)
 reader.hepmc.Path = "hepmc"
+pythiafile="Generation/data/Pythia_minbias_pp_100TeV.cmd"
+from Configurables import ConstPileUp, HepMCFileReader, GaussSmearVertex
+
+smeartool = GaussSmearVertex(
+     xVertexMean=0. * units.mm,
+     xVertexSigma=0.5 * units.mm,
+     yVertexMean=0 * units.mm,
+     yVertexSigma=0.5 * units.mm,
+     zVertexMean=0* units.mm,
+     zVertexSigma=70*units.mm,
+     tVertexMean = 0 * units.picosecond,
+     tVertexSigma = 30 * units.picosecond)
+
+
+from Configurables import PythiaInterface, GenAlg
+### PYTHIA algorithm
+pythia8gentool = PythiaInterface("Pythia8Interface", Filename=pythiafile)
+pythia8gen = GenAlg("Pythia8", SignalProvider=pythia8gentool, VertexSmearingTool=smeartool)
+pythia8gen.hepmc.Path = "hepmc"
 
 # reads an HepMC::GenEvent from the data service and writes a collection of EDM Particles
 from Configurables import HepMCToEDMConverter
@@ -39,19 +59,23 @@ geantservice = SimG4Svc("SimG4Svc", detector='SimG4DD4hepDetector', physicslist=
 
 # Geant4 algorithm
 # Translates EDM to G4Event, passes the event to G4, writes out outputs via tools
-from Configurables import SimG4Alg, SimG4SaveTrackerHits, SimG4PrimariesFromEdmTool
+from Configurables import SimG4Alg, SimG4SaveCalHits, SimG4PrimariesFromEdmTool
 # first, create a tool that saves the tracker hits
 # Name of that tool in GAUDI is "XX/YY" where XX is the tool class name ("SimG4SaveTrackerHits")
 # and YY is the given name ("saveTrackerHits")
-savetrackertool = SimG4SaveTrackerHits("saveTrackerHits", readoutNames = ["TrackerBarrelReadout", "TrackerEndcapReadout"])
-savetrackertool.positionedTrackHits.Path = "positionedHits"
-savetrackertool.trackHits.Path = "hits"
+savetrackertool = SimG4SaveCalHits("saveTrackerHits", readoutNames = ["TrackerBarrelReadout", "TrackerEndcapReadout"])
+savetrackertool.positionedCaloHits.Path = "positionedHits"
+savetrackertool.caloHits.Path = "hits"
 # next, create the G4 algorithm, giving the list of names of tools ("XX/YY")
 particle_converter = SimG4PrimariesFromEdmTool("EdmConverter")
 particle_converter.genParticles.Path = "allGenParticles"
 geantsim = SimG4Alg("SimG4Alg",
-                    outputs = ["SimG4SaveTrackerHits/saveTrackerHits"],
+                    outputs = ["SimG4SaveCalHits/saveTrackerHits"],
                     eventProvider=particle_converter)
+from Configurables import CreateCaloCells
+createEcalBarrelCellsStep1 = CreateCaloCells("EcalBarrelCells", doCellCalibration=False,  addCellNoise=False, filterCellNoise=False)
+createEcalBarrelCellsStep1.hits.Path="hits"
+createEcalBarrelCellsStep1.cells.Path="ECalBarrelCellsStep1"
 
 # PODIO algorithm
 from Configurables import PodioOutput
@@ -61,9 +85,9 @@ out.outputCommands = ["keep *"]
 
 # ApplicationMgr
 from Configurables import ApplicationMgr
-ApplicationMgr( TopAlg = [reader, hepmc_converter, geantsim, out],
+ApplicationMgr( TopAlg = [reader, hepmc_converter, geantsim, createEcalBarrelCellsStep1, out],
                 EvtSel = 'NONE',
-                EvtMax   = 1,
+                EvtMax   = 10,
                 # order is important, as GeoSvc is needed by SimG4Svc
                 ExtSvc = [podioevent, geoservice, geantservice],
                 OutputLevel=DEBUG
