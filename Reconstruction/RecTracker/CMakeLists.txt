@@ -38,17 +38,17 @@ include(CTest)
 gaudi_add_test(FastDigiTest
                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 			         FRAMEWORK options/fastDigiTest.py
-			         DEPENDS Examples.GeantFullSimTrackerHits)
+			         DEPENDS TestReconstruction.GeantFullSimTrackerHits)
 
 gaudi_add_test(CombinatorialTrackSeeding
                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 			         FRAMEWORK options/combinatorialTrackSeedingTest.py
-			         DEPENDS Examples.GeantFullSimTrackerHits)
+			         DEPENDS TestReconstruction.GeantFullSimTrackerHits)
 
 gaudi_add_test(TrickTrackSeeding
                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 			         FRAMEWORK options/TrickTrackSeedingTest.py
-			         DEPENDS Examples.GeantFullSimTrackerHits)
+			         DEPENDS TestReconstruction.GeantFullSimTrackerHits)
 
 # TODO: to be re-enabled once ACTS DD4hepPlugin is up to date
 #gaudi_add_test(ExtrapolationTest

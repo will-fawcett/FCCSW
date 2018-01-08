@@ -47,6 +47,7 @@ comparison.positionedHits.Path="positionedHits"
 from Configurables import PodioOutput
 out = PodioOutput("out",
                    OutputLevel=DEBUG)
+out.filename = "output_geantinos.root"
 out.outputCommands = ["keep *"]
 
 # ApplicationMgr

@@ -4,7 +4,7 @@ from GaudiKernel import PhysicalConstants as constants
 from Gaudi.Configuration import *
 
 from Configurables import FCCDataSvc
-podioevent   = FCCDataSvc("EventDataSvc", input="geantinosForSeeding.root")
+podioevent   = FCCDataSvc("EventDataSvc", input="output_geantinos.root")
 from Configurables import PodioInput
 podioinput = PodioInput("PodioReader", collections=[ "hits", "positionedHits", "trajectory", "trajectoryPoints"], OutputLevel=DEBUG)
 
