@@ -13,7 +13,7 @@
 //#//include "DDSegmentation/BitField64.h"
 //#include "DD4hep/BitField64.h"
 //#include "DDSegmentation/CartesianGridXZ.h"
-#include "DDG4/Geant4Hits.h"
+//#include "DDG4/Geant4Hits.h"
 
 #include "ACTS/Seeding/BarrelSeedFinder.hpp"
 #include "ACTS/Seeding/SpacePoint.hpp"

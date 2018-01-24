@@ -22,7 +22,7 @@
 
 class IGeoSvc;
 
-namespace DD4hep {
+namespace dd4hep {
 namespace DDSegmentation {
 class BitField64;
 }
@@ -44,7 +44,7 @@ public:
 
 private:
   ServiceHandle<IGeoSvc> m_geoSvc;
-  DD4hep::DDSegmentation::BitField64* m_decoder;
+  dd4hep::DDSegmentation::BitField64* m_decoder;
   /// system and layer ids for the inner barrel layer to be used for seeding
   Gaudi::Property<std::pair<int, int>> m_seedingLayerIndices0{this, "seedingLayerIndices0", {0, 0}};
   /// system and layer ids for the middle barrel layer to be used for seeding

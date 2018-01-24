@@ -7,7 +7,7 @@
 #include "datamodel/TrackStateCollection.h"
 
 
-#include "DD4hep/LCDD.h"
+#include "DD4hep/Detector.h"
 #include "DD4hep/Volumes.h"
 #include "DDRec/API/IDDecoder.h"
 #include "DDSegmentation/BitField64.h"
@@ -32,8 +32,8 @@ TrickTrackSeedingTool::TrickTrackSeedingTool(const std::string& type, const std:
   declareInterface<ITrackSeedingTool>(this);
   declareProperty("LayerGraphTool", m_layerGraphTool);
   declareProperty("DoubletCreationTool", m_doubletCreationTool);
-  declarePrivateTool(m_layerGraphTool, "BarrelLayerGraphTool/LayerGraphTool");
-  declarePrivateTool(m_doubletCreationTool, "DoubletCreationTool/DoubletCreationTool");
+  declareTool(m_layerGraphTool, "BarrelLayerGraphTool/LayerGraphTool");
+  declareTool(m_doubletCreationTool, "DoubletCreationTool/DoubletCreationTool");
 
 }
 

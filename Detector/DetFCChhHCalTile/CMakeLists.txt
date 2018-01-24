@@ -3,8 +3,7 @@
 ################################################################################
 gaudi_subdir(DetFCChhHCalTile v1r0)
 
-gaudi_depends_on_subdirs(GaudiKernel
-                        Detector/DetExtensions)
+gaudi_depends_on_subdirs(GaudiKernel)
 
 
 find_package(DD4hep)

@@ -7,8 +7,7 @@ gaudi_depends_on_subdirs(GaudiKernel
                          FWCore
                          Detector/DetInterface
                          Detector/DetSegmentation
-                         Detector/DetCommon
-                         Detector/DetExtensions)
+                         Detector/DetCommon)
 
 find_package(ROOT COMPONENTS MathCore GenVector Geom Tree)
 
