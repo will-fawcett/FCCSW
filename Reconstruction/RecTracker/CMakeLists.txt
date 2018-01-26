@@ -46,10 +46,15 @@ gaudi_add_test(CombinatorialTrackSeeding
                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 			         FRAMEWORK options/combinatorialTrackSeedingTest.py)
 
+gaudi_add_test(GeantFullSimWithGeantino
+               WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+               FRAMEWORK options/geant_fullsim_pgun_geantino.py)
+
 gaudi_add_test(TrickTrackSeeding
                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 			         FRAMEWORK options/TrickTrackSeedingTest.py
-			         DEPENDS TestReconstruction.GeantFullSimWithGeantino)
+			         DEPENDS GeantFullSimWithGeantino)
+
 
 # TODO: to be re-enabled once ACTS DD4hepPlugin is up to date
 #gaudi_add_test(ExtrapolationTest
