@@ -27,7 +27,7 @@ gaudi_add_library(TrackingUtils
 gaudi_add_module(RecTracker
                  src/components/*.cpp
                  INCLUDE_DIRS ROOT FWCore HepMC FCCEDM PODIO DD4hep DetInterface RecInterface TrackingUtils ACTS ${tricktrack_INCLUDE_DIR}
-                 LINK_LIBRARIES ROOT GaudiAlgLib FCCEDM PODIO HepMC DD4hep TrackingUtils ACTS::ACTSCore ACTS::ACTSDD4hepPlugin)
+                 LINK_LIBRARIES ROOT GaudiAlgLib FCCEDM PODIO HepMC DD4hep TrackingUtils ACTS::ACTSCore ACTS::ACTSDD4hepPlugin tricktrack)
 
 
 gaudi_add_library(ActsLogger

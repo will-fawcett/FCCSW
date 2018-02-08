@@ -16,9 +16,9 @@
 #include "TrackFitTest.h"
 #include "RecInterface/ITrackSeedingTool.h"
 #include "RecTracker/TrackingUtils.h"
+
 #include "tricktrack/RiemannFit.h"
 
-using namespace tricktrack;
 
 DECLARE_ALGORITHM_FACTORY(TrackFitTest)
 
@@ -46,7 +46,7 @@ StatusCode TrackFitTest::execute() {
 
   // do the actual fit
   //
-  Matrix3xNd riemannHits = Matrix3xNd::Zero(3,nhits);
+  tricktrack::Matrix3xNd riemannHits = tricktrack::Matrix3xNd::Zero(3,nhits);
   /*for (unsigned int i = 0; i < nhits; ++i) {
     riemannHits.col(i) << i, i, i;
   }
@@ -61,10 +61,10 @@ StatusCode TrackFitTest::execute() {
   
   std::cout << riemannHits << std::endl;
   std::cout << "Fast fit: " << std::endl;
-  std::cout << Fast_fit(riemannHits) << std::endl; 
+  std::cout << tricktrack::Fast_fit(riemannHits) << std::endl; 
           
-  Matrix3Nd hits_cov = Matrix3Nd::Random(3*nhits,3*nhits);
-  auto h = Helix_fit(riemannHits, hits_cov, 1);
+  tricktrack::Matrix3Nd hits_cov = tricktrack::Matrix3Nd::Random(3*nhits,3*nhits);
+  auto h = tricktrack::Helix_fit(riemannHits, hits_cov, 1);
   std::cout << "charge " << h.q << std::endl;
   std::cout << "chi_2 circle " << h.chi2_circle << std::endl;
   std::cout << "chi_2 line " << h.chi2_line << std::endl;
