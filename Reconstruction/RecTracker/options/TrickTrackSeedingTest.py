@@ -12,6 +12,7 @@ from Configurables import GeoSvc
 geoservice = GeoSvc("GeoSvc", detectors=['file:Detector/DetFCChhBaseline1/compact/FCChh_DectEmptyMaster.xml',
   'file:Detector/DetFCChhTrackerTkLayout/compact/Tracker.xml',
   ],
+  OutputLevel=INFO,
   )
 
 

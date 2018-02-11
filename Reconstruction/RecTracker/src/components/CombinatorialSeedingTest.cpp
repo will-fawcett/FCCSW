@@ -3,7 +3,8 @@
 
 #include "datamodel/PositionedTrackHitCollection.h"
 #include "datamodel/TrackHitCollection.h"
-#include "datamodel/TrackHitCollection.h"
+#include "datamodel/TrackStateCollection.h"
+#include "datamodel/TrackCollection.h"
 
 #include "DD4hep/Detector.h"
 #include "DD4hep/Volumes.h"
@@ -18,12 +19,16 @@
 #include "RecInterface/ITrackSeedingTool.h"
 #include "RecTracker/TrackingUtils.h"
 
+#include "tricktrack/RiemannFit.h"
+
 DECLARE_ALGORITHM_FACTORY(CombinatorialSeedingTest)
 
 CombinatorialSeedingTest::CombinatorialSeedingTest(const std::string& name, ISvcLocator* svcLoc)
     : GaudiAlgorithm(name, svcLoc) {
 
   declareProperty("positionedTrackHits", m_positionedTrackHits, "Tracker hits (Input)");
+  declareProperty("Tracks", m_tracks, "Tracks (Output)");
+  declareProperty("TrackStates", m_trackStates, "TrackStates (Output)");
   declareProperty("TrackSeedingTool", m_trackSeedingTool);
 }
 
@@ -37,10 +42,17 @@ StatusCode CombinatorialSeedingTest::execute() {
 
   // get hits from event store
   const fcc::PositionedTrackHitCollection* hits = m_positionedTrackHits.get();
+  fcc::TrackCollection* tracks = m_tracks.createAndPut();
+  fcc::TrackStateCollection* trackStates = m_trackStates.createAndPut();
   auto seedmap = m_trackSeedingTool->findSeeds(hits);
 
   for (auto seedIdPair: seedmap) {
     debug() << " found trackseed: " << seedIdPair.first << "\t" << seedIdPair.second << endmsg;
+    auto track = tracks->create();
+    auto trackState = trackStates->create();
+    trackState.phi(1.4);
+    track.addhits((*hits)[seedIdPair.second]);
+    track.addstates(trackState);
   }
 
   return StatusCode::SUCCESS;
