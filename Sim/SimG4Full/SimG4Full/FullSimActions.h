@@ -7,16 +7,21 @@
  *
  *  User action initialization for full simulation.
  *
- *  @author Anna Zaborowska
+ *  @author A. Zaborowska
+ *  @author J. Lingemann (adding particle history)
  */
 
 namespace sim {
 class FullSimActions : public G4VUserActionInitialization {
 public:
-  FullSimActions();
+  FullSimActions(bool enableHistory);
   virtual ~FullSimActions();
   /// Create all user actions.
   virtual void Build() const final;
+
+private:
+  /// Flag whether or not to store particle history
+  bool m_enableHistory;
 };
 }
 
