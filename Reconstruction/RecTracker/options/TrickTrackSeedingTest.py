@@ -3,8 +3,11 @@ from GaudiKernel import SystemOfUnits as units
 from GaudiKernel import PhysicalConstants as constants
 from Gaudi.Configuration import *
 
+inputfilename2 = "muons_for_seeding.root"
+
+
 from Configurables import FCCDataSvc
-podioevent   = FCCDataSvc("EventDataSvc", input="output_geantinos.root")
+podioevent   = FCCDataSvc("EventDataSvc", input=inputfilename2)
 from Configurables import PodioInput
 podioinput = PodioInput("PodioReader", collections=["simParticles", "simVertices", "hits", "positionedHits", "trajectory", "trajectoryPoints"], OutputLevel=DEBUG)
 

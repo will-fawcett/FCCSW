@@ -1,3 +1,10 @@
+import matplotlib
+
+matplotlib.use("TkAgg")
+
+import ROOT
+ROOT.gSystem.Load("libdatamodel.so")
+
 
 from EventStore import EventStore
 import sys
@@ -9,6 +16,8 @@ print 'number of events: ', len(events)
 plt.figure()
 for i, store in enumerate(events):
     print "event ", i
+    if i > 1:
+      break
     pos = []
     ids = []
     clusters = store.get('trajectoryPoints')
@@ -37,5 +46,4 @@ for i, store in enumerate(events):
     ids = []
     for t in tracks:
         print t.hits_size()
-    if i > 10:
-      break
+plt.show()
