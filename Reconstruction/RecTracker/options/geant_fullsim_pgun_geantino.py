@@ -11,14 +11,25 @@ geoservice = GeoSvc("GeoSvc", detectors=['file:Detector/DetFCChhBaseline1/compac
   'file:Detector/DetFCChhTrackerTkLayout/compact/Tracker.xml'],
                     OutputLevel = INFO)
 
+from Configurables import SimG4Svc, SimG4FullSimActions
+actions = SimG4FullSimActions()
+actions.enableHistory=True
 
 # Geant4 service
 # Configures the Geant simulation: geometry, physics list and user actions
 from Configurables import SimG4Svc
 # giving the names of tools will initialize the tools of that type
-geantservice = SimG4Svc("SimG4Svc", detector='SimG4DD4hepDetector', physicslist="SimG4GeantinoDeposits", actions="SimG4FullSimActions")
+geantservice = SimG4Svc("SimG4Svc", detector='SimG4DD4hepDetector', physicslist="SimG4GeantinoDeposits", actions=actions)
+from Configurables import SimG4ConstantMagneticFieldTool
+field = SimG4ConstantMagneticFieldTool(
+    "SimG4ConstantMagneticFieldTool", FieldOn=True, IntegratorStepper="ClassicalRK4")
 
 geantservice.g4PostInitCommands  += ["/tracking/storeTrajectory 1"]
+
+from Configurables import SimG4SaveParticleHistory
+savehisttool = SimG4SaveParticleHistory("saveHistory")
+savehisttool.mcParticles.Path = "simParticles"
+savehisttool.genVertices.Path = "simVertices"
 
 # Geant4 algorithm
 # Translates EDM to G4Event, passes the event to G4, writes out outputs via tools
@@ -33,10 +44,11 @@ savetrackertool = SimG4SaveTrackerHits("saveTrackerHits", readoutNames = ["Track
 savetrackertool.positionedTrackHits.Path = "positionedHits"
 savetrackertool.trackHits.Path = "hits"
 # next, create the G4 algorithm, giving the list of names of tools ("XX/YY")
-pgun = SimG4SingleParticleGeneratorTool("GeantinoGun", etaMin=-5, etaMax=5, particleName="geantino")
+pgun = SimG4SingleParticleGeneratorTool("GeantinoGun", etaMin=-1, etaMax=1, particleName="chargedgeantino", saveEdm=True, energyMin=2000, energyMax=10000)
 geantsim = SimG4Alg("SimG4Alg",
                     outputs= ["SimG4SaveTrackerHits/saveTrackerHits", "SimG4SaveTrajectory/saveTrajectory" ],
-                    eventProvider=pgun)
+                    eventProvider=pgun,
+                    saveHistoryTool=savehisttool)
 
 from Configurables import CompareTrackHitPositionAndCellId
 comparison = CompareTrackHitPositionAndCellId()
@@ -54,7 +66,7 @@ out.outputCommands = ["keep *"]
 from Configurables import ApplicationMgr
 ApplicationMgr( TopAlg = [geantsim, comparison, out],
                 EvtSel = 'NONE',
-                EvtMax   = 1000,
+                EvtMax   = 100,
                 # order is important, as GeoSvc is needed by SimG4Svc
                 ExtSvc = [podioevent, geoservice, geantservice],
                 OutputLevel=DEBUG

@@ -46,12 +46,6 @@ StatusCode TrickTrackSeedingTool::initialize() {
   auto readout = lcdd->readout(m_readoutName);
   m_decoder = readout.idSpec().decoder();
 
-  // get layer graph from tool and create automaton
-  m_layerGraph = m_layerGraphTool->getGraph();
-
-  debug() << "Create automaton ..." << endmsg;
-  m_automaton = std::make_unique<HitChainMaker<Hit>>(m_layerGraph);
-  m_trackingRegion = std::make_unique<tricktrack::TrackingRegion>(m_regionOriginX, m_regionOriginY, m_regionOriginRadius, m_ptMin);
   return sc;
 }
 
@@ -76,8 +70,15 @@ void TrickTrackSeedingTool::createBarrelSpacePoints(std::vector<Hit>& thePoints,
 
 std::multimap<unsigned int, unsigned int>
 TrickTrackSeedingTool::findSeeds(const fcc::PositionedTrackHitCollection* theHits) {
+  // get layer graph from tool and create automaton
+  m_layerGraph = m_layerGraphTool->getGraph();
+
+  m_trackingRegion = std::make_unique<tricktrack::TrackingRegion>(m_regionOriginX, m_regionOriginY, m_regionOriginRadius, m_ptMin);
+  debug() << "Create automaton ..." << endmsg;
+  m_automaton = std::make_unique<HitChainMaker<Hit>>(m_layerGraph);
 
   std::multimap<unsigned int, unsigned int> theSeeds;
+  debug() << "seedmap size: " << theSeeds.size() << endmsg;
 
 
   std::vector<Hit> pointsLayer1;
@@ -110,12 +111,13 @@ TrickTrackSeedingTool::findSeeds(const fcc::PositionedTrackHitCollection* theHit
   debug() << "found "  << doublet1->size() << " doublets on the first layer "  << endmsg;
   debug() << "found "  << doublet2->size() << " doublets on the second layer "  << endmsg;
 
-  debug() << "Create and connect cells ..." << endmsg;
+  debug() << "Create and connect cells ..." << doublets.size() << endmsg;
   m_automaton->createAndConnectCells(doublets, *m_trackingRegion, m_thetaCut, m_phiCut, m_hardPtCut);
   debug() << "... cells connected and created." << endmsg;
 
   m_automaton->evolve(3);
   std::vector<CMCell<Hit>::CMntuplet> foundTracklets;
+  debug() << "found " << foundTracklets.size()<< " tracklets" << endmsg;
   m_automaton->findNtuplets(foundTracklets, 3);
 
   debug() << "found " << foundTracklets.size()<< " tracklets" << endmsg;

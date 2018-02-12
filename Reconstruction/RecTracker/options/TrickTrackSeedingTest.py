@@ -6,7 +6,7 @@ from Gaudi.Configuration import *
 from Configurables import FCCDataSvc
 podioevent   = FCCDataSvc("EventDataSvc", input="output_geantinos.root")
 from Configurables import PodioInput
-podioinput = PodioInput("PodioReader", collections=[ "hits", "positionedHits", "trajectory", "trajectoryPoints"], OutputLevel=DEBUG)
+podioinput = PodioInput("PodioReader", collections=["simParticles", "simVertices", "hits", "positionedHits", "trajectory", "trajectoryPoints"], OutputLevel=DEBUG)
 
 from Configurables import GeoSvc
 geoservice = GeoSvc("GeoSvc", detectors=['file:Detector/DetFCChhBaseline1/compact/FCChh_DectEmptyMaster.xml',
@@ -47,7 +47,7 @@ out.filename="tricktrackSeeding_Example.root"
 from Configurables import ApplicationMgr
 ApplicationMgr( TopAlg = [podioinput, combi_seeding, out],
                 EvtSel = 'NONE',
-                EvtMax   = 1,
+                EvtMax   = 10,
                 # order is important, as GeoSvc is needed by SimG4Svc
                 ExtSvc = [podioevent, geoservice],
                 OutputLevel=DEBUG

@@ -44,16 +44,23 @@ StatusCode CombinatorialSeedingTest::execute() {
   const fcc::PositionedTrackHitCollection* hits = m_positionedTrackHits.get();
   fcc::TrackCollection* tracks = m_tracks.createAndPut();
   fcc::TrackStateCollection* trackStates = m_trackStates.createAndPut();
+  debug() << "hit collection size: " << hits->size() << endmsg;
   auto seedmap = m_trackSeedingTool->findSeeds(hits);
+  auto it1 = seedmap.begin();
+  auto it2 = seedmap.begin();
+  auto end = seedmap.end();
 
-  for (auto seedIdPair: seedmap) {
-    debug() << " found trackseed: " << seedIdPair.first << "\t" << seedIdPair.second << endmsg;
+  for (it1 = seedmap.begin(), it2 = it1, end = seedmap.end(); it1 != end; it1 = it2) {
+    debug() << " found trackseed: " << (*it1).first << "\t" << (*it1).second << endmsg;
     auto track = tracks->create();
     auto trackState = trackStates->create();
     trackState.phi(1.4);
-    track.addhits((*hits)[seedIdPair.second]);
     track.addstates(trackState);
-  }
+    for ( ; it2 != end && (*it2).first == (*it1).first; ++it2) {
+    debug() << " \t found trackseed: " << (*it2).first << "\t" << (*it2).second << endmsg;
+      track.addhits((*hits)[(*it2).second]);
+      }
+    }
 
   return StatusCode::SUCCESS;
 }
