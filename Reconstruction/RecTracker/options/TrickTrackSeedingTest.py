@@ -33,6 +33,7 @@ seed_tool.LayerGraphTool = layergraphtool
 seed_tool.seedingLayerIndices0=(0,0)
 seed_tool.seedingLayerIndices1=(0,1)
 seed_tool.seedingLayerIndices2=(0,2)
+seed_tool.seedingLayerIndices3=(0,3)
 seed_tool.readoutName = "TrackerBarrelReadout"
 
 combi_seeding = CombinatorialSeedingTest()
@@ -50,7 +51,7 @@ out.filename="tricktrackSeeding_Example.root"
 from Configurables import ApplicationMgr
 ApplicationMgr( TopAlg = [podioinput, combi_seeding, out],
                 EvtSel = 'NONE',
-                EvtMax   = 10,
+                EvtMax   = 3,
                 # order is important, as GeoSvc is needed by SimG4Svc
                 ExtSvc = [podioevent, geoservice],
                 OutputLevel=DEBUG

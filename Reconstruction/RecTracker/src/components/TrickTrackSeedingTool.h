@@ -51,6 +51,8 @@ private:
   Gaudi::Property<std::pair<int, int>> m_seedingLayerIndices1{this, "seedingLayerIndices1", {0, 1}};
   /// system and layer ids for the outer barrel layer to be used for seeding
   Gaudi::Property<std::pair<int, int>> m_seedingLayerIndices2{this, "seedingLayerIndices2", {0, 2}};
+  /// system and layer ids for the outer barrel layer to be used for seeding
+  Gaudi::Property<std::pair<int, int>> m_seedingLayerIndices3{this, "seedingLayerIndices3", {0, 3}};
   /// readout used for the barrel seeding layers
   Gaudi::Property<std::string> m_readoutName{this, "readoutName", "TrackerBarrelReadout"};
   /// Parameter for TrickTrack's TrackingRegion

@@ -49,17 +49,34 @@ StatusCode CombinatorialSeedingTest::execute() {
   auto it1 = seedmap.begin();
   auto it2 = seedmap.begin();
   auto end = seedmap.end();
+  constexpr unsigned int nhits = 3;
 
   for (it1 = seedmap.begin(), it2 = it1, end = seedmap.end(); it1 != end; it1 = it2) {
+    tricktrack::Matrix3xNd riemannHits = tricktrack::Matrix3xNd::Zero(3,nhits);
     debug() << " found trackseed: " << (*it1).first << "\t" << (*it1).second << endmsg;
     auto track = tracks->create();
     auto trackState = trackStates->create();
-    trackState.phi(1.4);
-    track.addstates(trackState);
+    unsigned int hitCounter = 0;
     for ( ; it2 != end && (*it2).first == (*it1).first; ++it2) {
     debug() << " \t found trackseed: " << (*it2).first << "\t" << (*it2).second << endmsg;
+
+    auto pos = (*hits)[(*it2).second].position();
+    riemannHits.col(hitCounter) << pos.x, pos.y, pos.z;
       track.addhits((*hits)[(*it2).second]);
+      hitCounter++;
       }
+    tricktrack::Matrix3Nd hits_cov = tricktrack::Matrix3Nd::Identity(3*nhits,3*nhits);
+    auto h = tricktrack::Helix_fit(riemannHits, hits_cov, 1, false, false);
+    std::cout << "parameters " <<  h.par << std::endl;
+    std::cout << "charge " << h.q << std::endl;
+    std::cout << "chi_2 circle " << h.chi2_circle << std::endl;
+    std::cout << "chi_2 line " << h.chi2_line << std::endl;
+    trackState.phi(h.par(0));
+    trackState.d0(h.par(1));
+    trackState.qOverP(h.q / h.par(2));
+    trackState.theta(h.par(3));
+    trackState.z0(h.par(4));
+    track.addstates(trackState);
     }
 
   return StatusCode::SUCCESS;

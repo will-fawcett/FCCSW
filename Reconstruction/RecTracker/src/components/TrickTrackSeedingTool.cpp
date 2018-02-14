@@ -84,41 +84,48 @@ TrickTrackSeedingTool::findSeeds(const fcc::PositionedTrackHitCollection* theHit
   std::vector<Hit> pointsLayer1;
   std::vector<Hit> pointsLayer2;
   std::vector<Hit> pointsLayer3;
+  std::vector<Hit> pointsLayer4;
 
   std::map<int, unsigned long int> mapLayer1;
   std::map<int, unsigned long int> mapLayer2;
   std::map<int, unsigned long int> mapLayer3;
+  std::map<int, unsigned long int> mapLayer4;
 
   createBarrelSpacePoints(pointsLayer1, mapLayer1, theHits, m_seedingLayerIndices0, 0);
   createBarrelSpacePoints(pointsLayer2, mapLayer2, theHits, m_seedingLayerIndices1, 0);
   createBarrelSpacePoints(pointsLayer3, mapLayer3, theHits, m_seedingLayerIndices2, 0);
+  createBarrelSpacePoints(pointsLayer4, mapLayer4, theHits, m_seedingLayerIndices3, 0);
 
   debug() << "found " << pointsLayer1.size() << " points on Layer 1" << endmsg;
   debug() << "found " << pointsLayer2.size() << " points on Layer 2" << endmsg;
   debug() << "found " << pointsLayer3.size() << " points on Layer 3" << endmsg;
+  debug() << "found " << pointsLayer4.size() << " points on Layer 4" << endmsg;
 
   std::vector<HitDoublets<Hit>*> doublets;
   std::vector<Hit> pointsLayer2b = pointsLayer2;
+  std::vector<Hit> pointsLayer3b = pointsLayer3;
   
 
   auto doublet1 = m_doubletCreationTool->findDoublets(pointsLayer1, pointsLayer2);
   auto doublet2 = m_doubletCreationTool->findDoublets(pointsLayer2b, pointsLayer3);
+  auto doublet3 = m_doubletCreationTool->findDoublets(pointsLayer3b, pointsLayer4);
 
   doublets.push_back(doublet1);
   doublets.push_back(doublet2);
+  doublets.push_back(doublet3);
 
 
   debug() << "found "  << doublet1->size() << " doublets on the first layer "  << endmsg;
   debug() << "found "  << doublet2->size() << " doublets on the second layer "  << endmsg;
+  debug() << "found "  << doublet3->size() << " doublets on the third layer "  << endmsg;
 
   debug() << "Create and connect cells ..." << doublets.size() << endmsg;
   m_automaton->createAndConnectCells(doublets, *m_trackingRegion, m_thetaCut, m_phiCut, m_hardPtCut);
   debug() << "... cells connected and created." << endmsg;
 
-  m_automaton->evolve(3);
+  m_automaton->evolve(4);
   std::vector<CMCell<Hit>::CMntuplet> foundTracklets;
-  debug() << "found " << foundTracklets.size()<< " tracklets" << endmsg;
-  m_automaton->findNtuplets(foundTracklets, 3);
+  m_automaton->findNtuplets(foundTracklets, 4);
 
   debug() << "found " << foundTracklets.size()<< " tracklets" << endmsg;
   auto cells = m_automaton->getAllCells();
@@ -128,13 +135,15 @@ TrickTrackSeedingTool::findSeeds(const fcc::PositionedTrackHitCollection* theHit
   for (const auto& tracklet : foundTracklets) {
     auto l_id1 = cells[tracklet[0]].getInnerHit().identifier();
     auto l_id2 = cells[tracklet[1]].getInnerHit().identifier();
-    auto l_id3 = cells[tracklet[1]].getOuterHit().identifier();
+    auto l_id3 = cells[tracklet[2]].getInnerHit().identifier();
+    auto l_id4 = cells[tracklet[2]].getOuterHit().identifier();
     theSeeds.insert(std::pair<unsigned int, unsigned int>(trackletCounter, l_id1));
     theSeeds.insert(std::pair<unsigned int, unsigned int>(trackletCounter, l_id2));
     theSeeds.insert(std::pair<unsigned int, unsigned int>(trackletCounter, l_id3));
+    theSeeds.insert(std::pair<unsigned int, unsigned int>(trackletCounter, l_id4));
 
     if ((mapLayer1[l_id1] == mapLayer2[l_id2]) && 
-        (mapLayer3[l_id3] == mapLayer2[l_id2])) {
+        (mapLayer3[l_id3] == mapLayer2[l_id2])  && mapLayer4[l_id4] == mapLayer3[l_id3] ) {
       ++numGoodTracklets;
     }
     ++trackletCounter;

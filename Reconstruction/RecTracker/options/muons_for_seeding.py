@@ -93,7 +93,7 @@ out.filename = "muons_for_seeding.root"
 from Configurables import ApplicationMgr
 ApplicationMgr(TopAlg=[gen, hepmc_converter, geantsim, out],
                EvtSel='NONE',
-               EvtMax=2,
+               EvtMax=200,
                # order is important, as GeoSvc is needed by SimG4Svc
                ExtSvc=[ppservice, podioevent, geoservice, geantservice],
                OutputLevel=DEBUG

@@ -46,8 +46,8 @@ StatusCode DoubletCreationTool::initialize() {
   for (int i = 0; i < theInnerHits.size(); ++i) {
     for(int j = 0; j < theOuterHits.size(); ++j) {
         // @todo: very ad-hoc
-        if ((std::fmod(std::abs(theOuterHits[j].phi() - theInnerHits[i].phi()), 2* M_PI)) < 0.4) {
-        if (std::abs(theOuterHits[j].z() - theInnerHits[i].z()) < 100) {
+        if ((std::fmod(std::abs(theOuterHits[j].phi() - theInnerHits[i].phi()), 2* M_PI)) < 0.3) {
+        if (std::abs(theOuterHits[j].z() - theInnerHits[i].z()) < 50) {
         doublets->add(i, j);
         }
         }
