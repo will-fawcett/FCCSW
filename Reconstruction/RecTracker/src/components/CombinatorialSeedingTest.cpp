@@ -55,14 +55,17 @@ StatusCode CombinatorialSeedingTest::execute() {
     tricktrack::Matrix3xNd riemannHits = tricktrack::Matrix3xNd::Zero(3,nhits);
     debug() << " found trackseed: " << (*it1).first << "\t" << (*it1).second << endmsg;
     auto track = tracks->create();
+    track.bits((*it1).first);
     auto trackState = trackStates->create();
     unsigned int hitCounter = 0;
     for ( ; it2 != end && (*it2).first == (*it1).first; ++it2) {
-    debug() << " \t found trackseed: " << (*it2).first << "\t" << (*it2).second << endmsg;
+      debug() << " \t found trackseed: " << (*it2).first << "\t" << (*it2).second << endmsg;
 
-    auto pos = (*hits)[(*it2).second].position();
-    riemannHits.col(hitCounter) << pos.x, pos.y, pos.z;
-      track.addhits((*hits)[(*it2).second]);
+      if (hitCounter < 8) { // riemann fit has a hardcoded limit of 8 hits
+        auto pos = (*hits)[(*it2).second].position();
+        riemannHits.col(hitCounter) << pos.x, pos.y, pos.z;
+        track.addhits((*hits)[(*it2).second]);
+      }
       hitCounter++;
       }
     tricktrack::Matrix3Nd hits_cov = tricktrack::Matrix3Nd::Identity(3*nhits,3*nhits);

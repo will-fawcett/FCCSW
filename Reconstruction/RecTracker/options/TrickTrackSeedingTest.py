@@ -36,8 +36,12 @@ seed_tool.seedingLayerIndices2=(0,2)
 seed_tool.seedingLayerIndices3=(0,3)
 seed_tool.readoutName = "TrackerBarrelReadout"
 
+from Configurables import TruthSeedingTool
+truth_seeds = TruthSeedingTool()
+
 combi_seeding = CombinatorialSeedingTest()
-combi_seeding.TrackSeedingTool = seed_tool
+
+combi_seeding.TrackSeedingTool = truth_seeds
 combi_seeding.positionedTrackHits.Path = "positionedHits"
 
 
