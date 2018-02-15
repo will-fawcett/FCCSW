@@ -7,7 +7,7 @@ from matplotlib import rc
 #rc('font',**{'family':'serif','serif':['Palatino']})
 rc('text', usetex=True)
 
-#matplotlib.use("TkAgg")
+matplotlib.use("TkAgg")
 
 import ROOT
 ROOT.gSystem.Load("libdatamodel.so")
@@ -96,8 +96,8 @@ for i, store in enumerate(events):
         print "sim cottheta: ", t.core().p4.pz / np.sqrt(t.core().p4.py**2 +  t.core().p4.py**2)
           
 plt.figure("xy")
-plt.xlim(0, 250)
-plt.ylim(00,250)
+plt.xlim(-400, 400)
+plt.ylim(-400,400)
 plt.xlabel("x [mm]")
 plt.ylabel("y [mm]")
 plt.savefig("tt_xy.png")

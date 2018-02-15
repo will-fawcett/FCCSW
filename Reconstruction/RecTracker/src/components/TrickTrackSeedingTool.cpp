@@ -80,44 +80,30 @@ TrickTrackSeedingTool::findSeeds(const fcc::PositionedTrackHitCollection* theHit
   std::multimap<unsigned int, unsigned int> theSeeds;
   debug() << "seedmap size: " << theSeeds.size() << endmsg;
 
+  unsigned int numLayers = m_layerGraph.theLayers.size(); 
+  std::vector<std::map<int, unsigned long int>> mapLayers; // temp solution to keep track of hit indices
+  std::vector<std::vector<Hit>> layerPoints;
+  std::vector<std::pair<int,int>> layerIndices {
+    m_seedingLayerIndices0,
+    m_seedingLayerIndices1,
+    m_seedingLayerIndices2,
+    m_seedingLayerIndices3};
 
-  std::vector<Hit> pointsLayer1;
-  std::vector<Hit> pointsLayer2;
-  std::vector<Hit> pointsLayer3;
-  std::vector<Hit> pointsLayer4;
+  for (unsigned int layerCounter = 0; layerCounter < numLayers; ++layerCounter) {
 
-  std::map<int, unsigned long int> mapLayer1;
-  std::map<int, unsigned long int> mapLayer2;
-  std::map<int, unsigned long int> mapLayer3;
-  std::map<int, unsigned long int> mapLayer4;
+  mapLayers.emplace_back();
+  layerPoints.emplace_back();
 
-  createBarrelSpacePoints(pointsLayer1, mapLayer1, theHits, m_seedingLayerIndices0, 0);
-  createBarrelSpacePoints(pointsLayer2, mapLayer2, theHits, m_seedingLayerIndices1, 0);
-  createBarrelSpacePoints(pointsLayer3, mapLayer3, theHits, m_seedingLayerIndices2, 0);
-  createBarrelSpacePoints(pointsLayer4, mapLayer4, theHits, m_seedingLayerIndices3, 0);
+  createBarrelSpacePoints(layerPoints.back(), mapLayers.back(), theHits, layerIndices[layerCounter], 0);
 
-  debug() << "found " << pointsLayer1.size() << " points on Layer 1" << endmsg;
-  debug() << "found " << pointsLayer2.size() << " points on Layer 2" << endmsg;
-  debug() << "found " << pointsLayer3.size() << " points on Layer 3" << endmsg;
-  debug() << "found " << pointsLayer4.size() << " points on Layer 4" << endmsg;
+  debug() << "found " << layerPoints.back().size() << " points on Layer " << endmsg;
+  }
 
   std::vector<HitDoublets<Hit>*> doublets;
-  std::vector<Hit> pointsLayer2b = pointsLayer2;
-  std::vector<Hit> pointsLayer3b = pointsLayer3;
-  
-
-  auto doublet1 = m_doubletCreationTool->findDoublets(pointsLayer1, pointsLayer2);
-  auto doublet2 = m_doubletCreationTool->findDoublets(pointsLayer2b, pointsLayer3);
-  auto doublet3 = m_doubletCreationTool->findDoublets(pointsLayer3b, pointsLayer4);
-
-  doublets.push_back(doublet1);
-  doublets.push_back(doublet2);
-  doublets.push_back(doublet3);
-
-
-  debug() << "found "  << doublet1->size() << " doublets on the first layer "  << endmsg;
-  debug() << "found "  << doublet2->size() << " doublets on the second layer "  << endmsg;
-  debug() << "found "  << doublet3->size() << " doublets on the third layer "  << endmsg;
+  for (auto layerPair: m_layerGraph.theLayerPairs) {
+    doublets.push_back(m_doubletCreationTool->findDoublets(layerPoints[layerPair.theLayers[0]], layerPoints[layerPair.theLayers[1]]));
+    debug() << "found "  << doublets.back()->size() << " doublets on layers  " << layerPair.theLayers[0] << " and " << layerPair.theLayers[1]  << endmsg;
+  }
 
   debug() << "Create and connect cells ..." << doublets.size() << endmsg;
   m_automaton->createAndConnectCells(doublets, *m_trackingRegion, m_thetaCut, m_phiCut, m_hardPtCut);
@@ -142,8 +128,8 @@ TrickTrackSeedingTool::findSeeds(const fcc::PositionedTrackHitCollection* theHit
     theSeeds.insert(std::pair<unsigned int, unsigned int>(trackletCounter, l_id3));
     theSeeds.insert(std::pair<unsigned int, unsigned int>(trackletCounter, l_id4));
 
-    if ((mapLayer1[l_id1] == mapLayer2[l_id2]) && 
-        (mapLayer3[l_id3] == mapLayer2[l_id2])  && mapLayer4[l_id4] == mapLayer3[l_id3] ) {
+    if ((mapLayers[0][l_id1] == mapLayers[1][l_id2]) && 
+        (mapLayers[2][l_id3] == mapLayers[1][l_id2])  && mapLayers[3][l_id4] == mapLayers[2][l_id3] ) {
       ++numGoodTracklets;
     }
     ++trackletCounter;

@@ -41,7 +41,7 @@ truth_seeds = TruthSeedingTool()
 
 combi_seeding = CombinatorialSeedingTest()
 
-combi_seeding.TrackSeedingTool = truth_seeds
+combi_seeding.TrackSeedingTool = seed_tool
 combi_seeding.positionedTrackHits.Path = "positionedHits"
 
 
