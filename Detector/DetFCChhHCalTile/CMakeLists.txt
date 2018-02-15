@@ -21,7 +21,7 @@ include_directories(SYSTEM ${DD4hep_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS})
 
 gaudi_add_module(DetFCChhHCalTile
 		  src/*.cpp
-		  INCLUDE_DIRS DD4hep ROOT DetExtensions Geant4
+		  INCLUDE_DIRS DD4hep ROOT Geant4
 		  LINK_LIBRARIES GaudiKernel DD4hep ROOT Geant4)
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})

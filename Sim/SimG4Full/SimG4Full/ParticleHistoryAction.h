@@ -16,13 +16,22 @@
 namespace sim {
 class ParticleHistoryAction : public G4UserTrackingAction {
 public:
-  ParticleHistoryAction();
+  ParticleHistoryAction(double energyCut);
   virtual ~ParticleHistoryAction() = default;
 
+  /// empty action - particles are only saved at the end of track
   void PreUserTrackingAction(const G4Track* aTrack);
+  /// particles are saved here, after geant4 is done simulating the track
   void PostUserTrackingAction(const G4Track* aTrack);
 
-  bool selectSecondary(const G4Track& aTrack);
+  /** Simple filter for particles to be saved, based on their energy.
+   * @param[in] aTrack track of the particle to be saved
+   * @param[in] aEnergyCut energy threshold above which particles are saved
+   */
+  bool selectSecondary(const G4Track& aTrack, double aEnergyCut);
+private:
+  /// energy threshold for secondaries to be saved
+  double m_energyCut;
 };
 }
 
