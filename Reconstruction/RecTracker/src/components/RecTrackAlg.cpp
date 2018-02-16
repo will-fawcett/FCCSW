@@ -15,15 +15,15 @@
 #include <cmath>
 #include <random>
 
-#include "CombinatorialSeedingTest.h"
+#include "RecTrackAlg.h"
 #include "RecInterface/ITrackSeedingTool.h"
 #include "RecTracker/TrackingUtils.h"
 
 #include "tricktrack/RiemannFit.h"
 
-DECLARE_ALGORITHM_FACTORY(CombinatorialSeedingTest)
+DECLARE_ALGORITHM_FACTORY(RecTrackAlg)
 
-CombinatorialSeedingTest::CombinatorialSeedingTest(const std::string& name, ISvcLocator* svcLoc)
+RecTrackAlg::RecTrackAlg(const std::string& name, ISvcLocator* svcLoc)
     : GaudiAlgorithm(name, svcLoc) {
 
   declareProperty("positionedTrackHits", m_positionedTrackHits, "Tracker hits (Input)");
@@ -32,13 +32,13 @@ CombinatorialSeedingTest::CombinatorialSeedingTest(const std::string& name, ISvc
   declareProperty("TrackSeedingTool", m_trackSeedingTool);
 }
 
-StatusCode CombinatorialSeedingTest::initialize() {
+StatusCode RecTrackAlg::initialize() {
   info() << "initialize" << endmsg;
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode CombinatorialSeedingTest::execute() {
+StatusCode RecTrackAlg::execute() {
 
   // get hits from event store
   const fcc::PositionedTrackHitCollection* hits = m_positionedTrackHits.get();
@@ -85,7 +85,7 @@ StatusCode CombinatorialSeedingTest::execute() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode CombinatorialSeedingTest::finalize() {
+StatusCode RecTrackAlg::finalize() {
   StatusCode sc = GaudiAlgorithm::finalize();
   return sc;
 }

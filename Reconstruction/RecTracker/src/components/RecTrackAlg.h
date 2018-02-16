@@ -20,16 +20,14 @@ class PositionedTrackHitCollection;
 }
 
 
-/*** @class CombinatorialSeedingTest 
+/*** @class RecTrackAlg 
  *
- *  Algorithm that only calls the Combinatorial Seeding tool
- *  for testing purposes and pints a debug statement.
  */
-class CombinatorialSeedingTest : public GaudiAlgorithm {
+class RecTrackAlg : public GaudiAlgorithm {
 public:
-  CombinatorialSeedingTest(const std::string& name, ISvcLocator* svcLoc);
+  RecTrackAlg(const std::string& name, ISvcLocator* svcLoc);
 
-  ~CombinatorialSeedingTest() = default;
+  ~RecTrackAlg() = default;
 
   StatusCode initialize() override final;
 
