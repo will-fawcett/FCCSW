@@ -3,8 +3,15 @@ from GaudiKernel import SystemOfUnits as units
 from GaudiKernel import PhysicalConstants as constants
 from Gaudi.Configuration import *
 
+from FWCore.joboptions import parse_standard_job_options
+args = parse_standard_job_options()
+
+inputfile = "muons_for_seeding.root"
+if args.inputfile:
+  inputfile = args.inputfile
+
 from Configurables import FCCDataSvc
-podioevent   = FCCDataSvc("EventDataSvc", input="muons_for_seeding.root")
+podioevent   = FCCDataSvc("EventDataSvc", input=inputfile)
 
 from Configurables import PodioInput
 podioinput = PodioInput("PodioReader", 
@@ -53,7 +60,7 @@ truth_seeds = TruthSeedingTool()
 
 from Configurables import RecTrackAlg
 RecTrackAlg = RecTrackAlg()
-RecTrackAlg.TrackSeedingTool = seed_tool
+RecTrackAlg.TrackSeedingTool = tricktrack_seed_tool
 RecTrackAlg.positionedTrackHits.Path = "positionedHits"
 
 
@@ -62,13 +69,20 @@ from Configurables import PodioOutput
 out = PodioOutput("out",
                    OutputLevel=DEBUG)
 out.outputCommands = ["keep *"]
-out.filename="tricktrackSeeding_Example.root"
+
+outputfile = "tricktrack_seeding_example.root"
+if args.outputfile:
+  outputfile = args.outputfile
+
+# get number of events from arguments
+nEvents = 2
+if args.nevents:
+    nEvents = args.nevents
 
 from Configurables import ApplicationMgr
 ApplicationMgr( TopAlg = [podioinput, RecTrackAlg, out],
                 EvtSel = 'NONE',
-                EvtMax   = 3,
-                # order is important, as GeoSvc is needed by SimG4Svc
+                EvtMax   = nEvents,
                 ExtSvc = [podioevent, geoservice],
                 OutputLevel=DEBUG,
  )

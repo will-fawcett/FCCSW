@@ -13,6 +13,7 @@ import ROOT
 ROOT.gSystem.Load("libdatamodel.so")
 
 from mock_track import *
+plot_tracks = False
 
 
 from EventStore import EventStore
@@ -39,9 +40,10 @@ for i, store in enumerate(events):
     clusters = store.get('trajectoryPoints')
     print clusters    
     for c in clusters:
-        cor = c.position()
-        pos.append([cor.x, cor.y, cor.z])
-        ids.append([c.bits()])
+        if c.bits() < 100:
+          cor = c.position()
+          pos.append([cor.x, cor.y, cor.z])
+          ids.append([c.bits()])
     pos = np.array(pos)
     ids = np.array(ids)
     plt.figure("xy")
@@ -63,37 +65,39 @@ for i, store in enumerate(events):
     plt.figure("rz")
     plt.plot(pos[:,2], np.sqrt(pos[:,0]**2 + pos[:,1]**2), 'o', color="midnightblue")
 
-    tracks = store.get('tracks')
-    for t in tracks:
-        print "track ID: ", t.bits()
-        pos = []
-        ids = []
-        ts = t.states(0)
-        trackparams = [
-          ts.d0(),
-          ts.z0(),
-          ts.phi() - np.pi * 0.5,
-          ts.theta(),
-          ts.qOverP(),
-          ]
-        print "track parameters: ", trackparams
-        pos2 = helix(trackparams)
-            
-        for j in range(t.hits_size()):
-          cor = t.hits(j).position()
-          pos.append([cor.x, cor.y, cor.z])
-        pos = np.array(pos)
-        plt.figure("xy")
-        plt.plot(pos[:,0],pos[:,1], '--', color="black")
-        plt.plot(pos2[:,0],pos2[:,1], '-', lw=3, color="green")
-        plt.figure("rz")
-        plt.plot(pos[:,2], np.sqrt(pos[:,0]**2 + pos[:,1]**2), '--', color="black")
-        plt.plot(pos2[:,2], np.sqrt(pos2[:,0]**2 + pos2[:,1]**2), '--', color="green")
-    part = store.get('simParticles')
-    for t in part:
-        print "sim trackID: ", t.core().bits, "sim pdgId: ", t.core().pdgId, "momentum: ", [t.core().p4.px, t.core().p4.py, t.core().p4.pz]
-        print "sim phi: ", np.arctan2(t.core().p4.py, t.core().p4.px)
-        print "sim cottheta: ", t.core().p4.pz / np.sqrt(t.core().p4.py**2 +  t.core().p4.py**2)
+    if plot_tracks:
+
+      tracks = store.get('tracks')
+      for t in tracks:
+          print "track ID: ", t.bits()
+          pos = []
+          ids = []
+          ts = t.states(0)
+          trackparams = [
+            ts.d0(),
+            ts.z0(),
+            ts.phi() - np.pi * 0.5,
+            ts.theta(),
+            ts.qOverP(),
+            ]
+          print "track parameters: ", trackparams
+          pos2 = helix(trackparams)
+              
+          for j in range(t.hits_size()):
+            cor = t.hits(j).position()
+            pos.append([cor.x, cor.y, cor.z])
+          pos = np.array(pos)
+          plt.figure("xy")
+          plt.plot(pos[:,0],pos[:,1], '--', color="black")
+          plt.plot(pos2[:,0],pos2[:,1], '-', lw=3, color="green")
+          plt.figure("rz")
+          plt.plot(pos[:,2], np.sqrt(pos[:,0]**2 + pos[:,1]**2), '--', color="black")
+          plt.plot(pos2[:,2], np.sqrt(pos2[:,0]**2 + pos2[:,1]**2), '--', color="green")
+      part = store.get('simParticles')
+      for t in part:
+          print "sim trackID: ", t.core().bits, "sim pdgId: ", t.core().pdgId, "momentum: ", [t.core().p4.px, t.core().p4.py, t.core().p4.pz]
+          print "sim phi: ", np.arctan2(t.core().p4.py, t.core().p4.px)
+          print "sim cottheta: ", t.core().p4.pz / np.sqrt(t.core().p4.py**2 +  t.core().p4.py**2)
           
 plt.figure("xy")
 plt.xlim(-400, 400)
