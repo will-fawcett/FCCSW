@@ -39,6 +39,9 @@ geoservice = GeoSvc("GeoSvc",
 
 
 # TrickTrack Seeding Configuration
+from Configurables import FastHitFilterTool
+hitfiltertool = FastHitFilterTool("FastHitFilterTool")
+
 from Configurables import BarrelLayerGraphTool
 layergraphtool = BarrelLayerGraphTool()
 
@@ -65,14 +68,15 @@ RecTrackAlg.positionedTrackHits.Path = "positionedHits"
 
 
 # PODIO algorithm
-from Configurables import PodioOutput
-out = PodioOutput("out",
-                   OutputLevel=DEBUG)
-out.outputCommands = ["keep *"]
-
 outputfile = "tricktrack_seeding_example.root"
 if args.outputfile:
   outputfile = args.outputfile
+from Configurables import PodioOutput
+out = PodioOutput("out",
+                   filename=outputfile,
+                   OutputLevel=DEBUG)
+out.outputCommands = ["keep *"]
+
 
 # get number of events from arguments
 nEvents = 2

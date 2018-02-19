@@ -8,6 +8,7 @@
 #include "FWCore/DataHandle.h"
 #include "RecInterface/ITrackSeedingTool.h"
 #include "RecInterface/IDoubletCreationTool.h"
+#include "RecInterface/IHitFilterTool.h"
 #include "RecInterface/ILayerGraphTool.h"
 #include "datamodel/PositionedTrackHitCollection.h"
 #include "datamodel/TrackHitCollection.h"
@@ -76,6 +77,7 @@ private:
 
   ToolHandle<ILayerGraphTool> m_layerGraphTool;
   ToolHandle<IDoubletCreationTool> m_doubletCreationTool;
+  ToolHandle<IHitFilterTool> m_hitFilterTool;
 
   std::unique_ptr<tricktrack::HitChainMaker<tricktrack::SpacePoint<size_t>>> m_automaton;
   std::unique_ptr<tricktrack::TrackingRegion> m_trackingRegion;

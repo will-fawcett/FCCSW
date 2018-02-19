@@ -9,15 +9,20 @@ rc('text', usetex=True)
 
 matplotlib.use("TkAgg")
 
+import sys
+import os
+
+import os
+
+
 import ROOT
 ROOT.gSystem.Load("libdatamodel.so")
 
 from mock_track import *
-plot_tracks = False
+plot_tracks = True
 
 
 from EventStore import EventStore
-import sys
 import numpy as np
 import matplotlib.pyplot as plt
 plt.figure("xy")

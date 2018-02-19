@@ -34,6 +34,7 @@ TrickTrackSeedingTool::TrickTrackSeedingTool(const std::string& type, const std:
   declareProperty("DoubletCreationTool", m_doubletCreationTool);
   declareTool(m_layerGraphTool, "BarrelLayerGraphTool/LayerGraphTool");
   declareTool(m_doubletCreationTool, "DoubletCreationTool/DoubletCreationTool");
+  declareTool(m_hitFilterTool, "FastHitFilterTool/FastHitFilterTool");
 
 }
 
@@ -56,14 +57,11 @@ void TrickTrackSeedingTool::createBarrelSpacePoints(std::vector<Hit>& thePoints,
                                                        int) {
   size_t hitCounter = 0;
   for (auto hit : *theHits) {
-    m_decoder->setValue(hit.core().cellId);
-    if ((*m_decoder)["system"] == sIndex.first) {
-      if ((*m_decoder)["layer"] == sIndex.second) {
+    if (m_hitFilterTool->filter(hit.core())) {
         thePoints.emplace_back(hit.position().x, hit.position().y, hit.position().z, hitCounter);
 
         indexToTrackId.insert(std::pair<int, unsigned long int>(hitCounter, hit.core().bits));
       }
-    }
         ++hitCounter;
   }
 }
@@ -94,6 +92,7 @@ TrickTrackSeedingTool::findSeeds(const fcc::PositionedTrackHitCollection* theHit
   mapLayers.emplace_back();
   layerPoints.emplace_back();
 
+  m_hitFilterTool->setIds(layerIndices[layerCounter].first, layerIndices[layerCounter].second);
   createBarrelSpacePoints(layerPoints.back(), mapLayers.back(), theHits, layerIndices[layerCounter], 0);
 
   debug() << "found " << layerPoints.back().size() << " points on Layer " << endmsg;
@@ -109,9 +108,12 @@ TrickTrackSeedingTool::findSeeds(const fcc::PositionedTrackHitCollection* theHit
   m_automaton->createAndConnectCells(doublets, *m_trackingRegion, m_thetaCut, m_phiCut, m_hardPtCut);
   debug() << "... cells connected and created." << endmsg;
 
-  m_automaton->evolve(4);
+
+  constexpr unsigned int minNumberOfHits = 4;
+
+  m_automaton->evolve(minNumberOfHits);
   std::vector<CMCell<Hit>::CMntuplet> foundTracklets;
-  m_automaton->findNtuplets(foundTracklets, 4);
+  m_automaton->findNtuplets(foundTracklets, minNumberOfHits);
 
   debug() << "found " << foundTracklets.size()<< " tracklets" << endmsg;
   auto cells = m_automaton->getAllCells();
