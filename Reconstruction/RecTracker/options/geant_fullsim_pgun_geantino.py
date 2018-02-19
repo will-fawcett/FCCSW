@@ -46,9 +46,9 @@ savetrackertool.trackHits.Path = "hits"
 # next, create the G4 algorithm, giving the list of names of tools ("XX/YY")
 pgun = SimG4SingleParticleGeneratorTool("GeantinoGun", etaMin=-1, etaMax=1, particleName="chargedgeantino", saveEdm=True, energyMin=2000, energyMax=10000)
 geantsim = SimG4Alg("SimG4Alg",
-                    outputs= ["SimG4SaveTrackerHits/saveTrackerHits", "SimG4SaveTrajectory/saveTrajectory" ],
+                    outputs= ["SimG4SaveTrackerHits/saveTrackerHits", "SimG4SaveTrajectory/saveTrajectory", "SimG4SaveParticleHistory/saveHistory" ],
                     eventProvider=pgun,
-                    saveHistoryTool=savehisttool)
+                    )
 
 from Configurables import CompareTrackHitPositionAndCellId
 comparison = CompareTrackHitPositionAndCellId()
