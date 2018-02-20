@@ -12,6 +12,8 @@
 #include "tricktrack/HitChainMaker.h"
 #include "tricktrack/HitDoublets.h"
 #include "tricktrack/SpacePoint.h"
+#include "tricktrack/FKDTree.h"
+#include "tricktrack/FKDPoint.h"
 
 using Hit = tricktrack::SpacePoint<size_t>; 
 using namespace tricktrack;
@@ -39,6 +41,21 @@ StatusCode TrickTrackSeedingTool::initialize() {
   }
 
   return sc;
+}
+
+void TrickTrackSeedingTool::createKDTree(
+                                           const fcc::PositionedTrackHitCollection* theHits,
+                                           std::pair<int, int> sIndex) {
+
+    FKDTree<float, 3> tree;
+    float minX = 0.2;
+    float minY = 0.1;
+    float minZ = 0.1;
+    float minT = 0.1;
+    float maxX = 0.7;
+    float maxY = 0.9;
+    float maxZ = 0.3;
+    float maxT = 0.9;
 }
 
 void TrickTrackSeedingTool::createBarrelSpacePoints(std::vector<Hit>& thePoints,

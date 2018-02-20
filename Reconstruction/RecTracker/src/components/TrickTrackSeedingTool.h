@@ -35,6 +35,9 @@ public:
   virtual std::multimap<unsigned int, unsigned int> findSeeds(const fcc::PositionedTrackHitCollection* theHits) override final;
   void createBarrelSpacePoints(std::vector<tricktrack::SpacePoint<size_t>>& thePoints, std::map<int, unsigned long int>&,
                                const fcc::PositionedTrackHitCollection* theHits, std::pair<int, int> sIndex, int trackCutoff);
+void createKDTree(
+                                           const fcc::PositionedTrackHitCollection* theHits,
+                                           std::pair<int, int> sIndex);
 
 private:
   /// system and layer ids for the inner barrel layer to be used for seeding
