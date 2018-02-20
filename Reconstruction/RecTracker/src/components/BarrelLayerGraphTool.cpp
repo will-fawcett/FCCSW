@@ -23,14 +23,18 @@ StatusCode BarrelLayerGraphTool::initialize() {
 
 StatusCode BarrelLayerGraphTool::finalize() { return GaudiTool::finalize(); }
 
+/// Construct and return the layergraph for the Cellular automaton,
+// for the inner four barrel layers only
+// the interface to the layer graph is likely to be changed
 tricktrack::CMGraph BarrelLayerGraphTool::getGraph() {
   
   auto g = tricktrack::CMGraph();
 
-  auto l1 = tricktrack::CMLayer("innerLayer", 10);
-  auto l2 = tricktrack::CMLayer("middleLayer", 10);
-  auto l3 = tricktrack::CMLayer("outerLayer", 10);
-  auto l4 = tricktrack::CMLayer("outermostLayer", 10);
+  constexpr numberOfHits = 1000; // used to resize vector "isOuterHitOfCell""
+  auto l1 = tricktrack::CMLayer("innerLayer", numberOfHits);
+  auto l2 = tricktrack::CMLayer("middleLayer", numberOfHits);
+  auto l3 = tricktrack::CMLayer("outerLayer", numberOfHits);
+  auto l4 = tricktrack::CMLayer("outermostLayer", numberOfHits);
 
   auto lp1 = tricktrack::CMLayerPair(0, 1);
   auto lp2 = tricktrack::CMLayerPair(1, 2);
