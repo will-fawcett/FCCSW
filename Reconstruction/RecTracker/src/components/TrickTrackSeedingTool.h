@@ -39,7 +39,7 @@ public:
                                const fcc::PositionedTrackHitCollection* theHits, std::pair<int, int> sIndex, int trackCutoff);
 tricktrack::HitDoublets<Hit>*   findDoublets( std::vector<tricktrack::TTPoint> theInnerHits,  std::vector<tricktrack::TTPoint> theOuterHits);
 //void createKDTree( std::vector<Hit>& thePoints, std::pair<int, int> sIndex);
-void findDoublets(tricktrack::HitDoublets<Hit>* doublets, std::vector<tricktrack::TTPoint> theInnerHits,  tricktrack::FKDTree<double, 4> theOuterTree);
+void findDoublets(tricktrack::HitDoublets<Hit>* doublets, std::vector<tricktrack::TTPoint> theInnerHits,  tricktrack::FKDTree<double, 4> theOuterTree, std::vector<tricktrack::TTPoint> theOuterHits);
 
 
 private:
@@ -77,9 +77,9 @@ private:
   /// Parameter for TrickTrack's doublet creation
   Gaudi::Property<double> m_deltaRho {this, "deltaRho", 1000};
   /// Parameter for TrickTrack's doublet creation
-  Gaudi::Property<double> m_deltaZ {this, "thetaZ", 50};
+  Gaudi::Property<double> m_deltaZ {this, "deltaZ", 50};
   /// Parameter for TrickTrack's doublet creation
-  Gaudi::Property<double> m_deltaT {this, "thetaT", 50.};
+  Gaudi::Property<double> m_deltaT {this, "deltaT", 1050.};
 
   ToolHandle<ILayerGraphTool> m_layerGraphTool;
   ToolHandle<IDoubletCreationTool> m_doubletCreationTool;

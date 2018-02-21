@@ -60,14 +60,14 @@ tricktrack::HitDoublets<Hit>*   TrickTrackSeedingTool::findDoublets( std::vector
           doublets->add(i, j);
           std::cout << i << "\t" << j << std::endl;
         }
-      }
+      //}
     }
   }
  return doublets;
 }
 
-void TrickTrackSeedingTool::findDoublets(tricktrack::HitDoublets<Hit>* doublets, std::vector<tricktrack::TTPoint> theInnerHits,  tricktrack::FKDTree<double, 4> theOuterTree) {
-  std::cout << "find doublets -- kdtree edition" << std::endl;
+void TrickTrackSeedingTool::findDoublets(tricktrack::HitDoublets<Hit>* doublets, std::vector<tricktrack::TTPoint> theInnerHits,  tricktrack::FKDTree<double, 4> theOuterTree, std::vector<tricktrack::TTPoint> theOuterHits) {
+  std::cout << "find doublets -- kdtree  edition" << std::endl;
   // brute force doublet creation
   for (int i = 0; i < theInnerHits.size(); ++i) {
     double currentPhi = theInnerHits[i].phi();
@@ -81,8 +81,10 @@ void TrickTrackSeedingTool::findDoublets(tricktrack::HitDoublets<Hit>* doublets,
     std::vector<unsigned int> result;
     theOuterTree.search(minPoint, maxPoint, result);
     for(auto j: result) {
-      doublets->add(i, j);
+      if ((std::fmod(std::abs(theOuterHits[j].phi() - theInnerHits[i].phi()), 2* M_PI)) < 0.3) {
+        doublets->add(i, j);
           std::cout << i << "\t" << j << std::endl;
+        }
     }
   }
 }
@@ -146,7 +148,7 @@ TrickTrackSeedingTool::findSeeds(const fcc::PositionedTrackHitCollection* theHit
     unsigned int innerLayerIndex = layerPair.theLayers[0];
     unsigned int outerLayerIndex = layerPair.theLayers[1];
     auto doubletsOnLayerPair = new tricktrack::HitDoublets<Hit>(layerPoints[innerLayerIndex], layerPoints[outerLayerIndex]);
-    findDoublets(doubletsOnLayerPair, layerPoints[innerLayerIndex], layerTrees[outerLayerIndex]);
+    findDoublets(doubletsOnLayerPair, layerPoints[innerLayerIndex], layerTrees[outerLayerIndex], layerPoints[outerLayerIndex]);
 
     //doublets.push_back(m_doubletCreationTool->findDoublets(layerPoints[innerLayerIndex], layerPoints[outerLayerIndex]));
     auto doooob = findDoublets(layerPoints[innerLayerIndex], layerPoints[outerLayerIndex]);
@@ -188,6 +190,7 @@ TrickTrackSeedingTool::findSeeds(const fcc::PositionedTrackHitCollection* theHit
     }
     if (l_trackId != -1) { // all the trackIds were identical, a correctly identified track
       ++numGoodTracklets;
+      debug() << "found good track with ID " << l_trackId << endmsg;
     }
     ++trackletCounter;
   }

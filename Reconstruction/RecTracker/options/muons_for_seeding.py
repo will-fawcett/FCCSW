@@ -15,10 +15,10 @@ from Configurables import GenAlg, ConstPtParticleGun
 from Configurables import ConstPileUp
 
 pileuptool = ConstPileUp(numPileUpEvents=5)
-pgun_tool = ConstPtParticleGun(PdgCodes=[13], PhiMin=0., PhiMax=constants.pi*0.5, EtaMin=0, EtaMax=5, PtList=[1*units.GeV, 2*units.GeV,5 * units.GeV,10*units.GeV, 100*units.GeV, 1000*units.GeV, 10000*units.GeV])
-pgun_tool2 = ConstPtParticleGun(PdgCodes=[13], PhiMin=0., PhiMax=constants.pi*0.5, EtaMin=-0.3, EtaMax=0.3, PtList=[5 * units.GeV,10*units.GeV, 100*units.GeV])
+pgun_tool = ConstPtParticleGun(PdgCodes=[13], PhiMin=0., PhiMax=constants.pi*0.2, EtaMin=0., EtaMax=0.3, PtList=[10*units.GeV, 100*units.GeV, 1000*units.GeV, 10000*units.GeV])
+pgun_tool2 = ConstPtParticleGun(PdgCodes=[13], PhiMin=0., PhiMax=constants.pi*0.2, EtaMin=0., EtaMax=0.3, PtList=[10*units.GeV, 100*units.GeV, 1000*units.GeV, 10000*units.GeV])
 
-gen = GenAlg("ParticleGun", PileUpTool=pileuptool, SignalProvider=pgun_tool, PileUpProvider=pgun_tool2, VertexSmearingTool="FlatSmearVertex")
+gen = GenAlg("ParticleGun", PileUpTool=pileuptool, SignalProvider=pgun_tool, PileUpProvider=pgun_tool2)
 gen.hepmc.Path = "hepmc"
 
 from Configurables import Gaudi__ParticlePropertySvc
