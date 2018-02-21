@@ -30,7 +30,7 @@ tricktrack::CMGraph BarrelLayerGraphTool::getGraph() {
   
   auto g = tricktrack::CMGraph();
 
-  constexpr numberOfHits = 1000; // used to resize vector "isOuterHitOfCell""
+  constexpr unsigned int numberOfHits = 1000; // used to resize vector "isOuterHitOfCell""
   auto l1 = tricktrack::CMLayer("innerLayer", numberOfHits);
   auto l2 = tricktrack::CMLayer("middleLayer", numberOfHits);
   auto l3 = tricktrack::CMLayer("outerLayer", numberOfHits);

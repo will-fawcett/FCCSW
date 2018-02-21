@@ -68,18 +68,17 @@ StatusCode RecTrackAlg::execute() {
       hitCounter++;
       }
 
-    std::cout << "riemannHits" << std::endl;
-    std::cout << riemannHits << std::endl;
     auto hitDim  = std::min(hitCounter, nhits);
     auto resizedHits = riemannHits.block(0,0,3,hitDim);
-    std::cout << "resizedHits" << std::endl;
-    std::cout << resizedHits << std::endl;
+    debug() << "riemannHits" << endmsg;
+    std::cout << resizedHits << std::endl; // @todo remove
     tricktrack::Matrix3Nd hits_cov = m_hitRes*tricktrack::Matrix3Nd::Identity(3*hitDim,3*hitDim);
 
     if (track.bits() == 1) {
 
     constexpr int c_speed = 299792458;
     const double B_field = m_Bz * c_speed / pow(10, 9) / 100; // conversion to GeV / cm / c
+    debug() << "B_field" << B_field << endmsg;
     auto h = tricktrack::Helix_fit(resizedHits, hits_cov, B_field, m_calcErrors, m_calcMultipleScattering);
     debug() << "#### Fit parameters: ### " << endmsg <<   h.par 
             << "########################" << endmsg 

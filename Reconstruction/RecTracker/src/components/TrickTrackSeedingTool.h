@@ -16,6 +16,8 @@
 
 #include "tricktrack/SpacePoint.h"
 #include "tricktrack/CMGraph.h"
+#include "tricktrack/FKDTree.h"
+#include "tricktrack/TTPoint.h"
 #include "tricktrack/TrackingRegion.h"
 #include "tricktrack/HitChainMaker.h"
 
@@ -33,11 +35,12 @@ public:
   virtual StatusCode finalize() override final;
 
   virtual std::multimap<unsigned int, unsigned int> findSeeds(const fcc::PositionedTrackHitCollection* theHits) override final;
-  void createBarrelSpacePoints(std::vector<tricktrack::SpacePoint<size_t>>& thePoints, std::map<int, unsigned long int>&,
+  void createBarrelSpacePoints(std::vector<tricktrack::TTPoint>& thePoints,
                                const fcc::PositionedTrackHitCollection* theHits, std::pair<int, int> sIndex, int trackCutoff);
-void createKDTree(
-                                           const fcc::PositionedTrackHitCollection* theHits,
-                                           std::pair<int, int> sIndex);
+tricktrack::HitDoublets<Hit>*   findDoublets( std::vector<tricktrack::TTPoint> theInnerHits,  std::vector<tricktrack::TTPoint> theOuterHits);
+//void createKDTree( std::vector<Hit>& thePoints, std::pair<int, int> sIndex);
+void findDoublets(tricktrack::HitDoublets<Hit>* doublets, std::vector<tricktrack::TTPoint> theInnerHits,  tricktrack::FKDTree<double, 4> theOuterTree);
+
 
 private:
   /// system and layer ids for the inner barrel layer to be used for seeding
@@ -69,13 +72,24 @@ private:
   /// Parameter for TrickTrack's cell connection
   Gaudi::Property<double> m_hardPtCut {this, "hardPtCut", 0.0};
 
+  /// Parameter for TrickTrack's doublet creation
+  Gaudi::Property<double> m_deltaPhi {this, "deltaPhi", 0.3};
+  /// Parameter for TrickTrack's doublet creation
+  Gaudi::Property<double> m_deltaRho {this, "deltaRho", 1000};
+  /// Parameter for TrickTrack's doublet creation
+  Gaudi::Property<double> m_deltaZ {this, "thetaZ", 50};
+  /// Parameter for TrickTrack's doublet creation
+  Gaudi::Property<double> m_deltaT {this, "thetaT", 50.};
+
   ToolHandle<ILayerGraphTool> m_layerGraphTool;
   ToolHandle<IDoubletCreationTool> m_doubletCreationTool;
   ToolHandle<IHitFilterTool> m_hitFilterTool;
 
-  std::unique_ptr<tricktrack::HitChainMaker<tricktrack::SpacePoint<size_t>>> m_automaton;
+  std::unique_ptr<tricktrack::HitChainMaker<tricktrack::TTPoint>> m_automaton;
   std::unique_ptr<tricktrack::TrackingRegion> m_trackingRegion;
   tricktrack::CMGraph m_layerGraph;
+  std::map<std::pair<int, int>, tricktrack::FKDTree<double, 4>> m_hitTrees;
+
 };
 
 #endif /* RECTRACKER_TRICKTRACKSEEDINGTOOL_H */
