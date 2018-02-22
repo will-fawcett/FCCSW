@@ -1,19 +1,19 @@
-#include "BarrelLayerGraphTool.h"
+#include "BarrelLayerGraphTool4.h"
 
 #include "RecInterface/ILayerGraphTool.h"
 
 // TrickTrack headers
 #include "tricktrack/CMGraph.h"
 
-DECLARE_TOOL_FACTORY(BarrelLayerGraphTool)
+DECLARE_TOOL_FACTORY(BarrelLayerGraphTool4)
 
-BarrelLayerGraphTool::BarrelLayerGraphTool(const std::string& type, const std::string& name,
+BarrelLayerGraphTool4::BarrelLayerGraphTool4(const std::string& type, const std::string& name,
                                                    const IInterface* parent)
     : GaudiTool(type, name, parent) {
   declareInterface<ILayerGraphTool>(this);
 }
 
-StatusCode BarrelLayerGraphTool::initialize() {
+StatusCode BarrelLayerGraphTool4::initialize() {
   StatusCode sc = GaudiTool::initialize();
   if (sc.isFailure()) {
     return sc;
@@ -21,12 +21,12 @@ StatusCode BarrelLayerGraphTool::initialize() {
   return sc;
 }
 
-StatusCode BarrelLayerGraphTool::finalize() { return GaudiTool::finalize(); }
+StatusCode BarrelLayerGraphTool4::finalize() { return GaudiTool::finalize(); }
 
 /// Construct and return the layergraph for the Cellular automaton,
 // for the inner four barrel layers only
 // the interface to the layer graph is likely to be changed
-tricktrack::CMGraph BarrelLayerGraphTool::getGraph() {
+tricktrack::CMGraph BarrelLayerGraphTool4::getGraph() {
   
   auto g = tricktrack::CMGraph();
 

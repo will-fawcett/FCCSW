@@ -30,7 +30,7 @@ TrickTrackSeedingTool::TrickTrackSeedingTool(const std::string& type, const std:
   declareInterface<ITrackSeedingTool>(this);
   declareProperty("LayerGraphTool", m_layerGraphTool);
   declareProperty("DoubletCreationTool", m_doubletCreationTool);
-  declareTool(m_layerGraphTool, "BarrelLayerGraphTool/LayerGraphTool");
+  declareTool(m_layerGraphTool, "BarrelLayerGraphTool4/LayerGraphTool");
   declareTool(m_doubletCreationTool, "DoubletCreationTool/DoubletCreationTool");
   declareTool(m_hitFilterTool, "FastHitFilterTool/FastHitFilterTool");
 
@@ -48,26 +48,23 @@ StatusCode TrickTrackSeedingTool::initialize() {
 
 tricktrack::HitDoublets<Hit>*   TrickTrackSeedingTool::findDoublets( std::vector<Hit> theInnerHits,  std::vector<Hit> theOuterHits) {
 
-  std::cout << "find doublets -- vector edition" << std::endl;
   auto doublets = new tricktrack::HitDoublets<Hit>(theInnerHits, theOuterHits);
 
   // brute force doublet creation
   for (unsigned int i = 0; i < theInnerHits.size(); ++i) {
     for(unsigned int j = 0; j < theOuterHits.size(); ++j) {
       // @todo: very ad-hoc / hard coded parameters
-      if ((std::fmod(std::abs(theOuterHits[j].phi() - theInnerHits[i].phi()), 2* M_PI)) < 0.3) {
-        if (std::abs(theOuterHits[j].z() - theInnerHits[i].z()) < 50) {
+      if ((std::fmod(std::abs(theOuterHits[j].phi() - theInnerHits[i].phi()), 2* M_PI)) < m_deltaPhi) {
+        if (std::abs(theOuterHits[j].z() - theInnerHits[i].z()) < m_deltaZ) {
           doublets->add(i, j);
-          std::cout << i << "\t" << j << std::endl;
         }
-      //}
+      }
     }
   }
  return doublets;
 }
 
 void TrickTrackSeedingTool::findDoublets(tricktrack::HitDoublets<Hit>* doublets, std::vector<tricktrack::TTPoint> theInnerHits,  tricktrack::FKDTree<double, 4> theOuterTree, std::vector<tricktrack::TTPoint> theOuterHits) {
-  std::cout << "find doublets -- kdtree  edition" << std::endl;
   // brute force doublet creation
   for (int i = 0; i < theInnerHits.size(); ++i) {
     double currentPhi = theInnerHits[i].phi();
@@ -80,11 +77,14 @@ void TrickTrackSeedingTool::findDoublets(tricktrack::HitDoublets<Hit>* doublets,
 
     std::vector<unsigned int> result;
     theOuterTree.search(minPoint, maxPoint, result);
-    for(auto j: result) {
-      if ((std::fmod(std::abs(theOuterHits[j].phi() - theInnerHits[i].phi()), 2* M_PI)) < 0.3) {
-        doublets->add(i, j);
-          std::cout << i << "\t" << j << std::endl;
+    for(unsigned int j = 0; j < theOuterHits.size(); ++j) {
+      if ((std::fmod(std::abs(theOuterHits[j].phi() - theInnerHits[i].phi()), 2* M_PI)) < m_deltaPhi) {
+        if (std::abs(theOuterHits[j].z() - theInnerHits[i].z()) < m_deltaZ) {
+          if (std::abs(theOuterHits[j].t() - theInnerHits[i].t()) < m_deltaT) {
+            doublets->add(i, j);
+          }
         }
+      }
     }
   }
 }
@@ -124,11 +124,6 @@ TrickTrackSeedingTool::findSeeds(const fcc::PositionedTrackHitCollection* theHit
 
   std::vector<std::vector<Hit>> layerPoints;
   std::vector<tricktrack::FKDTree<double, 4>> layerTrees;
-  std::vector<std::pair<int,int>> layerIndices {
-    m_seedingLayerIndices0,
-    m_seedingLayerIndices1,
-    m_seedingLayerIndices2,
-    m_seedingLayerIndices3};
 
   // create vector of hits on each seeding layer
   for (unsigned int layerCounter = 0; layerCounter < numLayers; ++layerCounter) {
@@ -136,8 +131,8 @@ TrickTrackSeedingTool::findSeeds(const fcc::PositionedTrackHitCollection* theHit
     layerPoints.emplace_back();
     layerTrees.emplace_back();
     // set the indices the hit filter uses to select hits
-    m_hitFilterTool->setIds(layerIndices[layerCounter].first, layerIndices[layerCounter].second);
-    createBarrelSpacePoints(layerPoints.back(), theHits, layerIndices[layerCounter], 0 /* debug parameter, currently unused */);
+    m_hitFilterTool->setIds(m_seedingLayerIndices[layerCounter].first, m_seedingLayerIndices[layerCounter].second);
+    createBarrelSpacePoints(layerPoints.back(), theHits, m_seedingLayerIndices[layerCounter], 0 /* debug parameter, currently unused */);
     debug() << "found " << layerPoints.back().size() << " points on Layer " << endmsg;
     layerTrees.back().build(layerPoints.back());
   }
@@ -150,8 +145,6 @@ TrickTrackSeedingTool::findSeeds(const fcc::PositionedTrackHitCollection* theHit
     auto doubletsOnLayerPair = new tricktrack::HitDoublets<Hit>(layerPoints[innerLayerIndex], layerPoints[outerLayerIndex]);
     findDoublets(doubletsOnLayerPair, layerPoints[innerLayerIndex], layerTrees[outerLayerIndex], layerPoints[outerLayerIndex]);
 
-    //doublets.push_back(m_doubletCreationTool->findDoublets(layerPoints[innerLayerIndex], layerPoints[outerLayerIndex]));
-    auto doooob = findDoublets(layerPoints[innerLayerIndex], layerPoints[outerLayerIndex]);
     doublets.push_back(doubletsOnLayerPair);
     debug() << "found "  << doublets.back()->size() << " doublets on layers  " << innerLayerIndex << " and " << outerLayerIndex  << endmsg;
   }

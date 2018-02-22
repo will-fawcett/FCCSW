@@ -44,15 +44,7 @@ void findDoublets(tricktrack::HitDoublets<Hit>* doublets, std::vector<tricktrack
 
 private:
   /// system and layer ids for the inner barrel layer to be used for seeding
-  Gaudi::Property<std::pair<int, int>> m_seedingLayerIndices0{this, "seedingLayerIndices0", {0, 0}};
-  /// system and layer ids for the middle barrel layer to be used for seeding
-  Gaudi::Property<std::pair<int, int>> m_seedingLayerIndices1{this, "seedingLayerIndices1", {0, 1}};
-  /// system and layer ids for the outer barrel layer to be used for seeding
-  Gaudi::Property<std::pair<int, int>> m_seedingLayerIndices2{this, "seedingLayerIndices2", {0, 2}};
-  /// system and layer ids for the outer barrel layer to be used for seeding
-  Gaudi::Property<std::pair<int, int>> m_seedingLayerIndices3{this, "seedingLayerIndices3", {0, 3}};
-  /// readout used for the barrel seeding layers
-  Gaudi::Property<std::string> m_readoutName{this, "readoutName", "TrackerBarrelReadout"};
+  Gaudi::Property<std::vector<std::pair<int, int>>> m_seedingLayerIndices{this, "seedingLayerIndices", {{0, 0}, {0,1}, {0,2},{0,3},{0,4}}};
   /// Parameter for TrickTrack's TrackingRegion
   /// coordinate of the center of the luminous region
   Gaudi::Property<double> m_regionOriginX {this, "regionOriginX", 0};
@@ -77,7 +69,7 @@ private:
   /// Parameter for TrickTrack's doublet creation
   Gaudi::Property<double> m_deltaRho {this, "deltaRho", 1000};
   /// Parameter for TrickTrack's doublet creation
-  Gaudi::Property<double> m_deltaZ {this, "deltaZ", 50};
+  Gaudi::Property<double> m_deltaZ {this, "deltaZ", 150};
   /// Parameter for TrickTrack's doublet creation
   Gaudi::Property<double> m_deltaT {this, "deltaT", 1050.};
 
