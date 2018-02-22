@@ -44,7 +44,7 @@ void findDoublets(tricktrack::HitDoublets<Hit>* doublets, std::vector<tricktrack
 
 private:
   /// system and layer ids for the inner barrel layer to be used for seeding
-  Gaudi::Property<std::vector<std::pair<int, int>>> m_seedingLayerIndices{this, "seedingLayerIndices", {{0, 0}, {0,1}, {0,2},{0,3},{0,4}}};
+  Gaudi::Property<std::vector<std::pair<int, int>>> m_seedingLayerIndices{this, "seedingLayerIndices", {{1, 0}, {1,1}, {1,2}}};
   /// Parameter for TrickTrack's TrackingRegion
   /// coordinate of the center of the luminous region
   Gaudi::Property<double> m_regionOriginX {this, "regionOriginX", 0};
