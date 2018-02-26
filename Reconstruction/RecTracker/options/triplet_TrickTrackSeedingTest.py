@@ -6,7 +6,7 @@ from Gaudi.Configuration import *
 from FWCore.joboptions import parse_standard_job_options
 args = parse_standard_job_options()
 
-inputfile = "muons_for_seeding.root"
+inputfile = "triplet_muons_for_seeding.root"
 if args.inputfile:
   inputfile = args.inputfile
 
@@ -80,7 +80,7 @@ RecTrackAlg.positionedTrackHits.Path = "positionedHits"
 
 
 # PODIO algorithm
-outputfile = "tricktrack_seeding_example.root"
+outputfile = "triplet_tracks.root"
 if args.outputfile:
   outputfile = args.outputfile
 from Configurables import PodioOutput

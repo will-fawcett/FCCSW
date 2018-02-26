@@ -8,6 +8,7 @@ gaudi_depends_on_subdirs(GaudiAlg FWCore Detector/DetInterface Sim/SimG4Interfac
 
 find_package(Geant4)
 find_package(FCCEDM)
+
 find_package(PODIO)
 find_package(HepMC)
 find_package(DD4hep COMPONENTS DDSegmentation REQUIRED)

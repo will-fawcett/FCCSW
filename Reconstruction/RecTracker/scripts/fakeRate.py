@@ -8,6 +8,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+ROOT.gSystem.Load("/afs/cern.ch/work/v/vavolkl/public/fcc.cern.ch/sw/0.9.0/fcc-edm/0.5.1/x86_64-slc6-gcc62-opt/lib/libdatamodel.so")
+
+
 
 # command line arguments
 parser = argparse.ArgumentParser()
