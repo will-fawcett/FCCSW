@@ -9,6 +9,8 @@
 #include "datamodel/TrackHitCollection.h"
 #include "datamodel/TrackStateCollection.h"
 
+#include "LineParameters.h"
+
 // TrickTrack headers
 #include "tricktrack/TTPoint.h"
 using Hit = tricktrack::TTPoint; 
