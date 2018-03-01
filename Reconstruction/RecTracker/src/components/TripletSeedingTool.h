@@ -23,10 +23,6 @@
 
 #include <map>
 
-
-
-
-
 class TripletSeedingTool : public GaudiTool, virtual public ITrackSeedingTool {
 public:
   TripletSeedingTool(const std::string& type, const std::string& name, const IInterface* parent);
@@ -35,19 +31,20 @@ public:
   virtual StatusCode finalize() override final;
 
   virtual std::multimap<unsigned int, unsigned int> findSeeds(const fcc::PositionedTrackHitCollection* theHits) override final;
-  void createBarrelSpacePoints(std::vector<tricktrack::TTPoint>& thePoints,
-                               const fcc::PositionedTrackHitCollection* theHits, std::pair<int, int> sIndex, int trackCutoff);
-tricktrack::HitDoublets<Hit>*   findDoublets( std::vector<tricktrack::TTPoint> theInnerHits,  std::vector<tricktrack::TTPoint> theOuterHits);
-//void createKDTree( std::vector<Hit>& thePoints, std::pair<int, int> sIndex);
-void findDoublets(tricktrack::HitDoublets<Hit>* doublets, std::vector<tricktrack::TTPoint> theInnerHits,  tricktrack::FKDTree<double, 4> theOuterTree, std::vector<tricktrack::TTPoint> theOuterHits);
 
+  void createBarrelSpacePoints(std::vector<tricktrack::TTPoint>& thePoints, const fcc::PositionedTrackHitCollection* theHits, std::pair<int, int> sIndex, int trackCutoff);
+
+  tricktrack::HitDoublets<Hit>* findDoublets( std::vector<tricktrack::TTPoint> theInnerHits,  std::vector<tricktrack::TTPoint> theOuterHits);
+
+  //void createKDTree( std::vector<Hit>& thePoints, std::pair<int, int> sIndex);
+  
+  void findDoublets(tricktrack::HitDoublets<Hit>* doublets, std::vector<tricktrack::TTPoint> theInnerHits,  tricktrack::FKDTree<double, 4> theOuterTree, std::vector<tricktrack::TTPoint> theOuterHits);
 
 private:
   /// system and layer ids for the inner barrel layer to be used for seeding
   ToolHandle<IHitFilterTool> m_hitFilterTool;
   Gaudi::Property<std::vector<std::pair<int, int>>> m_seedingLayerIndices{this, "seedingLayerIndices", {{1, 0}, {1,1}, {1,2}}};
   Gaudi::Property<double> m_Parameter {this, "someParameter", 0};
-
 
 };
 
