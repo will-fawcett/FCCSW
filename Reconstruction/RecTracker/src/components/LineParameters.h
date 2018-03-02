@@ -27,15 +27,15 @@ class LineParameters {
       m_coordinates = coordinates; 
     }
 
-    // constructor 
-    /**************
+    // constructor for hit pointer
     LineParameters(std::vector<tricktrack::TTPoint*> hits){
       for(tricktrack::TTPoint* hit : hits){
         m_coordinates.push_back( std::make_pair(hit->z(), hit->rho() ) ); // coordinates in (z, r)
         // m_coordinates.emplace_back( hit->z(), hit->rho() ); // coordinates in (z, r) 
       }
     }
-    **************/
+
+    // constructor for hit 
     LineParameters(std::vector<tricktrack::TTPoint> hits){
       for(const tricktrack::TTPoint hit : hits){
         m_coordinates.push_back( std::make_pair(hit.z(), hit.rho()) ); // coordinates in (z, r)

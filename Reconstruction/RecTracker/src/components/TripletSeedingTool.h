@@ -17,11 +17,15 @@
 #include "tricktrack/SpacePoint.h"
 #include "tricktrack/CMGraph.h"
 #include "tricktrack/FKDTree.h"
-#include "tricktrack/TTPoint.h"
+/*#include "tricktrack/TTPoint.h"*/
 #include "tricktrack/TrackingRegion.h"
 #include "tricktrack/HitChainMaker.h"
 
 #include <map>
+
+
+
+#include "myHit.h"
 
 class TripletSeedingTool : public GaudiTool, virtual public ITrackSeedingTool {
 public:
@@ -32,13 +36,13 @@ public:
 
   virtual std::multimap<unsigned int, unsigned int> findSeeds(const fcc::PositionedTrackHitCollection* theHits) override final;
 
-  void createBarrelSpacePoints(std::vector<tricktrack::TTPoint>& thePoints, const fcc::PositionedTrackHitCollection* theHits, std::pair<int, int> sIndex, int trackCutoff);
+  void createBarrelSpacePoints(std::vector<myHit>& thePoints, const fcc::PositionedTrackHitCollection* theHits, std::pair<int, int> sIndex, int trackCutoff);
 
-  tricktrack::HitDoublets<Hit>* findDoublets( std::vector<tricktrack::TTPoint> theInnerHits,  std::vector<tricktrack::TTPoint> theOuterHits);
+  tricktrack::HitDoublets<Hit>* findDoublets( std::vector<myHit> theInnerHits,  std::vector<myHit> theOuterHits);
 
   //void createKDTree( std::vector<Hit>& thePoints, std::pair<int, int> sIndex);
   
-  void findDoublets(tricktrack::HitDoublets<Hit>* doublets, std::vector<tricktrack::TTPoint> theInnerHits,  tricktrack::FKDTree<double, 4> theOuterTree, std::vector<tricktrack::TTPoint> theOuterHits);
+  void findDoublets(tricktrack::HitDoublets<Hit>* doublets, std::vector<myHit> theInnerHits,  tricktrack::FKDTree<double, 4> theOuterTree, std::vector<myHit> theOuterHits);
 
 private:
   /// system and layer ids for the inner barrel layer to be used for seeding

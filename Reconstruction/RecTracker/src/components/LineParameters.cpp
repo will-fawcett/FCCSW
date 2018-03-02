@@ -1,7 +1,5 @@
 #include "LineParameters.h"
 
-
-
 void LineParameters::calculateLineParameters(float x0, float y0, float x1, float y1){
   // Calculate the parameters of the straight line passing through the coordinates (x0, y0), (x1, y1)
 
@@ -9,7 +7,6 @@ void LineParameters::calculateLineParameters(float x0, float y0, float x1, float
   m_y_intercept  = (x1*y0 - x0*y1) / (x1 - x0);
   m_x_intercept = -1*m_y_intercept/m_gradient; 
 }
-
 
 void LineParameters::simpleLinearLeastSquaresFit() {
   // Function to do simple linear least squares fitting (for a straight line)
@@ -37,6 +34,4 @@ void LineParameters::simpleLinearLeastSquaresFit() {
   
   // x-intercept
   m_x_intercept = -1*m_y_intercept/m_gradient;
-
 }
-

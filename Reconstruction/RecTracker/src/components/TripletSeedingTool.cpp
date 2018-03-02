@@ -1,8 +1,5 @@
 #include "TripletSeedingTool.h"
 
-// add myTrack
-//#include "myTrack.h"
-
 #include "DetInterface/IGeoSvc.h"
 
 #include "datamodel/PositionedTrackHitCollection.h"
@@ -10,12 +7,14 @@
 #include "datamodel/TrackStateCollection.h"
 
 #include "LineParameters.h"
+#include "myTrack.h"
+#include "TrackFitter.h"
 
 // TrickTrack headers
-#include "tricktrack/TTPoint.h"
-using Hit = tricktrack::TTPoint; 
+//#include "tricktrack/TTPoint.h"
+//using Hit = tricktrack::TTPoint; 
+//using namespace tricktrack;
 
-using namespace tricktrack;
 
 
 DECLARE_TOOL_FACTORY(TripletSeedingTool)
@@ -36,7 +35,7 @@ StatusCode TripletSeedingTool::initialize() {
 }
 
 
-void TripletSeedingTool::createBarrelSpacePoints(std::vector<Hit>& thePoints,
+void TripletSeedingTool::createBarrelSpacePoints(std::vector<myHit>& thePoints,
                                                        const fcc::PositionedTrackHitCollection* theHits,
                                                        std::pair<int, int> sIndex,
                                                        int) {
@@ -52,25 +51,32 @@ void TripletSeedingTool::createBarrelSpacePoints(std::vector<Hit>& thePoints,
   size_t hitCounter = 0;
   std::set<int> trackIdsInThisLayer;
   for (auto hit : *theHits) {
-    if (m_hitFilterTool->filter(hit.core())) { // not sure what teh hitfiltertool does ... maybe to remove these duplicate hits? see RecTracker/src/components/FastHitFilterTool.cpp  
+    // not sure what the hitfiltertool does ... maybe to remove these duplicate hits? see RecTracker/src/components/FastHitFilterTool.cpp  
+    if (m_hitFilterTool->filter(hit.core())) { 
         auto result = trackIdsInThisLayer.insert(hit.core().bits); // insert returns std::pair (iterator to inserted element, bool set to true if insertion took place)
         if (result.second) {
 
         //std::cout << "layer " << sIndex.second << "\thit id: " << hit.core().bits << std::endl;
         //std::cout << "inputs: (x, y, z) : (" << hit.position().x << ", " << hit.position().y << ", " << hit.position().z << ")" << std::endl;
 
-        // WJF: TTPoint constructed with (r, phi, z, t, ID) ? 
-        thePoints.emplace_back( // emplace_back, kindov like push_back but seems to be able to create the object. Avoids the extra copy operation used by push_back
-            //hit.position().x,
-            sqrt(hit.position().x*hit.position().x + hit.position().y*hit.position().y), // r
-            //hit.position().y,
-            atan2f( hit.position().y, hit.position().x ), // phi ?  
-        hit.position().z,
-        hit.core().time, 
-        hitCounter);
+        /****************
+        // emplace_back, kindov like push_back but seems to be able to create the object. Avoids the extra copy operation used by push_back
+        thePoints.emplace_back(  
+          sqrt(hit.position().x*hit.position().x + hit.position().y*hit.position().y), 
+          atan2f( hit.position().y, hit.position().x ), 
+          hit.position().z,
+          hit.core().time, 
+          hitCounter);
+        *************/
+
+        thePoints.emplace_back(
+            hit.position().x,
+            hit.position().y,
+            hit.position().z,
+            hit.core().time,
+            hitCounter);
         
         }
-
       }
         ++hitCounter;
   }
@@ -89,7 +95,7 @@ std::multimap<unsigned int, unsigned int> TripletSeedingTool::findSeeds(const fc
   std::cout << "WJF: findSeeds() called: " << wjfCounter << std::endl;
 
   // fill layerPoints with the hits in each of the triplet layers 
-  std::vector<std::vector<Hit>> layerPoints;
+  std::vector<std::vector<myHit>> layerPoints;
   for (unsigned int layerCounter = 0; layerCounter < 3; ++layerCounter) {
 
     layerPoints.emplace_back();
@@ -100,12 +106,15 @@ std::multimap<unsigned int, unsigned int> TripletSeedingTool::findSeeds(const fc
     // convert "theHits" to TTPoint hit class, store these in layerPoints.back(), somehow also only extracts hits in a specific layer (from setIds from hitFilterTool)  
     createBarrelSpacePoints(layerPoints.back(), theHits, m_seedingLayerIndices[layerCounter], 0 /* debug parameter, currently unused */); 
 
-  //}
+    //debug() << "found " << layerPoints.back().size() << " points on Layer " << endmsg;
 
-    debug() << "found " << layerPoints.back().size() << " points on Layer " << endmsg;
+  }
+
     
+  for(unsigned int layerCounter=0; layerCounter<3; ++layerCounter){
+
     // loop over all hits in this layer 
-    for (Hit hit: layerPoints[layerCounter]) {
+    for (myHit hit: layerPoints[layerCounter]) {
 
       //float hitR = sqrt(hit.x()*hit.x() + hit.y()*hit.y());// hypotf(hit.x(), hit.y());
       //debug() << "x: " << hit.x() << "\ty: " << hit.y() << "\tz: " << hit.z() << "\tr: " << hitR << endmsg; 
