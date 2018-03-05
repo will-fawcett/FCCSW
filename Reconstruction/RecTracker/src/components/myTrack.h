@@ -30,7 +30,7 @@ class myTrack{
 
     /*float m_gradient;*/
     /*float m_intercept;*/
-    std::vector<myHit*> m_associatedHits; 
+    std::vector<const myHit*> m_associatedHits; 
 
     // track parameters
     float m_d0;
@@ -64,7 +64,7 @@ class myTrack{
 
 
     // constructor 
-    myTrack(std::vector<myHit*>& hits){
+    myTrack(std::vector<const myHit*>& hits){
       m_associatedHits = hits;
       m_initialised = calculateTrackParameters(); // call default track parameter calculation
     }
@@ -102,6 +102,7 @@ class myTrack{
     float kappa_bc() const {return m_kappa_013;} // beamline constraint
     float kappa_nbc() const {return m_kappa_123;} // no beamline constraint
 
+    std::vector<const myHit*> getAssociatedHits() const {return m_associatedHits;}
 
     // access hit information 
     /*float GetHitPtAtLayer(int layerID) const {return m_associatedHits.at(layerID)->PT;}*/

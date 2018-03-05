@@ -20,11 +20,14 @@ std::string Location::formatLocation(int layerID, int phiBin, int etaBin) const{
   return std::to_string(layerID)+"_"+std::to_string(phiBin)+"_"+std::to_string(etaBin);
 }
 
+// Calculate location string from a pointer to a Hit object
+std::string Location::locationFromHitPointer(const myHit* hit) const{
+  return this->locationFromEtaPhi( hit->SurfaceID(), hit->eta(), hit->phi()); 
+}
+
 // Calculate location string from a Hit object
-std::string Location::locationFromHit(myHit* hit) const{
-  float eta = -log( tan( acos( hit->rho()/hit->z())/2 ) );
-      //return this->locationFromEtaPhi(hit->SurfaceID, eta, hit->phi());
-  return this->locationFromEtaPhi( 0 , eta, hit->phi()); // to do: fix 
+std::string Location::locationFromHit(const myHit& hit) const{
+  return this->locationFromEtaPhi( hit.SurfaceID(), hit.eta(), hit.phi()); 
 }
 
 // Calculate location string from a surface ID and the eta and phi coordinates 

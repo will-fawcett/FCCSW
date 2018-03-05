@@ -11,7 +11,8 @@
 #include <iostream>
 #include <string>
 
-using hitContainer = std::map<int, std::vector<myHit*> >; 
+/*using hitContainer = std::map<int, std::vector<myHit*> >; */
+using hitContainer = std::vector< std::vector<myHit> > ;
 
 // enum for different fit types (can add more later) 
 enum fitTypes{

@@ -49,14 +49,16 @@ bool TrackFitter::AssociateHits(hitContainer& hc){
     case MAX:{
       return false;
     }
-
   }
   return true; 
 }
 
 std::map<std::string, std::vector<myHit*> > TrackFitter::associateHitsSimplePattern(hitContainer& hc, Location& loc) const{
 
-  // Separate collection of hits into "layer-eta"phi" regions
+  /******************************
+   *  Separate collection of hits into "layer-eta-phi" regions
+   *  for faster pattern recognition
+   ***********************************/
 
   // Some pre-defined knowledge about the tracker
   const float barrelLength = 2250; // [mm] 
@@ -66,9 +68,9 @@ std::map<std::string, std::vector<myHit*> > TrackFitter::associateHitsSimplePatt
 
   std::map<std::string, std::vector<myHit*> > newMap; 
   for(const auto layer : m_layerIDs){
-    for(myHit* hit : hc[layer]){
+    for(myHit hit : hc.at(layer)){
       std::string locationString = loc.locationFromHit(hit);
-      newMap[ locationString ].push_back(hit); 
+      newMap[ locationString ].push_back(&hit);  // pointer to hit 
       //setOfLocations.push_back(locationString);
     }
   }
@@ -150,15 +152,15 @@ bool TrackFitter::associateHitsSimple(hitContainer& hc, float minZ, float maxZ){
     // Simplest possible algorithm 
     //////////////////////////////////////////
 
-    //const float tolerance = 1.0; // [mm]
     const float tolerance = 0.1; // [mm]
 
     // get the inner and outer barrel radii
     const int innerLayerID = m_layerIDs.at(0);
     const int outerLayerID = m_layerIDs.back();
     const int middleLayerID = 1; 
-    const float rInner = hc[innerLayerID].at(0)->rho();
-    const float rOuter = hc[outerLayerID].at(0)->rho(); 
+
+    const float rInner = hc[innerLayerID].at(0).rho();
+    const float rOuter = hc[outerLayerID].at(0).rho(); 
 
     // reserve some space for the tracks (performance)  
     m_tracks.clear();
@@ -173,10 +175,10 @@ bool TrackFitter::associateHitsSimple(hitContainer& hc, float minZ, float maxZ){
 
     // Draw a line between the hit in the innermost and outermost layer
     // See if there is a hit on the line in the intermediate layer (within some tolerance)
-    for(const auto& innerHit : hc[innerLayerID]){
+    for(const myHit& innerHit : hc[innerLayerID]){
 
-      const float zInner = innerHit->z();
-      const float phiInner = innerHit->phi();
+      const float zInner = innerHit.z();
+      const float phiInner = innerHit.phi();
 
       // get locations (areas) for other hits
       std::string innerHitLocation = loc.locationFromHit(innerHit); 
@@ -190,7 +192,7 @@ bool TrackFitter::associateHitsSimple(hitContainer& hc, float minZ, float maxZ){
       std::vector<myHit*> middleHitVector = concatenateHitsBasedOnLocations(hitMap, middleHitLocations);
 
       //for(const auto& outerHit : hc[outerLayerID]){
-      for(const auto& outerHit : outerHitVector){
+      for(const myHit* outerHit : outerHitVector){
 
         // must be within phi criteria  
         if( quickDeltaPhi(phiInner, outerHit->phi()) > phiWindow) continue; 
@@ -208,7 +210,7 @@ bool TrackFitter::associateHitsSimple(hitContainer& hc, float minZ, float maxZ){
         const float intersect = (582.0 - params.y_intercept())/params.gradient();
 
         //for(const auto& intermediateHit : hc[middleLayerID]){
-        for(const auto& intermediateHit : middleHitVector){
+        for(const myHit* intermediateHit : middleHitVector){
           const float zInter = intermediateHit->z();
 
           // only select if intermediate hit matches within tolerance along Z  
@@ -218,9 +220,9 @@ bool TrackFitter::associateHitsSimple(hitContainer& hc, float minZ, float maxZ){
             if( quickDeltaPhi(phiInner, intermediateHit->phi()) > phiWindow) continue; 
 
             // Three hits are matched -> a track 
-            std::vector<myHit*> matchedHits;
+            std::vector<const myHit*> matchedHits;
             matchedHits.reserve(4); // prevent vector from having to grow 
-            matchedHits.push_back(innerHit);
+            matchedHits.push_back(&innerHit); // pointer to inner hit 
             matchedHits.push_back(intermediateHit);
             matchedHits.push_back(outerHit);
 
@@ -231,7 +233,8 @@ bool TrackFitter::associateHitsSimple(hitContainer& hc, float minZ, float maxZ){
             std::cout << "Layer:   Inner: " << innerHit->SurfaceID << "\tMiddle: " << intermediateHit->SurfaceID << "\touter: " << outerHit->SurfaceID << std::endl;
             *****************/
 
-            m_tracks.push_back( myTrack(matchedHits) ); 
+            //m_tracks.push_back( myTrack(matchedHits) ); 
+            m_tracks.emplace_back( matchedHits ); 
           }
         }
       }

@@ -1,5 +1,6 @@
 #include "myHit.h"
 #include <cmath>
+#include "TLorentzVector.h"
 
 float myHit::rho() const{
   if(!m_rho_cache){
@@ -19,16 +20,22 @@ float myHit::phi() const{
 
 float myHit::eta() const{
   if(!m_eta_cache){
-    //m_eta = this->Position().Eta(); 
-    m_eta = 5;
+    m_eta = this->calculateEta();
     m_eta_cache = true;
   }
   return m_eta;
 }
 
-//const TLorentzVector& myHit::Position() const {
-//TLorentzVector myHit::Position() const {
-//TLorentzVector vec;
-//vec.SetXYZT(m_x, m_y, m_z, m_t);
-//return vec;
-//}
+
+// WJF: TLorentzVector doesn't work with FCCSW
+// ETA calculation, copied from TLorentzVector and TVector 3
+float myHit::calculateEta() const{
+  float magnitude = sqrt(m_x*m_x + m_y*m_y + m_z*m_z); 
+  float cosTheta = (magnitude == 0.0) ? 1.0 : m_z/magnitude; 
+  if (cosTheta*cosTheta < 1) return -0.5* log( (1.0-cosTheta)/(1.0+cosTheta) );
+  if (m_z == 0) return 0;
+  //Warning("PseudoRapidity","transvers momentum = 0! return +/- 10e10");
+  if (m_z > 0) return 10e10;
+  else        return -10e10;
+}
+

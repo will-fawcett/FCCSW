@@ -40,9 +40,9 @@ bool myTrack::trackParametersTriplet(){
     return false;
   }
 
-  myHit * hit1 = m_associatedHits.at(0);
-  myHit * hit2 = m_associatedHits.at(1);
-  myHit * hit3 = m_associatedHits.at(2);
+  const myHit * hit1 = m_associatedHits.at(0);
+  const myHit * hit2 = m_associatedHits.at(1);
+  const myHit * hit3 = m_associatedHits.at(2);
 
   // Check hits are properly orderd radially. Shouldn't really happen
   if(hit1->rho() > hit2->rho() || hit2->rho() > hit3->rho()){
@@ -157,44 +157,16 @@ bool myTrack::isNotFake() const{
 bool myTrack::isFake() const{
 
   // If all of the hits associated to this track have the same particle ID, the the track is not a fake track
-  //
-  // If this hit is from pileup, the pileup particle is unlikely to be stored in the ROOT file, and so the reference to it will break
-  // In this case we cannot definitely tell if the track is fake or not, however we can match by pT. If all three particles have (exactly) the same pT
-  // then they should have originated from the same particle 
-
-  // TODO: convert 
   
-  /*******************
-  bool puFlag(false);
   std::vector<int> uniqueIDs;
-  std::vector<int> ptIDs;
-  for(Hit* hit : m_associatedHits){
-    ptIDs.push_back(hit->intPtKeVID);
-    if(hit->IsPU){
-      puFlag=true;
-    }
-    else{
-      // only fill if the UID exists (i.e. is not a PU particle) 
-      auto uniqueID = dynamic_cast<GenParticle*>(hit->Particle.GetObject())->GetUniqueID();
-      uniqueIDs.push_back(uniqueID);
-    }
+  for(const myHit* hit : m_associatedHits){
+    uniqueIDs.push_back(hit->particleID());
   }
-  
-  if(puFlag){
-    // check if the pT IDs are the same
-    for(int i=0; i<ptIDs.size()-1; ++i){
-      if(ptIDs.at(i) != ptIDs.at(i+1)) return true; // is fake if any of these are different
-    }
-  }
-  else{
-    // check if the unique IDs are the same
-    for(int i=0; i<uniqueIDs.size()-1; ++i){
-      if(uniqueIDs.at(i) != uniqueIDs.at(i+1) ) return true; // is fake if any of these are different
-    }
+  for(int i=0; i<uniqueIDs.size()-1; ++i){
+    if(uniqueIDs.at(i) != uniqueIDs.at(i+1)) return true; // track is fake if any of these are different 
   }
   return false;
-  *******************/
-  return true; 
+
 }
 
 void myTrack::printTrackParameters() const {
@@ -212,10 +184,10 @@ void myTrack::printHitInfo() const {
   this->printTrackParameters();
 
   //for(const myHit& hit : m_associatedHits){
-  for(myHit* hit : m_associatedHits){
+  for(const myHit* hit : m_associatedHits){
     std::cout << "\t(" << hit->x() << ", " << hit->y() << ", " << hit->z() << ") " 
       << " r=" << hit->rho() << " phi=" << hit->phi() // << " eta=" << hit->Eta eta not available ? 
-      //<< "\tID: " << hit->SurfaceID 
+      << "\tID: " << hit->SurfaceID() 
       //<< "\tpu: " << hit->IsPU 
       //<< " pt: " << hit->PT
       //<< " ID: " << hit->intPtKeVID

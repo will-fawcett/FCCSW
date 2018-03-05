@@ -25,6 +25,8 @@ TripletSeedingTool::TripletSeedingTool(const std::string& type, const std::strin
   declareTool(m_hitFilterTool, "FastHitFilterTool/FastHitFilterTool");
 }
 
+//------------------------------------------------------------------------------
+
 // Initialize 
 StatusCode TripletSeedingTool::initialize() {
   StatusCode sc = GaudiTool::initialize();
@@ -35,16 +37,32 @@ StatusCode TripletSeedingTool::initialize() {
 }
 
 
+//------------------------------------------------------------------------------
+
+inline int countFakes(std::vector<myTrack>& theTracks){
+    // Utility function to count the number of fake tracks
+    int nFakes(0);
+    for(const auto& track : theTracks){
+      if(track.isFake()) nFakes++;
+    }
+    return nFakes;
+}
+
+
+//------------------------------------------------------------------------------
+
 void TripletSeedingTool::createBarrelSpacePoints(std::vector<myHit>& thePoints,
                                                        const fcc::PositionedTrackHitCollection* theHits,
                                                        std::pair<int, int> sIndex,
+                                                       int layerCounter, 
                                                        int) {
   /**************
-   * Filters through the hits in theHits, adds hit objects (tricktrack::TTPoint) to the vector thePoints
+   * Filters through the hits in theHits, adds hit objects (myHit) to the vector thePoints
    * Args:
    *    std::vector<Hit>& thePoints : the vector to store the filtered hit objects
    *    const fcc::PositionedTrackHitCollection* theHits : the input hits 
    *    std::pair<int, int> sIndex : pair with layer index in the second element (first triplet layer has index 0. second triplet layer has index 1)  
+   *    int layerCounter: an integer labelling the layer the hit is in
    *    int : unused debug parameter
    *************/
 
@@ -74,7 +92,9 @@ void TripletSeedingTool::createBarrelSpacePoints(std::vector<myHit>& thePoints,
             hit.position().y,
             hit.position().z,
             hit.core().time,
-            hitCounter);
+            layerCounter, // layer ID
+            hit.core().bits, // particle ID
+            hitCounter); // something for a track ID 
         
         }
       }
@@ -104,39 +124,52 @@ std::multimap<unsigned int, unsigned int> TripletSeedingTool::findSeeds(const fc
     m_hitFilterTool->setIds(m_seedingLayerIndices[layerCounter].first, m_seedingLayerIndices[layerCounter].second);
 
     // convert "theHits" to TTPoint hit class, store these in layerPoints.back(), somehow also only extracts hits in a specific layer (from setIds from hitFilterTool)  
-    createBarrelSpacePoints(layerPoints.back(), theHits, m_seedingLayerIndices[layerCounter], 0 /* debug parameter, currently unused */); 
+    createBarrelSpacePoints(layerPoints.back(), theHits, m_seedingLayerIndices[layerCounter], layerCounter, 0 /* debug parameter, currently unused */); 
 
     //debug() << "found " << layerPoints.back().size() << " points on Layer " << endmsg;
 
   }
 
-    
-  for(unsigned int layerCounter=0; layerCounter<3; ++layerCounter){
-
-    // loop over all hits in this layer 
-    for (myHit hit: layerPoints[layerCounter]) {
-
-      //float hitR = sqrt(hit.x()*hit.x() + hit.y()*hit.y());// hypotf(hit.x(), hit.y());
-      //debug() << "x: " << hit.x() << "\ty: " << hit.y() << "\tz: " << hit.z() << "\tr: " << hitR << endmsg; 
-
-
-      /********************
-       *
-       * do something with hits in this layer
-       *
-       ******************/
-
-    }
-  }
-
   // output, associating trackIds with hitIndices
   std::multimap<unsigned int, unsigned int> theSeeds;
 
+  // Define parameters for TrackFitter 
+  float vertexDistSigma = 53.0; // standard deviation (1 sigma) of the distribution of vertices along z
+  int nVertexSigma = 3;
+  // based on the spread of vertices, calculate the maximum tolerance along the beam line to which a track can point
+  float maxZ = nVertexSigma*vertexDistSigma;
+  float minZ = -1*maxZ;
+  std::vector<float> parameters;
+  parameters.push_back(minZ);
+  parameters.push_back(maxZ);
+
+  // Layer ID
+  std::vector<int> layerIDs = {0, 1, 2};
+  TrackFitter tf(fitTypes::simpleLinear, parameters, layerIDs);
+
+  // Associate hits 
+  if(tf.AssociateHits(layerPoints)){
+
+    // Apply curvature cut 
+    tf.ApplyCurvatureCut( 0.005 );
+
+    // Get the tracks ...  
+    std::vector< myTrack > theTracks = tf.GetTracks();
+    int nFakes = countFakes(theTracks);
+
+    int trackID(0);
+    for(const myTrack& track : theTracks ) {
+      for(const myHit* hit : track.getAssociatedHits()){
+        theSeeds.insert(std::pair<unsigned int, unsigned int>(trackID,hit->identifier()));
+      } // end loop over hits associated to the track 
+      trackID++;
+    } // end loop over tracks 
+
+  } // end AssociateHits 
+
+
   // it's possible to use the other fit infrastructure as well, by inserting in this map the pair (trackId, indexInPositionedTrackHitCollection) 
   // the first three hits in collection  belong to track 0
-  theSeeds.insert(std::pair<unsigned int, unsigned int>(0,0));
-  theSeeds.insert(std::pair<unsigned int, unsigned int>(0,1));
-  theSeeds.insert(std::pair<unsigned int, unsigned int>(0,2));
   return theSeeds;
 }
 

@@ -36,7 +36,7 @@ public:
 
   virtual std::multimap<unsigned int, unsigned int> findSeeds(const fcc::PositionedTrackHitCollection* theHits) override final;
 
-  void createBarrelSpacePoints(std::vector<myHit>& thePoints, const fcc::PositionedTrackHitCollection* theHits, std::pair<int, int> sIndex, int trackCutoff);
+  void createBarrelSpacePoints(std::vector<myHit>& thePoints, const fcc::PositionedTrackHitCollection* theHits, std::pair<int, int> sIndex, int layerCounter, int trackCutoff);
 
   tricktrack::HitDoublets<Hit>* findDoublets( std::vector<myHit> theInnerHits,  std::vector<myHit> theOuterHits);
 
