@@ -28,6 +28,8 @@ public:
   virtual StatusCode finalize() override final;
 
   virtual std::multimap<unsigned int, unsigned int> findSeeds(const fcc::PositionedTrackHitCollection* theHits) override final;
+  virtual std::multimap<unsigned int, unsigned int> findSeedsWithParticles(const fcc::PositionedTrackHitCollection* theHits, const fcc::MCParticleCollection*         theParticles) override final; 
+
   void createBarrelSpacePoints(Acts::Seeding::BarrelSpacePoints<size_t>& thePoints,
                                const fcc::PositionedTrackHitCollection* theHits, std::pair<int, int> sIndex);
 

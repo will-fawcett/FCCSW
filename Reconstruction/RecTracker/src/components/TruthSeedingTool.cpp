@@ -26,6 +26,10 @@ StatusCode TruthSeedingTool::initialize() {
   return sc;
 }
 
+std::multimap<unsigned int, unsigned int> TruthSeedingTool::findSeedsWithParticles(const fcc::PositionedTrackHitCollection* theHits, const fcc::MCParticleCollection* theParticles){ // WJF add 
+  std::multimap<unsigned int, unsigned int> temp;
+  return temp;
+}
 
 std::multimap<unsigned int, unsigned int>
 TruthSeedingTool::findSeeds(const fcc::PositionedTrackHitCollection* theHits) {

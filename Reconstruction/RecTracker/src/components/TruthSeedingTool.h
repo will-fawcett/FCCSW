@@ -24,6 +24,7 @@ public:
   virtual StatusCode finalize() override final;
   /// create and return the map trackId -> hitIndex, associating hits to tracks
   virtual std::multimap<unsigned int, unsigned int> findSeeds(const fcc::PositionedTrackHitCollection* theHits) override final;
+  virtual std::multimap<unsigned int, unsigned int> findSeedsWithParticles(const fcc::PositionedTrackHitCollection* theHits, const fcc::MCParticleCollection* theParticles) override final; // WJF add 
 
 };
 
