@@ -9,6 +9,8 @@
 // FCCSW
 #include "FWCore/DataHandle.h"
 
+#include "datamodel/MCParticleCollection.h" // WJF add 
+
 class IGeoSvc;
 class ITrackSeedingTool;
 
@@ -36,10 +38,13 @@ public:
 
 private:
   /// TrackHits as Input to the track seeding
-  DataHandle<fcc::PositionedTrackHitCollection> m_positionedTrackHits{"positionedTrackHits", Gaudi::DataHandle::Reader,
-                                                                      this};
+  DataHandle<fcc::PositionedTrackHitCollection> m_positionedTrackHits{"positionedTrackHits", Gaudi::DataHandle::Reader, this};
+  DataHandle<fcc::MCParticleCollection> m_simParticles{"simParticles", Gaudi::DataHandle::Reader, this}; // WJF
+
   DataHandle<fcc::TrackCollection> m_tracks{"tracks", Gaudi::DataHandle::Writer, this};
   DataHandle<fcc::TrackStateCollection> m_trackStates{"trackStates", Gaudi::DataHandle::Writer, this};
+
+
   /// Handle to Track Seeding Tool that does the work
   Gaudi::Property<double> m_Bz{this, "Bz", 4., "Field strength along Z"};
   Gaudi::Property<double> m_hitRes{this, "hitRes", 0.1, "Resolution of local hit coordinates"};

@@ -29,6 +29,11 @@ void printNewHitMap(std::map<std::string, std::vector<myHit*>> theMap){
     std::cout << "ID: " << thep.first << "\t" << thep.second.size() << std::endl;
   }
 }
+void printNewHitMap(std::map<std::string, std::vector<myHit>>& theMap){
+  for(const auto& thep : theMap){
+    std::cout << "ID: " << thep.first << "\t" << thep.second.size() << std::endl;
+  }
+}
 
 bool TrackFitter::AssociateHits(hitContainer& hc){
 
@@ -53,7 +58,7 @@ bool TrackFitter::AssociateHits(hitContainer& hc){
   return true; 
 }
 
-std::map<std::string, std::vector<myHit*> > TrackFitter::associateHitsSimplePattern(hitContainer& hc, Location& loc) const{
+std::map<std::string, std::vector<myHit> > TrackFitter::associateHitsSimplePattern(hitContainer& hc, Location& loc) const{
 
   /******************************
    *  Separate collection of hits into "layer-eta-phi" regions
@@ -66,11 +71,13 @@ std::map<std::string, std::vector<myHit*> > TrackFitter::associateHitsSimplePatt
   // WJF: remove set-of-locations functionality
   //std::vector<std::string> setOfLocations; 
 
-  std::map<std::string, std::vector<myHit*> > newMap; 
+  //std::map<std::string, std::vector<myHit*> > newMap; 
+  std::map<std::string, std::vector<myHit> > newMap; 
   for(const auto layer : m_layerIDs){
     for(myHit hit : hc.at(layer)){
       std::string locationString = loc.locationFromHit(hit);
-      newMap[ locationString ].push_back(&hit);  // pointer to hit 
+      //newMap[ locationString ].push_back(&hit);  // pointer to hit 
+      newMap[ locationString ].push_back(hit); 
       //setOfLocations.push_back(locationString);
     }
   }
@@ -84,19 +91,19 @@ std::map<std::string, std::vector<myHit*> > TrackFitter::associateHitsSimplePatt
   return newMap;
 }
 
-std::vector<myHit*> concatenateVector(std::vector<myHit*>& A, std::vector<myHit*>& B){
+std::vector<myHit> concatenateVector(std::vector<myHit>& A, std::vector<myHit>& B){
   // https://stackoverflow.com/questions/3177241/what-is-the-best-way-to-concatenate-two-vectors
-  std::vector<myHit*> AB;
+  std::vector<myHit> AB;
   AB.reserve( A.size() + B.size() ); // preallocate memory
   AB.insert( AB.end(), A.begin(), A.end() );
   AB.insert( AB.end(), B.begin(), B.end() );
   return AB;
 }
 
-std::vector<myHit*> concatenateHitsBasedOnLocations(std::map<std::string, std::vector<myHit*>>& hitMap, std::vector<std::string>& locations){
+std::vector<myHit> concatenateHitsBasedOnLocations(std::map<std::string, std::vector<myHit>>& hitMap, std::vector<std::string>& locations){
   // Return a vector of all hits in all of the regions selected by locations 
   // Can probably make this more efficient ? 
-  std::vector<myHit*> newVec;
+  std::vector<myHit> newVec;
   for(const auto& location : locations){
     /******************
     try{
@@ -146,7 +153,7 @@ bool TrackFitter::associateHitsSimple(hitContainer& hc, float minZ, float maxZ){
     //loc.printProperties(); 
 
     // mapping of hits to eta-phi locations 
-    std::map<std::string, std::vector<myHit*>> hitMap = this->associateHitsSimplePattern(hc, loc); 
+    std::map<std::string, std::vector<myHit>> hitMap = this->associateHitsSimplePattern(hc, loc); 
 
     //////////////////////////////////////////
     // Simplest possible algorithm 
@@ -161,6 +168,7 @@ bool TrackFitter::associateHitsSimple(hitContainer& hc, float minZ, float maxZ){
 
     const float rInner = hc[innerLayerID].at(0).rho();
     const float rOuter = hc[outerLayerID].at(0).rho(); 
+    //const float rMiddle = hf[middleLayerID].at(0).rho();
 
     // reserve some space for the tracks (performance)  
     m_tracks.clear();
@@ -172,6 +180,8 @@ bool TrackFitter::associateHitsSimple(hitContainer& hc, float minZ, float maxZ){
     const float bendingRadius = 1000 * trackPtMin/1.199; // [mm]
     float phiWindow = fabs( acos(rInner / (2*bendingRadius)) - acos(rOuter / (2*bendingRadius)) );
     phiWindow *= 2; // multiply by two, to have the deviation travelling in either direction. 
+    //phiWindow *= 1.1; // inflate by 10% 
+
 
     // Draw a line between the hit in the innermost and outermost layer
     // See if there is a hit on the line in the intermediate layer (within some tolerance)
@@ -184,54 +194,58 @@ bool TrackFitter::associateHitsSimple(hitContainer& hc, float minZ, float maxZ){
       std::string innerHitLocation = loc.locationFromHit(innerHit); 
       std::vector<std::string> outerHitLocations  = loc.listOfLocationsInLayer(innerHitLocation, outerLayerID );
       std::vector<std::string> middleHitLocations = loc.listOfLocationsInLayer(innerHitLocation, middleLayerID);
-      //std::cout << "There are " << outerHitLocations.size() << " outer hit locations: " << std::endl;
-      //for(auto l : outerHitLocations) std::cout << "\t " <<  l << std::endl;
 
       // get vector of hits defined by list of locations
-      std::vector<myHit*> outerHitVector  = concatenateHitsBasedOnLocations(hitMap, outerHitLocations);
-      std::vector<myHit*> middleHitVector = concatenateHitsBasedOnLocations(hitMap, middleHitLocations);
+      std::vector<myHit> outerHitVector  = concatenateHitsBasedOnLocations(hitMap, outerHitLocations);
+      std::vector<myHit> middleHitVector = concatenateHitsBasedOnLocations(hitMap, middleHitLocations);
 
-      //for(const auto& outerHit : hc[outerLayerID]){
-      for(const myHit* outerHit : outerHitVector){
+
+      for(const myHit& outerHit : outerHitVector){
 
         // must be within phi criteria  
-        if( quickDeltaPhi(phiInner, outerHit->phi()) > phiWindow) continue; 
+        if( quickDeltaPhi(phiInner, outerHit.phi()) > phiWindow){
+          //std::cout << "phiInner: " << phiInner << " phiOuter: " << outerHit.phi() << std::endl;
+          //std::cout << "Rejected by inner--outer phi constraint" << std::endl;
+          continue; 
+        }
 
         // calculate parameters of line from inner hit to outer hit 
-        const float zOuter = outerHit->z();
         LineParameters params;
-        params.calculateLineParameters(zInner, rInner, zOuter, rOuter);
+        //params.calculateLineParameters(zInner, rInner, zOuter, rOuter);
+        params.calculateLineParameters(innerHit.z(), innerHit.rho(), outerHit.z(), outerHit.rho());
 
         // reject if line does not point to within 3 sigma of the luminous region
         const float beamlineIntersect = params.x_intercept() ;
-        if(beamlineIntersect > maxZ || beamlineIntersect < minZ) continue;
+        if(beamlineIntersect > maxZ || beamlineIntersect < minZ){
+          //std::cout << "Rejected by beamline constraint" << std::endl;
+          continue;
+        }
 
-        // intersection of the line with the intermediate layer
-        const float intersect = (582.0 - params.y_intercept())/params.gradient();
 
         //for(const auto& intermediateHit : hc[middleLayerID]){
-        for(const myHit* intermediateHit : middleHitVector){
-          const float zInter = intermediateHit->z();
+        for(const myHit& intermediateHit : middleHitVector){
+
+
+          // intersection of the line with the intermediate layer
+          const float intersect = (intermediateHit.rho() - params.y_intercept())/params.gradient();
+
+          const float zMiddle = intermediateHit.z();
 
           // only select if intermediate hit matches within tolerance along Z  
-          if(fabs( zInter - intersect) < tolerance){
+          if(fabs( zMiddle - intersect) < tolerance){
 
             // reject the intermediate hit if it is also outside the phi window
-            if( quickDeltaPhi(phiInner, intermediateHit->phi()) > phiWindow) continue; 
+            if( quickDeltaPhi(phiInner, intermediateHit.phi()) > phiWindow){
+              //std::cout << "Rejected by inner--middle phi constraint" << std::endl;
+              continue; 
+            }
 
             // Three hits are matched -> a track 
-            std::vector<const myHit*> matchedHits;
+            std::vector<myHit> matchedHits;
             matchedHits.reserve(4); // prevent vector from having to grow 
-            matchedHits.push_back(&innerHit); // pointer to inner hit 
+            matchedHits.push_back(innerHit); 
             matchedHits.push_back(intermediateHit);
             matchedHits.push_back(outerHit);
-
-            /****************
-            std::cout << "Track creation" << std::endl;
-            std::cout << "PHI: Inner: " << innerHit->Phi << "\tMiddle: " << intermediateHit->Phi << "\touter: " << outerHit->Phi << std::endl;
-            std::cout << "R:   Inner: " << innerHit->HitRadius << "\tMiddle: " << intermediateHit->HitRadius << "\touter: " << outerHit->HitRadius << std::endl;
-            std::cout << "Layer:   Inner: " << innerHit->SurfaceID << "\tMiddle: " << intermediateHit->SurfaceID << "\touter: " << outerHit->SurfaceID << std::endl;
-            *****************/
 
             //m_tracks.push_back( myTrack(matchedHits) ); 
             m_tracks.emplace_back( matchedHits ); 

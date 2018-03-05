@@ -38,7 +38,7 @@ class TrackFitter{
     // algorithms to associate hits 
     bool associateHitsSimple(hitContainer&, float, float);
 
-    std::map<std::string, std::vector<myHit*>>  associateHitsSimplePattern(hitContainer&, Location&) const;
+    std::map<std::string, std::vector<myHit>>  associateHitsSimplePattern(hitContainer&, Location&) const;
 
     // functions to calculate search windows
     float calculateZWindowForNextLevel(float, float, float, float);

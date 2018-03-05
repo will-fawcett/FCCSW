@@ -13,6 +13,7 @@
 #include "datamodel/PositionedTrackHitCollection.h"
 #include "datamodel/TrackHitCollection.h"
 #include "datamodel/TrackStateCollection.h"
+#include "datamodel/MCParticleCollection.h" // WJF add 
 
 #include "tricktrack/SpacePoint.h"
 #include "tricktrack/CMGraph.h"
@@ -35,8 +36,14 @@ public:
   virtual StatusCode finalize() override final;
 
   virtual std::multimap<unsigned int, unsigned int> findSeeds(const fcc::PositionedTrackHitCollection* theHits) override final;
+  virtual std::multimap<unsigned int, unsigned int> findSeedsWithParticles(const fcc::PositionedTrackHitCollection* theHits, const fcc::MCParticleCollection* theParticles) override final;
 
-  void createBarrelSpacePoints(std::vector<myHit>& thePoints, const fcc::PositionedTrackHitCollection* theHits, std::pair<int, int> sIndex, int layerCounter, int trackCutoff);
+  void createBarrelSpacePoints(std::vector<myHit>& thePoints, 
+      const fcc::PositionedTrackHitCollection* theHits, 
+      const fcc::MCParticleCollection* theParticles, 
+      std::pair<int, int> sIndex, 
+      int layerCounter, 
+      int trackCutoff);
 
   tricktrack::HitDoublets<Hit>* findDoublets( std::vector<myHit> theInnerHits,  std::vector<myHit> theOuterHits);
 

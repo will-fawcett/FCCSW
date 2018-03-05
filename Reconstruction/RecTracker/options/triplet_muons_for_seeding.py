@@ -90,13 +90,13 @@ from Configurables import PodioOutput
 out = PodioOutput("out",
                   OutputLevel=DEBUG)
 out.outputCommands = ["keep *"]
-out.filename = "triplet_muons_for_seeding.root"
+out.filename = "triplet_muons_for_seeding2.root"
 
 # ApplicationMgr
 from Configurables import ApplicationMgr
 ApplicationMgr(TopAlg=[gen, hepmc_converter, geantsim, out],
                EvtSel='NONE',
-               EvtMax=100,
+               EvtMax=1,
                # order is important, as GeoSvc is needed by SimG4Svc
                ExtSvc=[ppservice, podioevent, geoservice, geantservice],
                OutputLevel=DEBUG

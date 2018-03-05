@@ -40,35 +40,38 @@ bool myTrack::trackParametersTriplet(){
     return false;
   }
 
-  const myHit * hit1 = m_associatedHits.at(0);
-  const myHit * hit2 = m_associatedHits.at(1);
-  const myHit * hit3 = m_associatedHits.at(2);
+  //const myHit * hit1 = m_associatedHits.at(0);
+  //const myHit * hit2 = m_associatedHits.at(1);
+  //const myHit * hit3 = m_associatedHits.at(2);
+  myHit hit1 = m_associatedHits.at(0);
+  myHit hit2 = m_associatedHits.at(1);
+  myHit hit3 = m_associatedHits.at(2);
 
   // Check hits are properly orderd radially. Shouldn't really happen
-  if(hit1->rho() > hit2->rho() || hit2->rho() > hit3->rho()){
+  if(hit1.rho() > hit2.rho() || hit2.rho() > hit3.rho()){
     std::cerr << "ERROR: hits not in the correct order!" << std::endl;
-    std::cerr << "hit1: " << hit1->rho() << "\t (" << hit1->x() << ", " << hit1->y() << ", " << hit1->y() << ")" << " check: " << sqrt(hit1->x()*hit1->x()+hit1->y()*hit1->y()) << std::endl;
-    std::cerr << "hit2: " << hit2->rho() << "\t (" << hit2->x() << ", " << hit2->y() << ", " << hit2->y() << ")" << " check: " << sqrt(hit2->x()*hit2->x()+hit2->y()*hit2->y()) << std::endl;
-    std::cerr << "hit3: " << hit3->rho() << "\t (" << hit3->x() << ", " << hit3->y() << ", " << hit3->y() << ")" << " check: " << sqrt(hit3->x()*hit3->x()+hit3->y()*hit3->y()) << std::endl;
+    std::cerr << "hit1: " << hit1.rho() << "\t (" << hit1.x() << ", " << hit1.y() << ", " << hit1.y() << ")" << " check: " << sqrt(hit1.x()*hit1.x()+hit1.y()*hit1.y()) << std::endl;
+    std::cerr << "hit2: " << hit2.rho() << "\t (" << hit2.x() << ", " << hit2.y() << ", " << hit2.y() << ")" << " check: " << sqrt(hit2.x()*hit2.x()+hit2.y()*hit2.y()) << std::endl;
+    std::cerr << "hit3: " << hit3.rho() << "\t (" << hit3.x() << ", " << hit3.y() << ", " << hit3.y() << ")" << " check: " << sqrt(hit3.x()*hit3.x()+hit3.y()*hit3.y()) << std::endl;
     return false;
   }
 
   // copy of hit coordinates
-  float x1 = hit1->x();
-  float y1 = hit1->y(); 
-  float z1 = hit1->z(); 
+  float x1 = hit1.x();
+  float y1 = hit1.y(); 
+  float z1 = hit1.z(); 
 
-  float x2 = hit2->x();
-  float y2 = hit2->y(); 
-  float z2 = hit2->z(); 
+  float x2 = hit2.x();
+  float y2 = hit2.y(); 
+  float z2 = hit2.z(); 
 
-  float x3 = hit3->x();
-  float y3 = hit3->y(); 
-  float z3 = hit3->z(); 
+  float x3 = hit3.x();
+  float y3 = hit3.y(); 
+  float z3 = hit3.z(); 
 
-  float r01 = hit1->rho(); // = sqrt(x^2 + y^2) 
-  float r02 = hit2->rho();
-  float r03 = hit3->rho(); 
+  float r01 = hit1.rho(); // = sqrt(x^2 + y^2) 
+  float r02 = hit2.rho();
+  float r03 = hit3.rho(); 
 
   // Calculate the parameters in the longitudinal plane
   // Follows calculations by A. Schoning
@@ -159,11 +162,18 @@ bool myTrack::isFake() const{
   // If all of the hits associated to this track have the same particle ID, the the track is not a fake track
   
   std::vector<int> uniqueIDs;
-  for(const myHit* hit : m_associatedHits){
-    uniqueIDs.push_back(hit->particleID());
+  for(const myHit& hit : m_associatedHits){
+    uniqueIDs.push_back(hit.particleID());
   }
-  for(int i=0; i<uniqueIDs.size()-1; ++i){
-    if(uniqueIDs.at(i) != uniqueIDs.at(i+1)) return true; // track is fake if any of these are different 
+
+  for(int i=0; i<m_associatedHits.size()-1; ++i){
+    if(m_associatedHits.at(i).particleID() != m_associatedHits.at(i+1).particleID()){
+
+      std::cout << "fake detected, UID: " << uniqueIDs.at(i) << ", " << uniqueIDs.at(i+1) << std::endl;
+      std::cout << "pT: " << m_associatedHits.at(i).pT() << ", " << m_associatedHits.at(i+1).pT() << std::endl;
+      this->printHitInfo();
+      return true; // track is fake if any of these are different 
+    }
   }
   return false;
 
@@ -180,17 +190,20 @@ void myTrack::printTrackParameters() const {
 
 void myTrack::printHitInfo() const {
   std::cout << "Track has " << m_associatedHits.size() << " hits." << std::endl; 
-  std::cout << "isFake: " << this->isFake() << std::endl;
+  //std::cout << "isFake: " << this->isFake() << std::endl;
   this->printTrackParameters();
 
   //for(const myHit& hit : m_associatedHits){
-  for(const myHit* hit : m_associatedHits){
-    std::cout << "\t(" << hit->x() << ", " << hit->y() << ", " << hit->z() << ") " 
-      << " r=" << hit->rho() << " phi=" << hit->phi() // << " eta=" << hit->Eta eta not available ? 
-      << "\tID: " << hit->SurfaceID() 
-      //<< "\tpu: " << hit->IsPU 
-      //<< " pt: " << hit->PT
-      //<< " ID: " << hit->intPtKeVID
+  for(const myHit& hit : m_associatedHits){
+    std::cout << "\t(" << hit.x() << ", " << hit.y() << ", " << hit.z() << ") " 
+      << " r=" << hit.rho() << " phi=" << hit.phi() // << " eta=" << hit.Eta eta not available ? 
+      << " rCalc=" << sqrt(hit.x()*hit.x() + hit.y()*hit.y()) 
+      << "\tSurfaceID: " << hit.SurfaceID() 
+      << ", ParticleID: " << hit.particleID()
+      << ", identifier: " << hit.identifier() 
+      //<< "\tpu: " << hit.IsPU 
+      //<< " pt: " << hit.PT
+      //<< " ID: " << hit.intPtKeVID
       << std::endl; 
   }
 

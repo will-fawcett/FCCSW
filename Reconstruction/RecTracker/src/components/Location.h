@@ -63,7 +63,7 @@ class Location{
 
     }
 
-    std::string locationFromHitPointer(const myHit*) const;
+    std::string locationFromHit(const myHit*) const;
     std::string locationFromHit(const myHit&) const;
     std::string locationFromEtaPhi(int, float, float) const; 
 

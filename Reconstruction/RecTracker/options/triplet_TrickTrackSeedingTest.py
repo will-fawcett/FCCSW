@@ -25,7 +25,7 @@ podioinput = PodioInput("PodioReader",
                                       "trajectory", 
                                       "trajectoryPoints",
                                       ], 
-                          OutputLevel=DEBUG,
+                          OutputLevel=INFO,
                           )
 from Configurables import GeoSvc
 geoservice = GeoSvc("GeoSvc", detectors=['file:Detector/DetFCChhBaseline1/compact/FCChh_DectEmptyMaster.xml',
@@ -73,7 +73,7 @@ truth_seeds = TruthSeedingTool()
 
 from Configurables import RecTrackAlg
 RecTrackAlg = RecTrackAlg()
-RecTrackAlg.Errors = False
+#RecTrackAlg.Errors = False
 RecTrackAlg.hitRes = 5*1e-9
 RecTrackAlg.TrackSeedingTool = seed_tool#tricktrack_seed_tool
 RecTrackAlg.positionedTrackHits.Path = "positionedHits"
@@ -86,7 +86,7 @@ if args.outputfile:
 from Configurables import PodioOutput
 out = PodioOutput("out",
                    filename=outputfile,
-                   OutputLevel=DEBUG)
+                   OutputLevel=INFO)
 out.outputCommands = ["keep *"]
 
 
@@ -100,5 +100,5 @@ ApplicationMgr( TopAlg = [podioinput, RecTrackAlg, out],
                 EvtSel = 'NONE',
                 EvtMax   = nEvents,
                 ExtSvc = [podioevent, geoservice],
-                OutputLevel=DEBUG,
+                OutputLevel=INFO,
  )

@@ -3,7 +3,7 @@
 #include <algorithm>
 
 // Function to split string along delimiter, from: https://www.fluentcpp.com/2017/04/21/how-to-split-a-string-in-c/
-std::vector<int> split(const std::string& s, char delimiter)
+std::vector<int> mySplit(const std::string& s, char delimiter)
 {
    std::vector<int> tokens;
    std::string token;
@@ -21,7 +21,7 @@ std::string Location::formatLocation(int layerID, int phiBin, int etaBin) const{
 }
 
 // Calculate location string from a pointer to a Hit object
-std::string Location::locationFromHitPointer(const myHit* hit) const{
+std::string Location::locationFromHit(const myHit* hit) const{
   return this->locationFromEtaPhi( hit->SurfaceID(), hit->eta(), hit->phi()); 
 }
 
@@ -60,13 +60,14 @@ std::vector< std::string > Location::listOfLocationsInLayer(std::string location
 
   // matching criteria is the set of squares in eta phi that surround the square given by the location
   
-  //std::cout << "Location::listOfLocationsInLayer()" << std::endl;
-  //std::cout << "\tInputs: location " << location << " layer ID " << layerID << std::endl;
+
+  //std::cout << "listOfLocationsInLayer(location, layer) : " << location << ", " << layerID << std::endl;
   
   // split the string
-  std::vector<int> tokens = split(location, '_');
+  std::vector<int> tokens = mySplit(location, '_');
   if(tokens.size() != 3){
     std::cerr << "ERROR: unable to split location string" << std::endl;
+    for(auto tok : tokens) std::cerr << "\t" << tok << std::endl; 
   }
   int layer = tokens.at(0);
   int phiBin = tokens.at(1);

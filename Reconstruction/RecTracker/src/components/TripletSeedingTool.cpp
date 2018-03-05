@@ -6,6 +6,7 @@
 #include "datamodel/TrackHitCollection.h"
 #include "datamodel/TrackStateCollection.h"
 
+
 #include "LineParameters.h"
 #include "myTrack.h"
 #include "TrackFitter.h"
@@ -53,11 +54,13 @@ inline int countFakes(std::vector<myTrack>& theTracks){
 
 void TripletSeedingTool::createBarrelSpacePoints(std::vector<myHit>& thePoints,
                                                        const fcc::PositionedTrackHitCollection* theHits,
+                                                       const fcc::MCParticleCollection* theParticles, 
                                                        std::pair<int, int> sIndex,
                                                        int layerCounter, 
                                                        int) {
   /**************
-   * Filters through the hits in theHits, adds hit objects (myHit) to the vector thePoints
+   * Filters through the hits in theHits according to m_hitFilterTool,
+   * if the filter is passed, then the hit object (myHit) is added to the vector thePoints
    * Args:
    *    std::vector<Hit>& thePoints : the vector to store the filtered hit objects
    *    const fcc::PositionedTrackHitCollection* theHits : the input hits 
@@ -74,28 +77,30 @@ void TripletSeedingTool::createBarrelSpacePoints(std::vector<myHit>& thePoints,
         auto result = trackIdsInThisLayer.insert(hit.core().bits); // insert returns std::pair (iterator to inserted element, bool set to true if insertion took place)
         if (result.second) {
 
-        //std::cout << "layer " << sIndex.second << "\thit id: " << hit.core().bits << std::endl;
-        //std::cout << "inputs: (x, y, z) : (" << hit.position().x << ", " << hit.position().y << ", " << hit.position().z << ")" << std::endl;
 
-        /****************
-        // emplace_back, kindov like push_back but seems to be able to create the object. Avoids the extra copy operation used by push_back
-        thePoints.emplace_back(  
-          sqrt(hit.position().x*hit.position().x + hit.position().y*hit.position().y), 
-          atan2f( hit.position().y, hit.position().x ), 
-          hit.position().z,
-          hit.core().time, 
-          hitCounter);
-        *************/
+
+        // WJF: don't really need this particle matching (I think), but leave it here anyway
+
+          int nMatched(0);
+          float hitPt(.0); 
+          for(auto particle : *theParticles){
+            if(hit.core().bits == particle.core().bits){
+              hitPt = sqrt( particle.core().p4.px*particle.core().p4.px + particle.core().p4.py*particle.core().p4.py);
+              nMatched++;
+            }
+          }
+          if(nMatched > 1) std::cerr << "More than one matched particle!!! Number of matches: " << nMatched << std::endl;
 
         thePoints.emplace_back(
             hit.position().x,
             hit.position().y,
             hit.position().z,
             hit.core().time,
+            hitPt, // pT of the particle that created the hit ... 
             layerCounter, // layer ID
             hit.core().bits, // particle ID
             hitCounter); // something for a track ID 
-        
+
         }
       }
         ++hitCounter;
@@ -104,7 +109,7 @@ void TripletSeedingTool::createBarrelSpacePoints(std::vector<myHit>& thePoints,
 
 
 
-std::multimap<unsigned int, unsigned int> TripletSeedingTool::findSeeds(const fcc::PositionedTrackHitCollection* theHits) {
+std::multimap<unsigned int, unsigned int> TripletSeedingTool::findSeedsWithParticles(const fcc::PositionedTrackHitCollection* theHits, const fcc::MCParticleCollection* theParticles) {
 
   /**************
    * Function to ...
@@ -112,7 +117,8 @@ std::multimap<unsigned int, unsigned int> TripletSeedingTool::findSeeds(const fc
 
   static int wjfCounter(0);
   wjfCounter++;
-  std::cout << "WJF: findSeeds() called: " << wjfCounter << std::endl;
+  debug()    << "WJF: findSeedsWithParticles() called: " << wjfCounter << endmsg; 
+
 
   // fill layerPoints with the hits in each of the triplet layers 
   std::vector<std::vector<myHit>> layerPoints;
@@ -124,7 +130,7 @@ std::multimap<unsigned int, unsigned int> TripletSeedingTool::findSeeds(const fc
     m_hitFilterTool->setIds(m_seedingLayerIndices[layerCounter].first, m_seedingLayerIndices[layerCounter].second);
 
     // convert "theHits" to TTPoint hit class, store these in layerPoints.back(), somehow also only extracts hits in a specific layer (from setIds from hitFilterTool)  
-    createBarrelSpacePoints(layerPoints.back(), theHits, m_seedingLayerIndices[layerCounter], layerCounter, 0 /* debug parameter, currently unused */); 
+    createBarrelSpacePoints(layerPoints.back(), theHits, theParticles, m_seedingLayerIndices[layerCounter], layerCounter, 0 /* debug parameter, currently unused */); 
 
     //debug() << "found " << layerPoints.back().size() << " points on Layer " << endmsg;
 
@@ -156,11 +162,84 @@ std::multimap<unsigned int, unsigned int> TripletSeedingTool::findSeeds(const fc
     // Get the tracks ...  
     std::vector< myTrack > theTracks = tf.GetTracks();
     int nFakes = countFakes(theTracks);
+    debug() << "Found " << theTracks.size() << " tracks, of which " << nFakes << " are fakes." << endmsg; 
 
     int trackID(0);
     for(const myTrack& track : theTracks ) {
-      for(const myHit* hit : track.getAssociatedHits()){
-        theSeeds.insert(std::pair<unsigned int, unsigned int>(trackID,hit->identifier()));
+      for(const myHit& hit : track.getAssociatedHits()){
+        theSeeds.insert(std::pair<unsigned int, unsigned int>(trackID, hit.identifier()));
+      } // end loop over hits associated to the track 
+      trackID++;
+    } // end loop over tracks 
+
+  } // end AssociateHits 
+
+
+  // it's possible to use the other fit infrastructure as well, by inserting in this map the pair (trackId, indexInPositionedTrackHitCollection) 
+  // the first three hits in collection  belong to track 0
+  return theSeeds;
+}
+
+std::multimap<unsigned int, unsigned int> TripletSeedingTool::findSeeds(const fcc::PositionedTrackHitCollection* theHits) {
+
+  std::cout << "FUNCTION LEFT ONLY FOR COMPILATION ... " << std::endl;
+  /**************
+   * Function to ...
+   * ***************/
+
+  static int wjfCounter(0);
+  wjfCounter++;
+  debug()    << "WJF: findSeeds() called: " << wjfCounter << endmsg; 
+
+
+  // fill layerPoints with the hits in each of the triplet layers 
+  std::vector<std::vector<myHit>> layerPoints;
+  for (unsigned int layerCounter = 0; layerCounter < 3; ++layerCounter) {
+
+    layerPoints.emplace_back();
+
+    // set the indices the hit filter uses to select hits
+    m_hitFilterTool->setIds(m_seedingLayerIndices[layerCounter].first, m_seedingLayerIndices[layerCounter].second);
+
+    // convert "theHits" to TTPoint hit class, store these in layerPoints.back(), somehow also only extracts hits in a specific layer (from setIds from hitFilterTool)  
+    //createBarrelSpacePoints(layerPoints.back(), theHits, theParticles, m_seedingLayerIndices[layerCounter], layerCounter, 0 /* debug parameter, currently unused */); 
+
+    //debug() << "found " << layerPoints.back().size() << " points on Layer " << endmsg;
+
+  }
+
+  // output, associating trackIds with hitIndices
+  std::multimap<unsigned int, unsigned int> theSeeds;
+
+  // Define parameters for TrackFitter 
+  float vertexDistSigma = 53.0; // standard deviation (1 sigma) of the distribution of vertices along z
+  int nVertexSigma = 3;
+  // based on the spread of vertices, calculate the maximum tolerance along the beam line to which a track can point
+  float maxZ = nVertexSigma*vertexDistSigma;
+  float minZ = -1*maxZ;
+  std::vector<float> parameters;
+  parameters.push_back(minZ);
+  parameters.push_back(maxZ);
+
+  // Layer ID
+  std::vector<int> layerIDs = {0, 1, 2};
+  TrackFitter tf(fitTypes::simpleLinear, parameters, layerIDs);
+
+  // Associate hits 
+  if(tf.AssociateHits(layerPoints)){
+
+    // Apply curvature cut 
+    tf.ApplyCurvatureCut( 0.005 );
+
+    // Get the tracks ...  
+    std::vector< myTrack > theTracks = tf.GetTracks();
+    int nFakes = countFakes(theTracks);
+    debug() << "Found " << theTracks.size() << " tracks, of which " << nFakes << " are fakes." << endmsg; 
+
+    int trackID(0);
+    for(const myTrack& track : theTracks ) {
+      for(const myHit& hit : track.getAssociatedHits()){
+        theSeeds.insert(std::pair<unsigned int, unsigned int>(trackID, hit.identifier()));
       } // end loop over hits associated to the track 
       trackID++;
     } // end loop over tracks 

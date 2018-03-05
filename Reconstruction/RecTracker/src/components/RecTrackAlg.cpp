@@ -8,6 +8,7 @@
 #include "datamodel/TrackHitCollection.h"
 #include "datamodel/TrackStateCollection.h"
 
+
 #include "DD4hep/Detector.h"
 #include "DD4hep/Volumes.h"
 #include "DDRec/API/IDDecoder.h"
@@ -28,6 +29,7 @@ DECLARE_ALGORITHM_FACTORY(RecTrackAlg)
 RecTrackAlg::RecTrackAlg(const std::string& name, ISvcLocator* svcLoc) : GaudiAlgorithm(name, svcLoc) {
 
   declareProperty("positionedTrackHits", m_positionedTrackHits, "Tracker hits (Input)");
+  declareProperty("simParticles", m_simParticles, "Simulated particles (Input)"); // WJF add
   declareProperty("Tracks", m_tracks, "Tracks (Output)");
   declareProperty("TrackStates", m_trackStates, "TrackStates (Output)");
   declareProperty("TrackSeedingTool", m_trackSeedingTool);
@@ -42,10 +44,11 @@ StatusCode RecTrackAlg::execute() {
 
   // get hits from event store
   const fcc::PositionedTrackHitCollection* hits = m_positionedTrackHits.get();
+  const fcc::MCParticleCollection* particles = m_simParticles.get(); // WJF add  
   fcc::TrackCollection* tracks = m_tracks.createAndPut();
   fcc::TrackStateCollection* trackStates = m_trackStates.createAndPut();
   debug() << "hit collection size: " << hits->size() << endmsg;
-  auto seedmap = m_trackSeedingTool->findSeeds(hits);
+  auto seedmap = m_trackSeedingTool->findSeedsWithParticles(hits, particles);
   auto it1 = seedmap.begin();
   auto it2 = seedmap.begin();
   auto end = seedmap.end();

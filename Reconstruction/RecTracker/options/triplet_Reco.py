@@ -25,7 +25,7 @@ podioinput = PodioInput("PodioReader",
                                       "trajectory", 
                                       "trajectoryPoints",
                                       ], 
-                          OutputLevel=DEBUG,
+                          OutputLevel=INFO,
                           )
 
 from Configurables import GeoSvc
@@ -47,10 +47,13 @@ hitfiltertool = FastHitFilterTool("FastHitFilterTool")
 
 # Alternative: TruthSeeding
 from Configurables import TruthSeedingTool
-truth_seeds = TruthSeedingTool()
+truth_seeds = TruthSeedingTool(
+        OutputLevel=DEBUG
+        )
 
 from Configurables import TripletSeedingTool
-triplet_seeds = TripletSeedingTool()
+triplet_seeds = TripletSeedingTool(
+        OutputLevel=DEBUG)
 triplet_seeds.someParameter = 4.
 
 from Configurables import RecTrackAlg
@@ -58,6 +61,7 @@ RecTrackAlg = RecTrackAlg()
 RecTrackAlg.doFit=True
 RecTrackAlg.TrackSeedingTool = triplet_seeds
 RecTrackAlg.positionedTrackHits.Path = "positionedHits"
+RecTrackAlg.simParticles.Path = "simParticles"
 
 
 # PODIO algorithm
@@ -67,7 +71,7 @@ if args.outputfile:
 from Configurables import PodioOutput
 out = PodioOutput("out",
                    filename=outputfile,
-                   OutputLevel=DEBUG)
+                   OutputLevel=INFO)
 out.outputCommands = ["keep *"]
 
 
@@ -81,5 +85,5 @@ ApplicationMgr( TopAlg = [podioinput, RecTrackAlg, out],
                 EvtSel = 'NONE',
                 EvtMax   = nEvents,
                 ExtSvc = [podioevent],
-                OutputLevel=DEBUG,
+                OutputLevel=INFO,
  )
