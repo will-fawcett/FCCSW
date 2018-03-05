@@ -17,6 +17,8 @@ import matplotlib.pyplot as plt
 #rc('font',**{'family':'serif','serif':['Palatino']})
 #rc('text', usetex=True)
 
+ROOT.gSystem.Load("/afs/cern.ch/work/v/vavolkl/public/fcc.cern.ch/sw/0.9.0/fcc-edm/0.5.1/x86_64-slc6-gcc62-opt/lib/libdatamodel.so")
+
 # only backend that will work with LCG
 #matplotlib.use("TkAgg")
 
