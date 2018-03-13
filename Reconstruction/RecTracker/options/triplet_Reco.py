@@ -53,11 +53,12 @@ truth_seeds = TruthSeedingTool(
 
 from Configurables import TripletSeedingTool
 triplet_seeds = TripletSeedingTool(
-        OutputLevel=DEBUG)
+        OutputLevel=INFO)
 triplet_seeds.someParameter = 4.
 
 from Configurables import RecTrackAlg
-RecTrackAlg = RecTrackAlg()
+RecTrackAlg = RecTrackAlg(
+        OutputLevel=DEBUG)
 RecTrackAlg.doFit=True
 RecTrackAlg.TrackSeedingTool = triplet_seeds
 RecTrackAlg.positionedTrackHits.Path = "positionedHits"
@@ -85,5 +86,5 @@ ApplicationMgr( TopAlg = [podioinput, RecTrackAlg, out],
                 EvtSel = 'NONE',
                 EvtMax   = nEvents,
                 ExtSvc = [podioevent],
-                OutputLevel=INFO,
+                #OutputLevel=INFO,
  )

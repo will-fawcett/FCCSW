@@ -168,10 +168,6 @@ bool myTrack::isFake() const{
 
   for(int i=0; i<m_associatedHits.size()-1; ++i){
     if(m_associatedHits.at(i).particleID() != m_associatedHits.at(i+1).particleID()){
-
-      std::cout << "fake detected, UID: " << uniqueIDs.at(i) << ", " << uniqueIDs.at(i+1) << std::endl;
-      std::cout << "pT: " << m_associatedHits.at(i).pT() << ", " << m_associatedHits.at(i+1).pT() << std::endl;
-      this->printHitInfo();
       return true; // track is fake if any of these are different 
     }
   }

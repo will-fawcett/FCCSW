@@ -161,8 +161,6 @@ std::multimap<unsigned int, unsigned int> TripletSeedingTool::findSeedsWithParti
 
     // Get the tracks ...  
     std::vector< myTrack > theTracks = tf.GetTracks();
-    int nFakes = countFakes(theTracks);
-    debug() << "Found " << theTracks.size() << " tracks, of which " << nFakes << " are fakes." << endmsg; 
 
     int trackID(0);
     for(const myTrack& track : theTracks ) {

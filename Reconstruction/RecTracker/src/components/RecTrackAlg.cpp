@@ -48,12 +48,13 @@ StatusCode RecTrackAlg::execute() {
   fcc::TrackCollection* tracks = m_tracks.createAndPut();
   fcc::TrackStateCollection* trackStates = m_trackStates.createAndPut();
   debug() << "hit collection size: " << hits->size() << endmsg;
+
+  // get the seeds (collections of geometrically matched hits) 
   auto seedmap = m_trackSeedingTool->findSeedsWithParticles(hits, particles);
   auto it1 = seedmap.begin();
   auto it2 = seedmap.begin();
   auto end = seedmap.end();
   constexpr unsigned int nhits = 32;
-
 
 
 	// Iterate through multimap of <tracks-hits> elements
