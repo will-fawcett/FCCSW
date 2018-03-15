@@ -47,13 +47,14 @@ for i, store in enumerate(events):
             charge = 1
             if t.core().charge == -1:
               charge = -1
-            cpar = Particle2Track(momentum, vertex, charge=charge)
-            print "\tsim calculated params:", cpar
-            cmom = Track2Particle(cpar)
-            print "\tsim calculated particle: ", cmom
+            #cpar = Particle2Track(momentum, vertex, charge=charge)
+            #print "\tsim calculated params:", cpar
+            #cmom = Track2Particle(cpar)
+            #print "\tsim calculated particle: ", cmom
 
         print "processing tracks ..."
         tracks = store.get('tracks')
+        print len(tracks)
         for t in tracks:
               print "\t track ID: ", t.bits()
               if t.bits() == 1:
