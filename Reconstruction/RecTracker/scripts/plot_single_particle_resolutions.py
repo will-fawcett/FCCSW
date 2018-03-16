@@ -30,7 +30,7 @@ for i, store in enumerate(events):
     if i < args.nevents:
         print "event ", i
         genparticles = store.get("GenParticles")
-        print "processing allGenParticles ..."
+        print "processing GenParticles ..."
         for t in genparticles:
             momentum = [t.core().p4.px, t.core().p4.py, t.core().p4.pz, t.core().p4.mass]
             tm = ROOT.TLorentzVector(*momentum)

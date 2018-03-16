@@ -68,7 +68,7 @@ for i, store in enumerate(events):
       true_track_ids = []
       numFakes = 0
       num_ignored_secondaries = 0
-      for p in store.get("simParticles"):
+      for p in store.get("SimParticles"):
             pm = [ p.core().p4.px, 
                    p.core().p4.py, 
                    p.core().p4.pz, 
