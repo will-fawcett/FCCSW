@@ -1,4 +1,3 @@
-
 import scipy.stats
 import sys
 import matplotlib
@@ -17,7 +16,6 @@ parser.add_argument("filename", help="edm file to read")
 parser.add_argument("--nevents", help="max number of events to process", type=int, default=5000)
 args = parser.parse_args()
 
-
 events = EventStore([args.filename])
 print len(events),  " events in rootfile ", args.filename
 
@@ -30,38 +28,13 @@ l_true_pts = []
 # main event loop`
 for i, store in enumerate(events):
     if i < args.nevents:
-        print "event ", i
-        #genparticles = store.get("GenParticles")
-        #print "processing GenParticles ..."
-        genparticles = store.get("SimParticles") # WJF: get etas from sim particles instead of GenParticles
-        print "processing SimParticles ..."
-        for t in genparticles:
-            if t.bits() == 1:  # WJF: consider only primary particles 
-                momentum = [t.core().p4.px, t.core().p4.py, t.core().p4.pz, t.core().p4.mass]
-                tm = ROOT.TLorentzVector(*momentum)
-                print "\t sim Eta:", tm.Eta() 
-                print "\t sim Eta:", tm.Pt() 
-                eta = tm.Eta()
-                l_etas.append(tm.Eta())
-                l_true_pts.append(np.rint(tm.Pt()))
-                vertex = [0,0,0]
-                print "\tsim trackID: ", t.core().bits, "sim pdgId: ", t.core().pdgId, "momentum: ", [t.core().p4.px, t.core().p4.py, t.core().p4.pz]
-                print "\tsim phi: ", np.arctan(t.core().p4.py / t.core().p4.px)
-                print "\tsim cottheta: ", t.core().p4.pz / np.sqrt(t.core().p4.px**2 +  t.core().p4.py**2)
-                print "\tsim q_pT: ", 1. / np.sqrt(t.core().p4.px**2 +  t.core().p4.py**2)
-                charge = 1
-                if t.core().charge == -1:
-                  charge = -1
-            #cpar = Particle2Track(momentum, vertex, charge=charge)
-            #print "\tsim calculated params:", cpar
-            #cmom = Track2Particle(cpar)
-            #print "\tsim calculated particle: ", cmom
 
-        print 'Stored {0} simulated particles'.format(len(l_etas))
+        tracks = store.get('tracks')
+        if(len(tracks) == 0): continue; # don't bother if there are no tracks in this event 
+        print "event ", i
 
         print "processing tracks ..."
-        tracks = store.get('tracks')
-        print len(tracks)
+        print 'There are {0} tracks in this event'.format(len(tracks))
         for t in tracks:
               print "\t track ID: ", t.bits()
               if t.bits() == 1:
@@ -93,6 +66,38 @@ for i, store in enumerate(events):
                   plt.plot(pos[:,2], np.sqrt(pos[:,0]**2 + pos[:,1]**2), '--', color="black")
 
         print 'Stored {0} tracks'.format(len(l_pts))
+
+
+
+        #genparticles = store.get("GenParticles")
+        #print "processing GenParticles ..."
+        genparticles = store.get("SimParticles") # WJF: get etas from sim particles instead of GenParticles
+        print "processing SimParticles ..."
+        print 'There are {0} simparticles in this event'.format(len(genparticles))
+        for t in genparticles:
+            if t.bits() == 1:  # WJF: consider only primary particles 
+                momentum = [t.core().p4.px, t.core().p4.py, t.core().p4.pz, t.core().p4.mass]
+                tm = ROOT.TLorentzVector(*momentum)
+                print "\t sim Eta:", tm.Eta() 
+                print "\t sim Eta:", tm.Pt() 
+                eta = tm.Eta()
+                l_etas.append(tm.Eta())
+                l_true_pts.append(np.rint(tm.Pt()))
+                vertex = [0,0,0]
+                print "\tsim trackID: ", t.core().bits, "sim pdgId: ", t.core().pdgId, "momentum: ", [t.core().p4.px, t.core().p4.py, t.core().p4.pz]
+                print "\tsim phi: ", np.arctan(t.core().p4.py / t.core().p4.px)
+                print "\tsim cottheta: ", t.core().p4.pz / np.sqrt(t.core().p4.px**2 +  t.core().p4.py**2)
+                print "\tsim q_pT: ", 1. / np.sqrt(t.core().p4.px**2 +  t.core().p4.py**2)
+                charge = 1
+                if t.core().charge == -1:
+                  charge = -1
+            #cpar = Particle2Track(momentum, vertex, charge=charge)
+            #print "\tsim calculated params:", cpar
+            #cmom = Track2Particle(cpar)
+            #print "\tsim calculated particle: ", cmom
+
+        print 'Stored {0} simulated particles'.format(len(l_etas))
+
 
 
 etas = np.array(l_etas)
