@@ -8,6 +8,8 @@ from EventStore import EventStore
 import numpy as np
 import matplotlib.pyplot as plt
 
+# load the data model!! 
+ROOT.gSystem.Load("/afs/cern.ch/work/v/vavolkl/public/fcc.cern.ch/sw/0.9.0/fcc-edm/0.5.1/x86_64-slc6-gcc62-opt/lib/libdatamodel.so")
 
 # command line arguments
 parser = argparse.ArgumentParser()
@@ -29,24 +31,27 @@ l_true_pts = []
 for i, store in enumerate(events):
     if i < args.nevents:
         print "event ", i
-        genparticles = store.get("GenParticles")
-        print "processing GenParticles ..."
+        #genparticles = store.get("GenParticles")
+        #print "processing GenParticles ..."
+        genparticles = store.get("SimParticles") # WJF: get etas from sim particles instead of GenParticles
+        print "processing SimParticles ..."
         for t in genparticles:
-            momentum = [t.core().p4.px, t.core().p4.py, t.core().p4.pz, t.core().p4.mass]
-            tm = ROOT.TLorentzVector(*momentum)
-            print "\t sim Eta:", tm.Eta() 
-            print "\t sim Eta:", tm.Pt() 
-            eta = tm.Eta()
-            l_etas.append(tm.Eta())
-            l_true_pts.append(np.rint(tm.Pt()))
-            vertex = [0,0,0]
-            print "\tsim trackID: ", t.core().bits, "sim pdgId: ", t.core().pdgId, "momentum: ", [t.core().p4.px, t.core().p4.py, t.core().p4.pz]
-            print "\tsim phi: ", np.arctan(t.core().p4.py / t.core().p4.px)
-            print "\tsim cottheta: ", t.core().p4.pz / np.sqrt(t.core().p4.px**2 +  t.core().p4.py**2)
-            print "\tsim q_pT: ", 1. / np.sqrt(t.core().p4.px**2 +  t.core().p4.py**2)
-            charge = 1
-            if t.core().charge == -1:
-              charge = -1
+            if t.bits() == 1:  # WJF: consider only primary particles 
+                momentum = [t.core().p4.px, t.core().p4.py, t.core().p4.pz, t.core().p4.mass]
+                tm = ROOT.TLorentzVector(*momentum)
+                print "\t sim Eta:", tm.Eta() 
+                print "\t sim Eta:", tm.Pt() 
+                eta = tm.Eta()
+                l_etas.append(tm.Eta())
+                l_true_pts.append(np.rint(tm.Pt()))
+                vertex = [0,0,0]
+                print "\tsim trackID: ", t.core().bits, "sim pdgId: ", t.core().pdgId, "momentum: ", [t.core().p4.px, t.core().p4.py, t.core().p4.pz]
+                print "\tsim phi: ", np.arctan(t.core().p4.py / t.core().p4.px)
+                print "\tsim cottheta: ", t.core().p4.pz / np.sqrt(t.core().p4.px**2 +  t.core().p4.py**2)
+                print "\tsim q_pT: ", 1. / np.sqrt(t.core().p4.px**2 +  t.core().p4.py**2)
+                charge = 1
+                if t.core().charge == -1:
+                  charge = -1
             #cpar = Particle2Track(momentum, vertex, charge=charge)
             #print "\tsim calculated params:", cpar
             #cmom = Track2Particle(cpar)
@@ -89,12 +94,23 @@ for i, store in enumerate(events):
 etas = np.array(l_etas)
 dpts = np.array(l_dpts)
 pts = np.array(l_pts)
+print 'l_pts'
+print type(l_pts), len(l_pts)
 colors = {1.: "black", 2: "darkblue", 5.: "blue", 100.: "green", 1000: "magenta", 10000.: "darkgreen", 10.: "red"}
 for e in np.unique(l_true_pts):
   print "pT: ", e
   i = np.array(l_true_pts) == e
   e = int(e)
   plt.figure("pt_res")
+
+  #print etas[i]
+  #print type(pts)
+  #print type(i)
+  #print type(pts[i]) 
+  #print np.abs(pts[i])
+  #print e
+  #print colors[e]
+
   plt.semilogy(etas[i], np.abs(pts[i]), 'o', label=e, color=colors[e])
   plt.figure("dpt_res")
   plt.semilogy(etas[i], np.abs(dpts[i]), 'd', color=colors[e])
