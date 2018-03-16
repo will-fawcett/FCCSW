@@ -149,5 +149,6 @@ f = "SinglePartRes_" + args.filename.replace(".root", "") + "_nevents%05i" % arg
 figs = [plt.figure(n) for n in plt.get_fignums()]
 for fig in figs:
   fig.savefig(os.path.join(args.plotprefix, f + "_" + fig._label + ".png"))
+  fig.savefig(os.path.join(args.plotprefix, f + "_" + fig._label + ".pdf"))
 
 plt.show()
