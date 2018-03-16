@@ -186,6 +186,7 @@ std::multimap<unsigned int, unsigned int> TripletSeedingTool::findSeeds(const fc
    * Function to ...
    * ***************/
 
+  /******************************
   static int wjfCounter(0);
   wjfCounter++;
   debug()    << "WJF: findSeeds() called: " << wjfCounter << endmsg; 
@@ -201,7 +202,7 @@ std::multimap<unsigned int, unsigned int> TripletSeedingTool::findSeeds(const fc
     m_hitFilterTool->setIds(m_seedingLayerIndices[layerCounter].first, m_seedingLayerIndices[layerCounter].second);
 
     // convert "theHits" to TTPoint hit class, store these in layerPoints.back(), somehow also only extracts hits in a specific layer (from setIds from hitFilterTool)  
-    //createBarrelSpacePoints(layerPoints.back(), theHits, theParticles, m_seedingLayerIndices[layerCounter], layerCounter, 0 /* debug parameter, currently unused */); 
+    //createBarrelSpacePoints(layerPoints.back(), theHits, theParticles, m_seedingLayerIndices[layerCounter], layerCounter, 0 ); 
 
     //debug() << "found " << layerPoints.back().size() << " points on Layer " << endmsg;
 
@@ -246,8 +247,10 @@ std::multimap<unsigned int, unsigned int> TripletSeedingTool::findSeeds(const fc
   } // end AssociateHits 
 
 
+  ***********************/
   // it's possible to use the other fit infrastructure as well, by inserting in this map the pair (trackId, indexInPositionedTrackHitCollection) 
   // the first three hits in collection  belong to track 0
+  std::multimap<unsigned int, unsigned int> theSeeds;
   return theSeeds;
 }
 
