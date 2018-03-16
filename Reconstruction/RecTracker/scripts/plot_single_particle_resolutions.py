@@ -57,6 +57,8 @@ for i, store in enumerate(events):
             #cmom = Track2Particle(cpar)
             #print "\tsim calculated particle: ", cmom
 
+        print 'Stored {0} simulated particles'.format(len(l_etas))
+
         print "processing tracks ..."
         tracks = store.get('tracks')
         print len(tracks)
@@ -89,6 +91,8 @@ for i, store in enumerate(events):
                   plt.plot(pos[:,0],pos[:,1], '--', color="black")
                   plt.figure("rz")
                   plt.plot(pos[:,2], np.sqrt(pos[:,0]**2 + pos[:,1]**2), '--', color="black")
+
+        print 'Stored {0} tracks'.format(len(l_pts))
 
 
 etas = np.array(l_etas)
