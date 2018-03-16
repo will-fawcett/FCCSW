@@ -109,7 +109,9 @@ void TripletSeedingTool::createBarrelSpacePoints(std::vector<myHit>& thePoints,
 
 
 
-std::multimap<unsigned int, unsigned int> TripletSeedingTool::findSeedsWithParticles(const fcc::PositionedTrackHitCollection* theHits, const fcc::MCParticleCollection* theParticles) {
+std::multimap<unsigned int, unsigned int> TripletSeedingTool::findSeedsWithParticles(const fcc::PositionedTrackHitCollection* theHits, const fcc::MCParticleCollection* theParticles, std::vector<myTrack>& theTracks) {
+
+  theTracks.clear();
 
   /**************
    * Function to ...
@@ -161,7 +163,8 @@ std::multimap<unsigned int, unsigned int> TripletSeedingTool::findSeedsWithParti
     tf.ApplyCurvatureCut( 0.005 );
 
     // Get the tracks ...  
-    std::vector< myTrack > theTracks = tf.GetTracks();
+    //std::vector< myTrack > 
+    theTracks = tf.GetTracks();
 
     int trackID(0);
     for(const myTrack& track : theTracks ) {

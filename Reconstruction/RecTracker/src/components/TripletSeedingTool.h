@@ -25,6 +25,8 @@
 #include <map>
 
 
+#include "myTrack.h"
+#include <utility>
 
 #include "myHit.h"
 
@@ -36,7 +38,7 @@ public:
   virtual StatusCode finalize() override final;
 
   virtual std::multimap<unsigned int, unsigned int> findSeeds(const fcc::PositionedTrackHitCollection* theHits) override final;
-  virtual std::multimap<unsigned int, unsigned int> findSeedsWithParticles(const fcc::PositionedTrackHitCollection* theHits, const fcc::MCParticleCollection* theParticles) override final;
+  virtual std::multimap<unsigned int, unsigned int> findSeedsWithParticles(const fcc::PositionedTrackHitCollection* theHits, const fcc::MCParticleCollection*         theParticles, std::vector<myTrack>& theTracks) override final; 
 
   void createBarrelSpacePoints(std::vector<myHit>& thePoints, 
       const fcc::PositionedTrackHitCollection* theHits, 

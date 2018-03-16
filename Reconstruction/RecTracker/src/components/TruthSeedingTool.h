@@ -4,6 +4,9 @@
 // stl
 #include <map>
 
+#include "myTrack.h"
+#include <utility>
+
 // from Gaudi
 #include "GaudiAlg/GaudiTool.h"
 
@@ -24,7 +27,7 @@ public:
   virtual StatusCode finalize() override final;
   /// create and return the map trackId -> hitIndex, associating hits to tracks
   virtual std::multimap<unsigned int, unsigned int> findSeeds(const fcc::PositionedTrackHitCollection* theHits) override final;
-  virtual std::multimap<unsigned int, unsigned int> findSeedsWithParticles(const fcc::PositionedTrackHitCollection* theHits, const fcc::MCParticleCollection* theParticles) override final; // WJF add 
+  virtual std::multimap<unsigned int, unsigned int> findSeedsWithParticles(const fcc::PositionedTrackHitCollection* theHits, const fcc::MCParticleCollection*         theParticles, std::vector<myTrack>& theTracks) override final; 
 
 };
 

@@ -50,7 +50,9 @@ StatusCode RecTrackAlg::execute() {
   debug() << "hit collection size: " << hits->size() << endmsg;
 
   // get the seeds (collections of geometrically matched hits) 
-  auto seedmap = m_trackSeedingTool->findSeedsWithParticles(hits, particles);
+  std::vector<myTrack> theTracks;
+  auto seedmap = m_trackSeedingTool->findSeedsWithParticles(hits, particles, theTracks);
+  //info() << "Recovered " << theTracks.size() << "tracks from the event"  << endmsg;
   auto it1 = seedmap.begin();
   auto it2 = seedmap.begin();
   auto end = seedmap.end();

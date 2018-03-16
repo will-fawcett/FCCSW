@@ -40,7 +40,7 @@ void CombinatorialSeedingTool::createBarrelSpacePoints(Acts::Seeding::BarrelSpac
   }
 }
 
-std::multimap<unsigned int, unsigned int> CombinatorialSeedingTool::findSeedsWithParticles(const fcc::PositionedTrackHitCollection* theHits, const fcc::MCParticleCollection* theParticles){ // WJF add 
+std::multimap<unsigned int, unsigned int> CombinatorialSeedingTool::findSeedsWithParticles(const fcc::PositionedTrackHitCollection* theHits, const fcc::MCParticleCollection* theParticles, std::vector<myTrack>& theTracks){ // WJF add 
   std::multimap<unsigned int, unsigned int> temp;
   return temp;
 }

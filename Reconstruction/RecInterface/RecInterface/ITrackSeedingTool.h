@@ -8,6 +8,9 @@
 
 #include "datamodel/MCParticleCollection.h" // WJF add
 
+/*#include "myTrack.h"*/
+#include "../../RecTracker/src/components/myTrack.h"
+
 
 namespace fcc {
 class TrackHitCollection;
@@ -20,7 +23,7 @@ public:
   DeclareInterfaceID(ITrackSeedingTool, 1, 0);
 
   virtual std::multimap<unsigned int, unsigned int> findSeeds(const fcc::PositionedTrackHitCollection* theHits) = 0;
-  virtual std::multimap<unsigned int, unsigned int> findSeedsWithParticles(const fcc::PositionedTrackHitCollection* theHits, const fcc::MCParticleCollection*         theParticles) = 0;
+  virtual std::multimap<unsigned int, unsigned int> findSeedsWithParticles(const fcc::PositionedTrackHitCollection* theHits, const fcc::MCParticleCollection*         theParticles, std::vector<myTrack>&) = 0;
 };
 
 #endif /* RECINTERFACE_ITRACKSEEDINGTOOL_H */

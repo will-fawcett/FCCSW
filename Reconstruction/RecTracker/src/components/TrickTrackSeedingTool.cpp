@@ -109,7 +109,7 @@ void TrickTrackSeedingTool::createBarrelSpacePoints(std::vector<Hit>& thePoints,
 }
 
 
-std::multimap<unsigned int, unsigned int> TrickTrackSeedingTool::findSeedsWithParticles(const fcc::PositionedTrackHitCollection* theHits, const fcc::MCParticleCollection* theParticles){ // WJF add 
+std::multimap<unsigned int, unsigned int> TrickTrackSeedingTool::findSeedsWithParticles(const fcc::PositionedTrackHitCollection* theHits, const fcc::MCParticleCollection* theParticles, std::vector<myTrack>& theTracks){ // WJF add 
   std::multimap<unsigned int, unsigned int> temp;
   return temp;
 }
