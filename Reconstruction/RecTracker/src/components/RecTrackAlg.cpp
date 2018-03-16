@@ -111,7 +111,8 @@ StatusCode RecTrackAlg::execute() {
         trackState.phi(h.par(0));
         trackState.d0(h.par(1));
         trackState.qOverP(h.q / h.par(2));  // fit outputs pT
-        trackState.theta(h.par(3));         // fit outputs cotTheta
+        //trackState.theta(h.par(3));         // fit outputs cotTheta
+        trackState.theta( atan(1 / h.par(3)) ); // WJF: tricktrack par(3) returns cot(theta). We want theta  
         trackState.z0(h.par(4));
         track.addstates(trackState);
       }

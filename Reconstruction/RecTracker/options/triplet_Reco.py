@@ -50,10 +50,12 @@ hitfiltertool = FastHitFilterTool("FastHitFilterTool")
 
 
 # Alternative: TruthSeeding
+'''
 from Configurables import TruthSeedingTool
 truth_seeds = TruthSeedingTool(
         OutputLevel=DEBUG
         )
+'''
 
 from Configurables import TripletSeedingTool
 triplet_seeds = TripletSeedingTool(
