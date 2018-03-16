@@ -18,8 +18,10 @@ podioinput = PodioInput("PodioReader",
                         collections=[
                                       "GenParticles",
                                       "GenVertices",
-                                      "simParticles", 
-                                      "simVertices", 
+                                      #"simParticles", 
+                                      "SimParticles", 
+                                      #"simVertices", 
+                                      "SimVertices", 
                                       #"hits", 
                                       "TrackerHits",
                                       #"positionedHits", 
@@ -60,11 +62,11 @@ triplet_seeds.someParameter = 4.
 
 from Configurables import RecTrackAlg
 RecTrackAlg = RecTrackAlg(
-        OutputLevel=DEBUG)
+        OutputLevel=INFO)
 RecTrackAlg.doFit=True
 RecTrackAlg.TrackSeedingTool = triplet_seeds
 RecTrackAlg.positionedTrackHits.Path = "TrackerPositionedHits"
-RecTrackAlg.simParticles.Path = "simParticles"
+RecTrackAlg.simParticles.Path = "SimParticles"
 
 
 # PODIO algorithm

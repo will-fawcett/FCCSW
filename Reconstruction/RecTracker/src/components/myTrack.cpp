@@ -57,27 +57,27 @@ bool myTrack::trackParametersTriplet(){
   }
 
   // copy of hit coordinates
-  float x1 = hit1.x();
-  float y1 = hit1.y(); 
-  float z1 = hit1.z(); 
+  double x1 = hit1.x();
+  double y1 = hit1.y(); 
+  double z1 = hit1.z(); 
 
-  float x2 = hit2.x();
-  float y2 = hit2.y(); 
-  float z2 = hit2.z(); 
+  double x2 = hit2.x();
+  double y2 = hit2.y(); 
+  double z2 = hit2.z(); 
 
-  float x3 = hit3.x();
-  float y3 = hit3.y(); 
-  float z3 = hit3.z(); 
+  double x3 = hit3.x();
+  double y3 = hit3.y(); 
+  double z3 = hit3.z(); 
 
-  float r01 = hit1.rho(); // = sqrt(x^2 + y^2) 
-  float r02 = hit2.rho();
-  float r03 = hit3.rho(); 
+  double r01 = hit1.rho(); // = sqrt(x^2 + y^2) 
+  double r02 = hit2.rho();
+  double r03 = hit3.rho(); 
 
   // Calculate the parameters in the longitudinal plane
   // Follows calculations by A. Schoning
 
-  float r13 = hypotf( fabs(x3-x1) , fabs(y3-y1) ); // not sure if fabs actuall needed ...  
-  float chord13 = x1*y3 - y1*x3; 
+  double r13 = hypot( fabs(x3-x1) , fabs(y3-y1) ); // not sure if fabs actuall needed ...  
+  double chord13 = x1*y3 - y1*x3; 
   float PHI1 = 2 * asin( chord13 / (r13*r03) );
   float PHI3 = 2 * asin( chord13 / (r13*r01) );
 
@@ -89,11 +89,32 @@ bool myTrack::trackParametersTriplet(){
   // described by (x-a)^2 + (y-b)^2 = R^2
   float a = (y3*r01*r01 - y1*r03*r03) / (2*(y3*x1 - y1*x3));
   float b = (x3*r01*r01 - x1*r03*r03) / (2*(x3*y1 - x1*y3));
+  float radius = sqrt(a*a + b*b); 
 
   // radius of trajectory  
   //float radiusAndre = ( (x1*x1 - x3*x3) + (y1*y1 - y3*y3) ) / ( 2*(x1 - x3) ); // not sure if formulea in Andres paper is quite correct ... ? 
   float radiusAndre = (r01 * r03 * r13) / (2*chord13); 
-  float radius = sqrt(a*a + b*b); 
+
+  if(isinf(radius)){
+    std::cerr << "Calculated radius is infinite?" << std::endl; 
+    std::cerr << "radiusAndre = (r01 * r03 * r13) / (2*chord13)" << std::endl;
+    std::cerr << "r01: " << r01 << std::endl;
+    std::cerr << "r03: " << r03 << std::endl;
+    std::cerr << "r13: " << r13 << std::endl;
+    std::cerr << "chord13: " << chord13 << std::endl;
+    if(chord13 == 0){
+      std::cerr << "chord13 = x1*y3 - y1*x3" << std::endl;
+      std::cerr << "x1: " << x1 << std::endl;
+      std::cerr << "x3: " << x3 << std::endl;
+      std::cerr << "y1: " << y1 << std::endl;
+      std::cerr << "y3: " << y3 << std::endl;
+      std::cerr << "x1*y3: " << x1*y3 << std::endl;
+      std::cerr << "x3*y1: " << x3*y1 << std::endl;
+      std::cout << "hit1 pt: " << hit1.pT() << std::endl;
+      std::cout << "hit2 pt: " << hit2.pT() << std::endl;
+      std::cout << "hit3 pt: " << hit3.pT() << std::endl;
+    }
+  }
 
   // kappa (1/radius) 
   float kappa_013 = 1/radius; 
@@ -119,10 +140,18 @@ bool myTrack::trackParametersTriplet(){
   m_eta = -1*log( tan( fabs(m_theta)/2.0 )); // take fabs(theta), want -pi and pi to be treated the same
   if(isnan(m_eta)){
     std::cerr << "trackParametersBeamlineConstraint(): ERROR: Eta calculation performed incorrectly." << std::endl; 
-    std::cerr << "m_theta: " << m_theta << std::endl;
-    std::cerr << "tan(fabs(m_theta)/2.0): " << tan(fabs(m_theta)/2.0) << std::endl;
-    std::cerr << "log(tan(fabs(m_theta))): " << log( tan(fabs(m_theta)/2.0) ) << std::endl;
-    std::cerr << "Curious and curiouser ... " << std::endl;
+    std::cerr << "m_theta = atan2f( (s3-s1), (z3-z1) ) = atan2f( (" << s3 << "-" << s1 << "), (" << z3 << "-" << z1 << ") )" << std::endl; // atan2f returns theta in [-pi, pi] 
+    if(isnan(s3) || isnan(s1)){
+      std::cout << "\ts_i = radius * phi_i" << std::endl;
+      std::cout << "\tradius = " << radius << "\tphi_1 = " << PHI1 << "\tphi_3 = " << PHI3<<  std::endl;
+      std::cout << "\tradiusAndre = " << radiusAndre << std::endl;
+    }
+    else{
+      std::cerr << "m_theta: " << m_theta << std::endl;
+      std::cerr << "tan(fabs(m_theta)/2.0): " << tan(fabs(m_theta)/2.0) << std::endl;
+      std::cerr << "log(tan(fabs(m_theta))): " << log( tan(fabs(m_theta)/2.0) ) << std::endl;
+      std::cerr << "Curious and curiouser ... " << std::endl;
+    }
     m_eta = -100.0;
     return false;
   }

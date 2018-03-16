@@ -49,7 +49,13 @@ bool TrackFitter::AssociateHits(hitContainer& hc){
     case simpleLinear:{
        float minZ = m_parameters.at(0);
        float maxZ = m_parameters.at(1);
-       return this->associateHitsSimple(hc, minZ, maxZ);
+       try{
+         return this->associateHitsSimple(hc, minZ, maxZ, false);
+        }
+       catch (const std::exception& exception){
+         std::cout << "ERROR detected: " << exception.what() << std::endl;
+         return this->associateHitsSimple(hc, minZ, maxZ, true);
+       }
     }
     case MAX:{
       return false;
@@ -58,7 +64,9 @@ bool TrackFitter::AssociateHits(hitContainer& hc){
   return true; 
 }
 
-std::map<std::string, std::vector<myHit> > TrackFitter::associateHitsSimplePattern(hitContainer& hc, Location& loc) const{
+std::map<std::string, std::vector<myHit> > TrackFitter::associateHitsSimplePattern(hitContainer& hc, Location& loc, bool debug) const{
+
+  if(debug) std::cout << "DEBUG\tbegin: associateHitsSimplePattern()" << std::endl;
 
   /******************************
    *  Separate collection of hits into "layer-eta-phi" regions
@@ -87,6 +95,7 @@ std::map<std::string, std::vector<myHit> > TrackFitter::associateHitsSimplePatte
 
   // debug 
   //printNewHitMap(newMap); 
+  if(debug) std::cout << "DEBUG\tend: associateHitsSimplePattern()" << std::endl;
 
   return newMap;
 }
@@ -146,14 +155,17 @@ std::vector<myHit*> concatenateHitsBasedOnLocations_Jon(const std::map<std::stri
 }
 
 
-bool TrackFitter::associateHitsSimple(hitContainer& hc, float minZ, float maxZ){
+bool TrackFitter::associateHitsSimple(hitContainer& hc, float minZ, float maxZ, bool debug){
+
+  if(debug) std::cerr << "DEBUG\tSome error detected, entering debug mode!" << std::endl;
+  if(debug) std::cout << "DEBUG\tbegin: associateHitsSimple()" << std::endl;
 
     // create a Location object (really just a function ... ) 
     Location loc(0.06, 0.1);
     //loc.printProperties(); 
 
     // mapping of hits to eta-phi locations 
-    std::map<std::string, std::vector<myHit>> hitMap = this->associateHitsSimplePattern(hc, loc); 
+    std::map<std::string, std::vector<myHit>> hitMap = this->associateHitsSimplePattern(hc, loc, debug); 
 
     //////////////////////////////////////////
     // Simplest possible algorithm 
@@ -166,9 +178,21 @@ bool TrackFitter::associateHitsSimple(hitContainer& hc, float minZ, float maxZ){
     const int outerLayerID = m_layerIDs.back();
     const int middleLayerID = 1; 
 
-    const float rInner = hc[innerLayerID].at(0).rho();
-    const float rOuter = hc[outerLayerID].at(0).rho(); 
+    if( hc.at(outerLayerID).size() == 0 || hc.at(middleLayerID).size() == 0 || hc.at(innerLayerID).size() == 0){
+      // no hits in the outer layer _at all_ for this event
+      return false;
+    }
+
+    if(debug) std::cout << "DEBUG: there are " << hc.at(innerLayerID).size() << " hits in the inner layer" << std::endl;
+    if(debug) std::cout << "DEBUG: there are " << hc.at(middleLayerID).size() << " hits in the middle layer" << std::endl;
+    if(debug) std::cout << "DEBUG: there are " << hc.at(outerLayerID).size() << " hits in the outer layer" << std::endl;
+    if(debug) std::cout << "DEBUG: getting radii..." << std::endl;
+
+    const float rInner = hc.at(innerLayerID).at(0).rho();
+    const float rOuter = hc.at(outerLayerID).at(0).rho(); 
     //const float rMiddle = hf[middleLayerID].at(0).rho();
+    
+    if(debug) std::cout << "DEBUG: found the inner and outer radii. Inner: " << rInner << "\touter: " << rOuter << std::endl;
 
     // reserve some space for the tracks (performance)  
     m_tracks.clear();
@@ -253,6 +277,8 @@ bool TrackFitter::associateHitsSimple(hitContainer& hc, float minZ, float maxZ){
         }
       }
     }
+
+    if(debug) std::cout << "end: associateHitsSimple()" << std::endl;
 
     return true;
 }

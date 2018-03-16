@@ -69,6 +69,8 @@ void TripletSeedingTool::createBarrelSpacePoints(std::vector<myHit>& thePoints,
    *    int : unused debug parameter
    *************/
 
+  debug() << "createBarrelSpacePoints()" << endmsg;
+
   size_t hitCounter = 0;
   std::set<int> trackIdsInThisLayer;
   for (auto hit : *theHits) {
@@ -76,8 +78,6 @@ void TripletSeedingTool::createBarrelSpacePoints(std::vector<myHit>& thePoints,
     if (m_hitFilterTool->filter(hit.core())) { 
         auto result = trackIdsInThisLayer.insert(hit.core().bits); // insert returns std::pair (iterator to inserted element, bool set to true if insertion took place)
         if (result.second) {
-
-
 
         // WJF: don't really need this particle matching (I think), but leave it here anyway
 
@@ -154,6 +154,7 @@ std::multimap<unsigned int, unsigned int> TripletSeedingTool::findSeedsWithParti
   TrackFitter tf(fitTypes::simpleLinear, parameters, layerIDs);
 
   // Associate hits 
+  debug() << "Associate Hits" << endmsg;
   if(tf.AssociateHits(layerPoints)){
 
     // Apply curvature cut 
