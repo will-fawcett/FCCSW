@@ -59,6 +59,27 @@ StatusCode RecTrackAlg::execute() {
   constexpr unsigned int nhits = 32;
 
 
+  // instead of using tricktrack to calculate the track parameters, use my own code
+  int trackID(0);
+  for(const auto trk : theTracks){
+    auto track = tracks->create();
+    track.bits(trackID);
+    trackID++;
+    auto trackState = trackStates->create();
+
+    std::array<float, 15> fitcov;
+
+    trackState.cov(fitcov); // not sure what to put in here 
+    trackState.phi(trk.Phi());
+    trackState.d0(trk.D0());
+    trackState.qOverP(trk.charge() / trk.Pt());  // fit outputs pT
+    //trackState.theta(h.par(3));         // fit outputs cotTheta
+    trackState.theta( atan(1 / trk.Theta()) ); // WJF: tricktrack par(3) returns cot(theta). We want theta  
+    trackState.z0( trk.Z0() );
+
+    track.addstates(trackState);
+
+  }
 
 	// Iterate through multimap of <tracks-hits> elements
 	// range.first : first multimap element containing a range of hits with the same trackID

@@ -2,6 +2,11 @@
 #include "myTrack.h"
 #include "LineParameters.h"
 
+// god knows why this isn't a standard function! 
+template <typename T> int sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
 
 bool myTrack::calculateTrackParameters( cartesianCoordinate coord, trackParamAlgo algorithm ){
 
@@ -89,11 +94,12 @@ bool myTrack::trackParametersTriplet(){
   // described by (x-a)^2 + (y-b)^2 = R^2
   float a = (y3*r01*r01 - y1*r03*r03) / (2*(y3*x1 - y1*x3));
   float b = (x3*r01*r01 - x1*r03*r03) / (2*(x3*y1 - x1*y3));
-  float radius = sqrt(a*a + b*b); 
+  float radius_OLD = sqrt(a*a + b*b); 
 
   // radius of trajectory  
-  //float radiusAndre = ( (x1*x1 - x3*x3) + (y1*y1 - y3*y3) ) / ( 2*(x1 - x3) ); // not sure if formulea in Andres paper is quite correct ... ? 
-  float radiusAndre = (r01 * r03 * r13) / (2*chord13); 
+  //float radiusAndre = (r01 * r03 * r13) / (2*chord13); 
+  float radius = (r01 * r03 * r13) / (2*chord13);  // not use this as radius, signed 
+  m_charge = sgn(radius); 
 
   if(isinf(radius)){
     std::cerr << "Calculated radius is infinite?" << std::endl; 
@@ -144,7 +150,7 @@ bool myTrack::trackParametersTriplet(){
     if(isnan(s3) || isnan(s1)){
       std::cout << "\ts_i = radius * phi_i" << std::endl;
       std::cout << "\tradius = " << radius << "\tphi_1 = " << PHI1 << "\tphi_3 = " << PHI3<<  std::endl;
-      std::cout << "\tradiusAndre = " << radiusAndre << std::endl;
+      std::cout << "\tradius_OLD = " << radius_OLD << std::endl;
     }
     else{
       std::cerr << "m_theta: " << m_theta << std::endl;

@@ -40,6 +40,7 @@ class myTrack{
     float m_eta;
     /*float m_qOverP;*/
     float m_pT;
+    int m_charge;
 
     float m_kappa_013;
     float m_kappa_123; 
@@ -101,6 +102,7 @@ class myTrack{
     float Eta() const {return m_eta;} 
     float kappa_bc() const {return m_kappa_013;} // beamline constraint
     float kappa_nbc() const {return m_kappa_123;} // no beamline constraint
+    int charge() const {return m_charge;}
 
     std::vector<myHit> getAssociatedHits() const {return m_associatedHits;}
 
